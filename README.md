@@ -9,13 +9,19 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite (normally http://127.0.0.1:5173).
+Open the local URL printed by Vite (normally http://127.0.0.1:5173/calls/).
 
 ```sh
 npm test
 npm run build
 npm run preview
 ```
+
+## GitHub Pages
+
+The site is published at https://adnangodance.github.io/calls/. GitHub Pages uses **GitHub Actions** as its deployment source. The workflow in `.github/workflows/deploy.yml` installs dependencies, runs the tests, builds the app, verifies its asset paths, and publishes only `dist/` on every push to `main`.
+
+Vite's `/calls/` base path applies to scripts, styles, the favicon, and recordings. Do not publish the repository root directly: its `index.html` is a development entry point that requires Vite to compile the app.
 
 ## Training flow
 

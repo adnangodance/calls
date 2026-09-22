@@ -389,7 +389,7 @@ export default function App() {
           <div className="detail-body">
             <div className={`audio-player ${playing ? 'is-playing' : ''}`}>
               <audio
-                key={active.id} ref={audio} src={active.audio} preload="metadata"
+                key={active.id} ref={audio} src={`${import.meta.env.BASE_URL}${active.audio.replace(/^\//, '')}`} preload="metadata"
                 onLoadedMetadata={() => {
                   if (!audio.current) return;
                   audio.current.playbackRate = speed;

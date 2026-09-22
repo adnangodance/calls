@@ -9,7 +9,7 @@ import React, { act } from 'react';
 
 // Exercise the real React UI with controlled media events. jsdom does not
 // decode audio; the browser's played ranges are supplied for each scenario.
-const dom = new JSDOM('<!doctype html><div id="root"></div>', { url: 'http://localhost/' });
+const dom = new JSDOM('<!doctype html><div id="root"></div>', { url: 'http://localhost/calls/' });
 for (const name of ['window', 'document', 'localStorage', 'HTMLElement', 'HTMLInputElement', 'HTMLTextAreaElement']) {
   Object.defineProperty(globalThis, name, { configurable: true, value: dom.window[name] });
 }
@@ -20,7 +20,7 @@ const calls = JSON.parse(await readFile(new URL('../src/calls.json', import.meta
 const first = calls[0];
 const mediaPrototype = dom.window.HTMLMediaElement.prototype;
 Object.defineProperties(mediaPrototype, {
-  duration: { configurable: true, get() { return calls.find(call => call.audio === this.getAttribute('src'))?.duration || 0; } },
+  duration: { configurable: true, get() { return calls.find(call => `/calls${call.audio}` === this.getAttribute('src'))?.duration || 0; } },
   paused: { configurable: true, get() { return this.testPaused !== false; } },
   played: { configurable: true, get() {
     const ranges = (this.testPlayed || []).map(range => [...range]);
@@ -41,6 +41,8 @@ mediaPrototype.pause = function () {
 const { createRoot } = await import('react-dom/client');
 const source = await readFile(new URL('../src/App.tsx', import.meta.url), 'utf8');
 const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX } }).outputText
+  // Vite substitutes this value when building for the GitHub Pages subpath.
+  .replaceAll('import.meta.env.BASE_URL', JSON.stringify('/calls/'))
   .replace(/from ['"]\.\/calls\.json['"];/, "from './calls.json' with { type: 'json' };");
 const temporaryModule = resolve(`src/.app-test-${process.pid}.mjs`);
 let App;
@@ -102,6 +104,14 @@ async function answer(correct = true) {
 async function submit() {
   await interact(() => document.querySelector('#quiz-panel form').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true })));
 }
+
+test('every recording resolves under the GitHub Pages project path', async () => {
+  await mount();
+  for (const [index, call] of calls.entries()) {
+    assert.equal(document.querySelector('audio').src, `http://localhost/calls${call.audio}`);
+    if (index < calls.length - 1) await interact(() => button('Next demo').click());
+  }
+});
 
 test('finishing playback opens the questionnaire, accepts answers, and restores the result', async () => {
   await mount();
