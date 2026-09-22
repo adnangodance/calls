@@ -1,0 +1,982 @@
+[
+  {
+    "id": "sunrise",
+    "title": "Sunrise Dermatology Group",
+    "location": "Hoboken, NJ",
+    "specialty": "Dermatology",
+    "topic": "Turning an objection into a conversation",
+    "manager": "Zee Rabushaj",
+    "rating": 9.6,
+    "date": "Sep 17",
+    "level": "Getting started",
+    "objectives": [
+      "Permission-based opening",
+      "Clarifying the objection",
+      "Agreeing on a next step"
+    ],
+    "summary": [
+      "Zee asks for a moment before introducing the reason for the call.",
+      "He acknowledges a past concern, then asks what actually went wrong.",
+      "He closes with a specific, low-pressure walkthrough with the office manager."
+    ],
+    "reflection": "How would you respond to a prospect who says, ‘We tried this before and it didn’t work’?",
+    "transcript": [
+      {
+        "speaker": "Zee",
+        "text": "Hi, Doctor Ruiz. This is Zee with TargetOne. Have I caught you with a minute? I wanted to learn how your team handles topical prescription coordination today.",
+        "at": 0.0
+      },
+      {
+        "speaker": "Dr. Ruiz",
+        "text": "A minute is fine, but we tried a different compounding partner before. It was slow, and patients kept calling our front desk.",
+        "at": 10.126
+      },
+      {
+        "speaker": "Zee",
+        "text": "That sounds frustrating for your team. When you say slow, was the main issue the pharmacy turnaround, shipping, or not knowing the status?",
+        "at": 17.57
+      },
+      {
+        "speaker": "Dr. Ruiz",
+        "text": "Mostly not knowing the status. Our staff spent a lot of time chasing updates, and I don't want to repeat that.",
+        "at": 26.421
+      },
+      {
+        "speaker": "Zee",
+        "text": "That makes sense. Before recommending anything, I'd like to show your office manager how status updates work and discuss what turnaround your practice needs. Would a short walkthrough be useful?",
+        "at": 33.177
+      },
+      {
+        "speaker": "Dr. Ruiz",
+        "text": "Possibly. Maria, our office manager, would be the right person to look at that first.",
+        "at": 44.909
+      },
+      {
+        "speaker": "Zee",
+        "text": "Great. Could we set aside fifteen minutes with Maria on Tuesday at ten? I'll focus on updates and the handoff to your team.",
+        "at": 50.232
+      },
+      {
+        "speaker": "Dr. Ruiz",
+        "text": "Tuesday at ten works. Send the invitation to the front desk, and I'll ask Maria to join.",
+        "at": 57.73
+      }
+    ],
+    "questions": [
+      {
+        "prompt": "What was the prospect’s main concern?",
+        "options": [
+          "The price of the prescription",
+          "The lack of status updates and extra work for staff",
+          "The length of the sales call"
+        ],
+        "correct": 1,
+        "explanation": "Dr. Ruiz clarified that chasing updates created work for the front desk. Zee discovered the specific issue instead of assuming it was price or shipping."
+      },
+      {
+        "prompt": "How did Zee respond to the initial objection?",
+        "options": [
+          "He acknowledged the experience and asked a clarifying question",
+          "He promised that every prescription would ship the same day",
+          "He immediately offered a discount"
+        ],
+        "correct": 0,
+        "explanation": "Acknowledging the frustration made space for a useful discovery question. Zee avoided unsupported promises."
+      },
+      {
+        "prompt": "What made the next step effective?",
+        "options": [
+          "The prospect agreed to buy immediately",
+          "Zee said he would call back sometime",
+          "They agreed on a time, the right participant, and a focused agenda"
+        ],
+        "correct": 2,
+        "explanation": "The walkthrough had a clear owner, time, and purpose: Tuesday at ten with Maria, focused on status updates."
+      }
+    ],
+    "duration": 63.401,
+    "audio": "/audio/sunrise.wav"
+  },
+  {
+    "id": "metro",
+    "title": "Metro Pain Management",
+    "location": "Newark, NJ",
+    "specialty": "Pain management",
+    "topic": "Discover the problem before you pitch",
+    "manager": "Edrin Osmanaj",
+    "rating": 9.2,
+    "date": "Sep 10",
+    "level": "Getting started",
+    "objectives": [
+      "Open-ended discovery",
+      "Understanding the workflow",
+      "Summarizing what you heard"
+    ],
+    "summary": [
+      "Edrin opens with a question about the current process.",
+      "He follows the first answer to understand who owns the work.",
+      "He checks his understanding before suggesting a focused demo."
+    ],
+    "reflection": "Write one follow-up question you would ask to understand this practice’s workflow better.",
+    "transcript": [
+      {
+        "speaker": "Edrin",
+        "text": "Hello, Anna. This is Edrin from TargetOne. Thanks for making time. Could you walk me through what happens after a provider sends a prescription today?",
+        "at": 0.0
+      },
+      {
+        "speaker": "Anna",
+        "text": "The prescription goes out, and then our nurses handle the follow-up calls. Sometimes the patient calls us before we have any update.",
+        "at": 9.65
+      },
+      {
+        "speaker": "Edrin",
+        "text": "And when an update is missing, who takes responsibility for finding it?",
+        "at": 17.331
+      },
+      {
+        "speaker": "Anna",
+        "text": "Usually one of our two nurses. They call the pharmacy between appointments, which takes time away from the patients here.",
+        "at": 21.834
+      },
+      {
+        "speaker": "Edrin",
+        "text": "How often is your team dealing with that kind of interruption?",
+        "at": 28.763
+      },
+      {
+        "speaker": "Anna",
+        "text": "Several times a day. The biggest problem is that we don't have one clear place to check what is happening.",
+        "at": 32.095
+      },
+      {
+        "speaker": "Edrin",
+        "text": "So the priority is a clear way to check status, with less chasing for the nursing team. Have I understood that correctly? If so, I can tailor a walkthrough to that workflow.",
+        "at": 37.886
+      },
+      {
+        "speaker": "Anna",
+        "text": "Exactly. Let's include our lead nurse in a walkthrough on Thursday afternoon. She can explain the process in more detail.",
+        "at": 48.864
+      }
+    ],
+    "questions": [
+      {
+        "prompt": "Why was Edrin’s opening question useful?",
+        "options": [
+          "It introduced every product feature",
+          "It let the prospect explain the current workflow in their own words",
+          "It forced a yes-or-no decision"
+        ],
+        "correct": 1,
+        "explanation": "An open-ended process question revealed the workflow and the pain point without leading the prospect."
+      },
+      {
+        "prompt": "Who was most affected by the current process?",
+        "options": [
+          "The practice’s two nurses",
+          "The accounting team",
+          "The sales manager"
+        ],
+        "correct": 0,
+        "explanation": "Anna described nurses chasing updates between appointments, taking their attention away from patients."
+      },
+      {
+        "prompt": "What did Edrin do before proposing a walkthrough?",
+        "options": [
+          "Quoted a price",
+          "Asked for a signed contract",
+          "Summarized the need and checked that he understood it"
+        ],
+        "correct": 2,
+        "explanation": "Checking the summary with Anna ensured the walkthrough would address a real priority."
+      }
+    ],
+    "duration": 55.972,
+    "audio": "/audio/metro.wav"
+  },
+  {
+    "id": "harbor",
+    "title": "Harbor Point Pharmacy",
+    "location": "Jersey City, NJ",
+    "specialty": "Pharmacy",
+    "topic": "Make the value relevant",
+    "manager": "Zee Rabushaj",
+    "rating": 9.1,
+    "date": "Sep 20",
+    "level": "Getting started",
+    "objectives": [
+      "Understanding priorities",
+      "Connecting value to a need",
+      "Checking for relevance"
+    ],
+    "summary": [
+      "Zee learns that handoffs matter more than more inbound inquiries.",
+      "He describes only the workflow relevant to that priority.",
+      "He checks whether that benefit is useful before asking for more time."
+    ],
+    "reflection": "Describe the value of a clear handoff in one sentence, using the prospect’s own priorities.",
+    "transcript": [
+      {
+        "speaker": "Zee",
+        "text": "Hi, James. Thanks for speaking with me. Before I tell you about TargetOne, what would you most like to improve about working with new practices?",
+        "at": 0.0
+      },
+      {
+        "speaker": "James",
+        "text": "We don't really need more inquiries. We need better information when a practice hands a request over to us.",
+        "at": 9.8
+      },
+      {
+        "speaker": "Zee",
+        "text": "What tends to be missing from that handoff?",
+        "at": 15.846
+      },
+      {
+        "speaker": "James",
+        "text": "The right contact person and what the practice expects next. Our team ends up calling back just to clarify those basics.",
+        "at": 18.409
+      },
+      {
+        "speaker": "Zee",
+        "text": "Understood. The workflow I'd like to walk through records the practice contact, their request, and the agreed next step in one place. The point would be a clearer handoff for your team.",
+        "at": 25.579
+      },
+      {
+        "speaker": "James",
+        "text": "That would be more useful than just receiving another list of contacts.",
+        "at": 36.687
+      },
+      {
+        "speaker": "Zee",
+        "text": "Would it help if we used a sample request from your process in a short demo? You could tell us whether the handoff includes what your team actually needs.",
+        "at": 40.604
+      },
+      {
+        "speaker": "James",
+        "text": "Yes. Send me an agenda, and let's look at it Friday morning with our operations lead.",
+        "at": 48.891
+      }
+    ],
+    "questions": [
+      {
+        "prompt": "What did James want to improve?",
+        "options": [
+          "The clarity of information in a practice handoff",
+          "The number of cold calls his team makes",
+          "His pharmacy’s logo"
+        ],
+        "correct": 0,
+        "explanation": "James explicitly prioritized complete handoff information over more inquiries."
+      },
+      {
+        "prompt": "Which approach made the value pitch relevant?",
+        "options": [
+          "Listing every available feature",
+          "Linking a clear contact and next step to fewer clarification calls",
+          "Promising guaranteed revenue"
+        ],
+        "correct": 1,
+        "explanation": "Zee connected a specific workflow to the problem James had just described."
+      },
+      {
+        "prompt": "Why propose using a sample request in the demo?",
+        "options": [
+          "To avoid answering questions",
+          "To replace the operations lead",
+          "To let the team assess the workflow against their real needs"
+        ],
+        "correct": 2,
+        "explanation": "Using an example from their process makes the discussion concrete and lets the prospect evaluate relevance."
+      }
+    ],
+    "duration": 54.126,
+    "audio": "/audio/harbor.wav"
+  },
+  {
+    "id": "oak",
+    "title": "Oak Street Pediatrics",
+    "location": "Montclair, NJ",
+    "specialty": "Pediatrics",
+    "topic": "Earn time with a busy prospect",
+    "manager": "Will",
+    "rating": 8.9,
+    "date": "Sep 14",
+    "level": "Building confidence",
+    "objectives": [
+      "Respecting time",
+      "A concise opening",
+      "Offering a specific callback"
+    ],
+    "summary": [
+      "Will respects that the prospect is between appointments.",
+      "He asks permission for one sentence and keeps it short.",
+      "He lets the prospect choose between two callback times."
+    ],
+    "reflection": "Write a one-sentence opening for a prospect who only has 20 seconds.",
+    "transcript": [
+      {
+        "speaker": "Will",
+        "text": "Hi, Doctor Chen. This is Will at TargetOne. Is this an okay time for a brief introduction?",
+        "at": 0.0
+      },
+      {
+        "speaker": "Dr. Chen",
+        "text": "Honestly, not really. I'm between appointments and have about twenty seconds.",
+        "at": 6.445
+      },
+      {
+        "speaker": "Will",
+        "text": "Of course. May I give you one sentence so you can decide whether a callback would be worthwhile?",
+        "at": 11.067
+      },
+      {
+        "speaker": "Dr. Chen",
+        "text": "Go ahead.",
+        "at": 16.719
+      },
+      {
+        "speaker": "Will",
+        "text": "We help practice teams explore a clearer process for coordinating with their pharmacy partners, and I'd like to understand whether follow-up is an issue for your office.",
+        "at": 17.622
+      },
+      {
+        "speaker": "Dr. Chen",
+        "text": "It can be, but our office manager handles that. Call back when she is here.",
+        "at": 27.023
+      },
+      {
+        "speaker": "Will",
+        "text": "Thank you. Would tomorrow at nine or Wednesday at two be better for a quick call with your office manager?",
+        "at": 31.798
+      },
+      {
+        "speaker": "Dr. Chen",
+        "text": "Wednesday at two. Ask for Olivia. She can tell you whether it is relevant.",
+        "at": 37.741
+      }
+    ],
+    "questions": [
+      {
+        "prompt": "What did Will do when the prospect said they were busy?",
+        "options": [
+          "Continued with a long pitch",
+          "Asked permission for a one-sentence introduction",
+          "Told them the call was urgent"
+        ],
+        "correct": 1,
+        "explanation": "Will acknowledged the time limit and requested permission for a very brief introduction."
+      },
+      {
+        "prompt": "Who was the right person for the follow-up?",
+        "options": [
+          "Olivia, the office manager",
+          "Any patient at the practice",
+          "The prospect’s accountant"
+        ],
+        "correct": 0,
+        "explanation": "Dr. Chen identified the office manager as the person responsible for the workflow."
+      },
+      {
+        "prompt": "Which callback did they agree on?",
+        "options": [
+          "Tomorrow at nine",
+          "An unspecified time next month",
+          "Wednesday at two"
+        ],
+        "correct": 2,
+        "explanation": "Will offered two specific times, and the prospect chose Wednesday at two."
+      }
+    ],
+    "duration": 42.335,
+    "audio": "/audio/oak.wav"
+  },
+  {
+    "id": "bayview",
+    "title": "Bayview Internal Medicine",
+    "location": "Bayonne, NJ",
+    "specialty": "Internal medicine",
+    "topic": "Handle ‘send me an email’",
+    "manager": "Will",
+    "rating": 8.7,
+    "date": "Sep 07",
+    "level": "Building confidence",
+    "objectives": [
+      "Accepting the request",
+      "One useful follow-up question",
+      "Agreeing on email content"
+    ],
+    "summary": [
+      "Will agrees to send information without pushing back.",
+      "He asks what would make the email useful to the prospect.",
+      "He gets permission for a specific follow-up after the email."
+    ],
+    "reflection": "What question could you ask to make a ‘send me an email’ response more productive?",
+    "transcript": [
+      {
+        "speaker": "Will",
+        "text": "Hi, Sarah. This is Will from TargetOne. I am calling about your practice's coordination with pharmacy partners. Do you have a moment?",
+        "at": 0.0
+      },
+      {
+        "speaker": "Sarah",
+        "text": "Could you just send me an email? I get a lot of calls and can't go through a presentation right now.",
+        "at": 9.081
+      },
+      {
+        "speaker": "Will",
+        "text": "Absolutely. To make it useful, is your main interest improving follow-up, understanding the setup process, or something else?",
+        "at": 14.634
+      },
+      {
+        "speaker": "Sarah",
+        "text": "The setup process. We are a small team, and I can't take on another complicated implementation.",
+        "at": 22.875
+      },
+      {
+        "speaker": "Will",
+        "text": "Understood. I'll send a short outline of the setup steps and what we would need from your team, so you can judge the effort.",
+        "at": 29.07
+      },
+      {
+        "speaker": "Sarah",
+        "text": "That is fine. Please keep it brief and don't add me to a daily mailing list.",
+        "at": 36.138
+      },
+      {
+        "speaker": "Will",
+        "text": "Of course. I'll send the outline you requested. Would it be okay to follow up once on Thursday to see if there are questions?",
+        "at": 40.415
+      },
+      {
+        "speaker": "Sarah",
+        "text": "Thursday is okay. Email first, and I will let you know if a call makes sense.",
+        "at": 47.994
+      }
+    ],
+    "questions": [
+      {
+        "prompt": "What information did Sarah actually want?",
+        "options": [
+          "A full catalog of every service",
+          "A short outline of setup steps and team effort",
+          "A daily newsletter"
+        ],
+        "correct": 1,
+        "explanation": "Sarah was concerned about implementation effort for her small team."
+      },
+      {
+        "prompt": "What made Will’s follow-up question appropriate?",
+        "options": [
+          "It helped tailor the email without forcing a presentation",
+          "It challenged the prospect’s honesty",
+          "It ignored the request to end the call"
+        ],
+        "correct": 0,
+        "explanation": "Will accepted the email request and asked one focused question to make the information relevant."
+      },
+      {
+        "prompt": "What follow-up did Sarah permit?",
+        "options": [
+          "Daily phone calls",
+          "An unannounced visit",
+          "One email follow-up on Thursday"
+        ],
+        "correct": 2,
+        "explanation": "Sarah allowed a Thursday follow-up by email and would decide whether a call was useful."
+      }
+    ],
+    "duration": 53.087,
+    "audio": "/audio/bayview.wav"
+  },
+  {
+    "id": "lakeside",
+    "title": "Lakeside Family Medicine",
+    "location": "Wayne, NJ",
+    "specialty": "Family medicine",
+    "topic": "Navigate an existing relationship",
+    "manager": "Will",
+    "rating": 8.8,
+    "date": "Sep 19",
+    "level": "Building confidence",
+    "objectives": [
+      "Respecting existing relationships",
+      "Finding an unmet need",
+      "Avoiding competitor criticism"
+    ],
+    "summary": [
+      "Will acknowledges a successful existing partnership.",
+      "He explores whether anything falls outside its current scope.",
+      "He offers to assess a backup process without asking for a switch."
+    ],
+    "reflection": "How would you uncover an opportunity without criticizing a prospect’s current partner?",
+    "transcript": [
+      {
+        "speaker": "Will",
+        "text": "Hello, Michael. This is Will with TargetOne. I'd like to learn about how your office coordinates with its pharmacy partners.",
+        "at": 0.0
+      },
+      {
+        "speaker": "Michael",
+        "text": "We already have someone we work with, and we are happy with them. We are not looking to change.",
+        "at": 7.816
+      },
+      {
+        "speaker": "Will",
+        "text": "It's good that you have a relationship that works. I'm not asking you to change it. Is there anything outside their current scope that your team still has to solve separately?",
+        "at": 13.362
+      },
+      {
+        "speaker": "Michael",
+        "text": "Sometimes we need a backup contact when our usual person is away. That can slow us down.",
+        "at": 22.857
+      },
+      {
+        "speaker": "Will",
+        "text": "How does the team handle those situations now?",
+        "at": 28.404
+      },
+      {
+        "speaker": "Michael",
+        "text": "We call the main number and hope someone can help. It isn't a big enough problem to replace a partner over.",
+        "at": 31.248
+      },
+      {
+        "speaker": "Will",
+        "text": "That makes sense. Would a conversation focused only on a backup process be useful? We could first see whether there is anything we can help with, alongside your existing relationship.",
+        "at": 37.189
+      },
+      {
+        "speaker": "Michael",
+        "text": "I could give you ten minutes next week to discuss that. Please keep it focused on the backup process.",
+        "at": 47.981
+      }
+    ],
+    "questions": [
+      {
+        "prompt": "How did Will handle the existing partnership?",
+        "options": [
+          "He criticized the current partner",
+          "He demanded an immediate switch",
+          "He acknowledged the relationship and explored gaps in its scope"
+        ],
+        "correct": 2,
+        "explanation": "Respecting a working relationship helped Will explore a specific unmet need."
+      },
+      {
+        "prompt": "What gap did Michael identify?",
+        "options": [
+          "A backup contact when their usual person is away",
+          "A need for a new office",
+          "A lack of patient appointments"
+        ],
+        "correct": 0,
+        "explanation": "The occasional absence of their usual contact was the one issue Michael described."
+      },
+      {
+        "prompt": "What should the next conversation focus on?",
+        "options": [
+          "Replacing the existing partner entirely",
+          "Assessing a backup process",
+          "An unrelated product presentation"
+        ],
+        "correct": 1,
+        "explanation": "Michael agreed to ten minutes specifically about a backup process."
+      }
+    ],
+    "duration": 53.754,
+    "audio": "/audio/lakeside.wav"
+  },
+  {
+    "id": "greenway",
+    "title": "Greenway Urgent Care",
+    "location": "Clifton, NJ",
+    "specialty": "Urgent care",
+    "topic": "Find the right decision-maker",
+    "manager": "Edrin Osmanaj",
+    "rating": 9.0,
+    "date": "Sep 16",
+    "level": "Putting it together",
+    "objectives": [
+      "Respectful gatekeeper conversation",
+      "Mapping the decision process",
+      "A relevant introduction"
+    ],
+    "summary": [
+      "Edrin treats the front desk contact as a helpful partner.",
+      "He asks who owns the process and how decisions are made.",
+      "He agrees on the preferred route for a relevant introduction."
+    ],
+    "reflection": "Write a respectful question that helps you identify who owns a prospect’s decision process.",
+    "transcript": [
+      {
+        "speaker": "Edrin",
+        "text": "Good morning. This is Edrin at TargetOne. Could you help me find the right person to speak with about pharmacy coordination for your clinics?",
+        "at": 0.0
+      },
+      {
+        "speaker": "Reception",
+        "text": "That might be our operations director, but she doesn't take unscheduled sales calls.",
+        "at": 8.391
+      },
+      {
+        "speaker": "Edrin",
+        "text": "I understand. What is the best way to share a short introduction with her?",
+        "at": 13.399
+      },
+      {
+        "speaker": "Reception",
+        "text": "You can email our general address. I forward relevant information to Priya, the director.",
+        "at": 18.135
+      },
+      {
+        "speaker": "Edrin",
+        "text": "Thank you. Does Priya manage this for all locations, or does each clinic make its own decision?",
+        "at": 23.718
+      },
+      {
+        "speaker": "Reception",
+        "text": "Priya reviews new processes for all three locations. She normally brings in the lead clinic manager after the initial review.",
+        "at": 29.905
+      },
+      {
+        "speaker": "Edrin",
+        "text": "That is helpful. I'll send a brief note explaining the workflow we would like to discuss, addressed to Priya. Is there a subject line that makes it easy for you to route?",
+        "at": 37.142
+      },
+      {
+        "speaker": "Reception",
+        "text": "Put pharmacy coordination, attention Priya, in the subject. I will send it to her, and she can reply if it is relevant.",
+        "at": 46.854
+      }
+    ],
+    "questions": [
+      {
+        "prompt": "Who reviews new processes for the three clinics?",
+        "options": [
+          "Each receptionist independently",
+          "Priya, the operations director",
+          "An external marketing agency"
+        ],
+        "correct": 1,
+        "explanation": "The receptionist explained that Priya reviews processes across all three locations."
+      },
+      {
+        "prompt": "Which action showed respect for the gatekeeper?",
+        "options": [
+          "Asking for the preferred way to share an introduction",
+          "Pretending to be a personal friend",
+          "Insisting on an immediate transfer"
+        ],
+        "correct": 0,
+        "explanation": "Edrin respected the no-unscheduled-calls boundary and asked how to route relevant information."
+      },
+      {
+        "prompt": "What was the agreed next step?",
+        "options": [
+          "Call every clinic repeatedly",
+          "Visit Priya without an appointment",
+          "Email a short introduction with the requested subject line"
+        ],
+        "correct": 2,
+        "explanation": "The receptionist gave a clear email route and subject line for Priya’s review."
+      }
+    ],
+    "duration": 54.382,
+    "audio": "/audio/greenway.wav"
+  },
+  {
+    "id": "riverside",
+    "title": "Riverside Wellness Spa",
+    "location": "Edgewater, NJ",
+    "specialty": "Med spa",
+    "topic": "Respond to an early price question",
+    "manager": "Zee Rabushaj",
+    "rating": 8.6,
+    "date": "Sep 12",
+    "level": "Putting it together",
+    "objectives": [
+      "Acknowledging price",
+      "Clarifying scope",
+      "Setting honest expectations"
+    ],
+    "summary": [
+      "Zee acknowledges the budget question directly.",
+      "He avoids quoting an unsupported figure before understanding scope.",
+      "He agrees to provide a written scope and price for review."
+    ],
+    "reflection": "How would you answer a pricing question when you do not yet know the required scope?",
+    "transcript": [
+      {
+        "speaker": "Zee",
+        "text": "Hi, Emma. Thanks for your interest in TargetOne. What would you like to cover first?",
+        "at": 0.0
+      },
+      {
+        "speaker": "Emma",
+        "text": "Just tell me the price. We are watching our budget, so I don't want a long demo if it is out of reach.",
+        "at": 5.702
+      },
+      {
+        "speaker": "Zee",
+        "text": "That's a fair place to start. I don't want to give you an inaccurate number. May I ask two quick questions about the scope so I can get you the right pricing?",
+        "at": 11.786
+      },
+      {
+        "speaker": "Emma",
+        "text": "Okay, as long as this is quick.",
+        "at": 20.996
+      },
+      {
+        "speaker": "Zee",
+        "text": "Would this be for one location or several? And are you exploring just the coordination workflow, or support for your team's setup as well?",
+        "at": 23.295
+      },
+      {
+        "speaker": "Emma",
+        "text": "One location. We'd want to understand the setup support too. I need the full cost, not just a starting figure.",
+        "at": 31.651
+      },
+      {
+        "speaker": "Zee",
+        "text": "Understood. I'll get you a written breakdown for one location, including the requested setup support and any assumptions. You can review that before deciding whether to schedule a demo.",
+        "at": 38.904
+      },
+      {
+        "speaker": "Emma",
+        "text": "That works. Send the breakdown, and then we can decide if the next conversation makes sense.",
+        "at": 49.768
+      }
+    ],
+    "questions": [
+      {
+        "prompt": "Why didn’t Zee quote a number immediately?",
+        "options": [
+          "He wanted to ignore the budget",
+          "He needed the scope to avoid giving inaccurate pricing",
+          "He was offering the service for free"
+        ],
+        "correct": 1,
+        "explanation": "Zee acknowledged the price question and explained that accurate pricing required two details about scope."
+      },
+      {
+        "prompt": "What scope did Emma describe?",
+        "options": [
+          "One location with setup support included in the breakdown",
+          "Ten locations without setup",
+          "A personal subscription"
+        ],
+        "correct": 0,
+        "explanation": "Emma specified one location and asked to see the full cost including setup support."
+      },
+      {
+        "prompt": "What should happen before scheduling the demo?",
+        "options": [
+          "Emma must sign a contract",
+          "Zee should call every day",
+          "Emma should receive and review a written price breakdown"
+        ],
+        "correct": 2,
+        "explanation": "The agreed step was a written breakdown so Emma could evaluate fit before committing more time."
+      }
+    ],
+    "duration": 55.465,
+    "audio": "/audio/riverside.wav"
+  },
+  {
+    "id": "summit",
+    "title": "Summit Orthopedic Partners",
+    "location": "Summit, NJ",
+    "specialty": "Orthopedics",
+    "topic": "Turn interest into a clear next step",
+    "manager": "Edrin Osmanaj",
+    "rating": 9.4,
+    "date": "Sep 21",
+    "level": "Putting it together",
+    "objectives": [
+      "Recapping the need",
+      "Including stakeholders",
+      "A specific meeting agenda"
+    ],
+    "summary": [
+      "Edrin recaps the problem before asking for a meeting.",
+      "He includes both the process owner and the budget reviewer.",
+      "He confirms a time, an agenda, and what to prepare."
+    ],
+    "reflection": "Write a closing question that includes a next action, the right people, and a specific time.",
+    "transcript": [
+      {
+        "speaker": "Edrin",
+        "text": "Alex, based on what you've shared, your team wants a clearer handoff and fewer calls to find the right contact. Is that a fair summary?",
+        "at": 0.0
+      },
+      {
+        "speaker": "Alex",
+        "text": "Yes, that is the main issue. What you described sounds interesting. Send something over, and we will take a look.",
+        "at": 8.299
+      },
+      {
+        "speaker": "Edrin",
+        "text": "Happy to. To make the next step useful, would a twenty-minute walkthrough with the people involved be better than a general brochure? We could use a sample handoff from your team.",
+        "at": 15.194
+      },
+      {
+        "speaker": "Alex",
+        "text": "Maybe. Our practice administrator needs to be included if there is a cost involved.",
+        "at": 25.399
+      },
+      {
+        "speaker": "Edrin",
+        "text": "Absolutely. Who owns the day-to-day process and should also join?",
+        "at": 30.263
+      },
+      {
+        "speaker": "Alex",
+        "text": "That would be me. The administrator is Jordan. We are both usually free on Tuesday after two.",
+        "at": 34.393
+      },
+      {
+        "speaker": "Edrin",
+        "text": "Would Tuesday at two thirty work for you and Jordan? I'll send a twenty-minute invite with an agenda: your current handoff, a sample workflow, and questions about scope and cost.",
+        "at": 40.052
+      },
+      {
+        "speaker": "Alex",
+        "text": "Yes, send it for two thirty. I'll bring an example of a handoff that was difficult last week.",
+        "at": 50.811
+      }
+    ],
+    "questions": [
+      {
+        "prompt": "Who should join the walkthrough?",
+        "options": [
+          "Only the salesperson",
+          "Alex and Jordan, covering the workflow and budget",
+          "Every patient in the practice"
+        ],
+        "correct": 1,
+        "explanation": "Alex owns the process, while Jordan, the practice administrator, needs to review cost."
+      },
+      {
+        "prompt": "What did they agree to prepare?",
+        "options": [
+          "A sample difficult handoff from the team",
+          "A signed purchase order",
+          "A list of competitors’ customers"
+        ],
+        "correct": 0,
+        "explanation": "Alex offered to bring a real workflow example so the walkthrough could be specific."
+      },
+      {
+        "prompt": "Which detail made the meeting commitment concrete?",
+        "options": [
+          "‘We should talk sometime’",
+          "‘Let us know when you are free’",
+          "Tuesday at 2:30, for 20 minutes, with a defined agenda"
+        ],
+        "correct": 2,
+        "explanation": "The participants, time, duration, and agenda were all clear at the end of the call."
+      }
+    ],
+    "duration": 56.615,
+    "audio": "/audio/summit.wav"
+  },
+  {
+    "id": "cedar",
+    "title": "Cedar Grove Medical Center",
+    "location": "Cedar Grove, NJ",
+    "specialty": "Primary care",
+    "topic": "Bring the whole conversation together",
+    "manager": "Zee Rabushaj",
+    "rating": 9.7,
+    "date": "Sep 22",
+    "level": "The final demo",
+    "objectives": [
+      "A complete discovery conversation",
+      "Handling a concern",
+      "A mutual action plan"
+    ],
+    "summary": [
+      "Zee moves from a permission-based opening into discovery.",
+      "He explores the workload concern without promising effortless setup.",
+      "He closes with a small, relevant next step and clear ownership."
+    ],
+    "reflection": "What are two techniques from these 10 demos that you will use on your first sales call?",
+    "transcript": [
+      {
+        "speaker": "Zee",
+        "text": "Hi, Lisa. This is Zee at TargetOne. Have you got two minutes to see whether a conversation about your pharmacy coordination workflow would be useful?",
+        "at": 0.0
+      },
+      {
+        "speaker": "Lisa",
+        "text": "Two minutes is fine. We have a process already, but our front desk spends too much time chasing the status of requests.",
+        "at": 9.383
+      },
+      {
+        "speaker": "Zee",
+        "text": "When that happens, what information is the team usually trying to find?",
+        "at": 16.645
+      },
+      {
+        "speaker": "Lisa",
+        "text": "Who has the request and what is supposed to happen next. But I am worried that setting up another process will create even more work.",
+        "at": 21.135
+      },
+      {
+        "speaker": "Zee",
+        "text": "That is a reasonable concern. Any change takes effort, so I would want us to assess that honestly. Could we first map one typical request together and identify where the handoff breaks down?",
+        "at": 28.381
+      },
+      {
+        "speaker": "Lisa",
+        "text": "I could do that. I would need our front desk lead there because she knows the detail.",
+        "at": 40.041
+      },
+      {
+        "speaker": "Zee",
+        "text": "Great. How about Thursday at eleven for fifteen minutes with you and your front desk lead? I'll send a simple agenda. If you bring one example, we can look at the current process and then decide together whether another step is worthwhile.",
+        "at": 44.513
+      },
+      {
+        "speaker": "Lisa",
+        "text": "Thursday at eleven works. I'll invite the front desk lead and bring an example. Let's start there and see if it helps.",
+        "at": 58.35
+      }
+    ],
+    "questions": [
+      {
+        "prompt": "What did Zee do when Lisa raised the setup concern?",
+        "options": [
+          "Promised setup would take no effort",
+          "Acknowledged the concern and proposed assessing one workflow first",
+          "Dismissed the concern as unimportant"
+        ],
+        "correct": 1,
+        "explanation": "Zee was honest that change takes effort and suggested a small step to assess whether it was worthwhile."
+      },
+      {
+        "prompt": "Why include the front desk lead?",
+        "options": [
+          "She knows the day-to-day process in detail",
+          "She must approve all sales calls",
+          "To make the meeting as large as possible"
+        ],
+        "correct": 0,
+        "explanation": "Lisa said the front desk lead could explain the actual handoff details."
+      },
+      {
+        "prompt": "Which description best captures the final agreement?",
+        "options": [
+          "A commitment to buy immediately",
+          "An open-ended promise to stay in touch",
+          "A short working session with clear preparation and a shared decision afterward"
+        ],
+        "correct": 2,
+        "explanation": "Both sides had responsibilities: Zee would send the agenda, Lisa would bring an example and the right colleague, and they would evaluate the next step together."
+      }
+    ],
+    "duration": 65.103,
+    "audio": "/audio/cedar.wav"
+  }
+]
