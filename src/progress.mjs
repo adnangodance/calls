@@ -41,6 +41,7 @@ export function sanitizeProgress(raw, calls) {
       position: Number.isFinite(saved.position) ? Math.max(0, Math.min(saved.position, call.duration)) : 0,
       answers: Array.isArray(saved.answers) ? call.questions.map((q, i) => Number.isInteger(saved.answers[i]) && saved.answers[i] >= 0 && saved.answers[i] < q.options.length ? saved.answers[i] : -1) : [],
       reflection: typeof saved.reflection === 'string' ? saved.reflection.slice(0, 5000) : '',
+      confidence: Number.isInteger(saved.confidence) && saved.confidence >= 1 && saved.confidence <= 5 ? saved.confidence : 0,
       bestScore: [0, 33, 67, 100].includes(saved.bestScore) ? saved.bestScore : undefined,
       completed: saved.completed === true && [67, 100].includes(saved.bestScore),
       submitted: saved.submitted === true && call.questions.every((q, i) => Number.isInteger(saved.answers?.[i]) && saved.answers[i] >= 0 && saved.answers[i] < q.options.length) && typeof saved.reflection === 'string' && saved.reflection.trim().length > 0,

@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Sparkles, Star, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
 import callData from './calls.json';
-import { gradeQuiz, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
+import { gradeQuiz, listenedSeconds, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
 
 type Call = (typeof callData)[number];
-type Progress = { coverage: number[][]; position: number; answers: number[]; reflection: string; bestScore?: number; completed: boolean; submitted?: boolean };
+type Progress = { coverage: number[][]; position: number; answers: number[]; reflection: string; confidence: number; bestScore?: number; completed: boolean; submitted?: boolean };
 type Saved = { activeId?: string; progress: Record<string, Progress> };
 type Filter = 'all' | 'todo' | 'completed';
 const calls = callData as Call[];
-const EMPTY: Progress = { coverage: [], position: 0, answers: [], reflection: '', completed: false };
+const EMPTY: Progress = { coverage: [], position: 0, answers: [], reflection: '', confidence: 0, completed: false };
 const STORAGE_KEY = 'targetone-training-v1';
 const managers = [...new Set(calls.map(c => c.manager))];
 const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
@@ -73,6 +73,7 @@ export default function App() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [manager, setManager] = useState('all');
+  const [tab, setTab] = useState<'listen' | 'quiz'>('quiz');
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
   const [speed, setSpeed] = useState(1);
@@ -89,10 +90,12 @@ export default function App() {
   });
   const audio = useRef<HTMLAudioElement>(null);
   const detail = useRef<HTMLElement>(null);
+  const guide = useRef<HTMLDialogElement>(null);
   const quizHeading = useRef<HTMLHeadingElement>(null);
   const active = calls.find(c => c.id === activeId)!;
   const index = calls.findIndex(c => c.id === activeId);
   const current = progress[activeId] || EMPTY;
+  const coveragePercent = Math.min(100, Math.floor(listenedSeconds(current.coverage) / active.duration * 100));
   const completed = calls.filter(c => progress[c.id]?.completed).length;
   const scores = calls.map(c => progress[c.id]?.bestScore).filter((s): s is number => s !== undefined);
   const average = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
@@ -113,6 +116,7 @@ export default function App() {
   }
 
   function selectCall(id: string) {
+    setTab('quiz');
     if (id === activeId) return;
     audio.current?.pause();
     setFormError('');
@@ -128,6 +132,20 @@ export default function App() {
       document.getElementById('call-title')?.focus({ preventScroll: true });
       detail.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+  }
+
+  function openQuiz() {
+    setTab('quiz');
+    requestAnimationFrame(() => {
+      quizHeading.current?.focus({ preventScroll: true });
+      quizHeading.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  function startTraining() {
+    const next = calls.find(call => !progress[call.id]?.completed) || calls[0];
+    selectCall(next.id);
+    openQuiz();
   }
 
   async function togglePlay() {
@@ -209,13 +227,21 @@ export default function App() {
   return <>
     <header className="app-header">
       <a className="brand" href="#main" aria-label="TargetOne home"><Target size={20} strokeWidth={1.8} /><span>Target<span className="brand-one">One</span></span></a>
-      <span className="app-section">Sales training</span>
+      <nav className="workspace-nav" aria-label="Workspace">
+        {['Routes', 'Users', 'AutoDialer', 'Analytics', 'Pipeline', 'Followup', 'Call History'].map(label => <span className="workspace-placeholder" key={label}>{label}</span>)}
+        <a className="nav-active" href="#main" aria-current="page">Training Calls</a>
+        <span className="workspace-placeholder secondary-nav">Customer Service</span>
+      </nav>
+      <div className="header-account"><span className="workspace-status"><i />Florida<ChevronDown size={11} /></span><span className="header-divider" /><span className="user-avatar">AG</span><span className="user-name">Adnan Goda</span></div>
     </header>
 
     <main id="main" className="page-shell">
+      <div className="breadcrumbs"><span>Workspace</span><ChevronRight size={12} /><span>Learning & development</span></div>
       <section className="page-heading" aria-labelledby="page-title">
-        <div><h1 id="page-title">Training Calls</h1><p>Practice at your pace. Play the recording whenever you need context.</p></div>
+        <div><div className="heading-title"><h1 id="page-title">Training Calls</h1><span className="course-badge">SALES ONBOARDING</span></div><p>Listen to the experts. Find your approach. Make your next call count.</p></div>
+        <div className="heading-actions"><button className="button button-dark start-training-button" onClick={startTraining}><span className="start-play-icon" aria-hidden="true"><Play size={7} fill="currentColor" strokeWidth={0} /></span>{completed === 10 ? 'Revisit training' : answeredQuestions > 0 ? 'Continue training' : 'Start training'}</button></div>
       </section>
+
 
       <section className="training-stats" aria-label="Your training progress" tabIndex={0}>
         <article className="stat-card stat-completion" aria-labelledby="stat-completion-label">
@@ -244,6 +270,14 @@ export default function App() {
         </article>
       </section>
       {completed === calls.length && <div className="course-complete" role="status"><Trophy size={24} /><div><strong>All demos completed</strong><p>Revisit any call or review your answers whenever you need a refresher.</p></div></div>}
+
+      <div className="learning-strip">
+        <span className="learning-note"><span className="learning-icon"><Sparkles size={16} strokeWidth={1.5} /></span>A little listening. A lot of learning.</span>
+        <div className="learning-extras">
+          <div className="learning-steps"><span><i>1</i>Listen if helpful</span><ChevronRight size={12} /><span><i>2</i>Complete the questionnaire</span><ChevronRight size={12} /><span><i>3</i>Build your confidence</span></div>
+          <button className="learning-guide" aria-label="How training works" title="How training works" onClick={() => guide.current?.showModal()}><Sparkles size={14} strokeWidth={1.5} /></button>
+        </div>
+      </div>
 
       <div className="learning-layout">
         <aside className="library" aria-label="Training call library">
@@ -281,12 +315,21 @@ export default function App() {
         <section className="call-detail" ref={detail} aria-label="Selected training call">
           <div className="detail-header">
             <div className="detail-kicker"><span>Demo {String(index + 1).padStart(2, '0')} <span className="muted">/ {calls.length}</span></span><span className="kicker-dot">·</span><span className="lesson-level">{active.level}</span><span className={`lesson-status ${current.completed ? 'done' : ''}`}>{current.completed ? <><CircleCheck size={12} />Completed</> : answered > 0 ? 'In progress' : 'Not started'}</span></div>
-            <div className="detail-title-row"><div><h2 id="call-title" tabIndex={-1}>{active.title}</h2><p className="detail-subtitle">{active.topic}</p></div></div>
+            <div className="detail-title-row"><div><h2 id="call-title" tabIndex={-1}>{active.title}</h2><p className="detail-subtitle">{active.topic}</p></div><div className="rating-block" title="Illustrative manager rating for this sample call"><div className="rating-score"><Star size={15} strokeWidth={1.6} /><strong>{active.rating.toFixed(1)}</strong><span>/ 10</span></div><span>Manager rating</span></div></div>
             <div className="call-information"><span className={`manager-avatar ${managerClass(active.manager)}`}>{active.manager[0]}</span><strong>{active.manager}</strong><span className="metadata-separator" /><span className="specialty-tag">{active.specialty}</span><span className="location"><MapPin size={12} />{active.location}</span></div>
           </div>
 
+          <div className="lesson-tabs" role="tablist" aria-label="Demo learning steps">
+            <button id="listen-tab" role="tab" aria-selected={tab === 'listen'} aria-controls="listen-panel" tabIndex={tab === 'listen' ? 0 : -1} className={tab === 'listen' ? 'active' : ''} onClick={() => setTab('listen')} onKeyDown={event => { if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') { event.preventDefault(); setTab('quiz'); document.getElementById('quiz-tab')?.focus(); } }}>
+              <span className={`step-number ${coveragePercent >= 100 ? 'done' : ''}`}>{coveragePercent >= 100 ? <Check size={12} /> : '1'}</span>Listen to the call
+            </button>
+            <button id="quiz-tab" role="tab" aria-selected={tab === 'quiz'} aria-controls="quiz-panel" tabIndex={tab === 'quiz' ? 0 : -1} className={tab === 'quiz' ? 'active' : ''} onClick={openQuiz} onKeyDown={event => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); setTab('listen'); document.getElementById('listen-tab')?.focus(); } }}>
+              <span className={`step-number ${current.completed ? 'done' : ''}`}>{current.completed ? <Check size={12} /> : '2'}</span>Questionnaire
+              {!current.completed && <span className="tab-ready">Ready</span>}
+            </button>
+          </div>
+
           <div className="detail-body">
-            <div className="recording-heading"><span><Headphones size={14} />Call recording</span><span>Optional</span></div>
             <div className={`audio-player ${playing ? 'is-playing' : ''}`}>
               <audio
                 key={active.id} ref={audio} src={`${import.meta.env.BASE_URL}${active.audio.replace(/^\//, '')}`} preload="metadata"
@@ -314,11 +357,24 @@ export default function App() {
               </div>
             </div>
             <div className="player-controls"><div className="transport"><button aria-label="Rewind 10 seconds" onClick={() => seek(time - 10)}><RotateCcw size={16} /><span>10</span></button><button aria-label="Forward 10 seconds" onClick={() => seek(time + 10)}><RotateCw size={16} /><span>10</span></button></div><div className="audio-options"><label className="speed-select"><select aria-label="Playback speed" value={speed} onChange={e => { const value = Number(e.target.value); setSpeed(value); if (audio.current) { recordPlayback(audio.current); audio.current.playbackRate = value; } }}><option value="0.75">0.75×</option><option value="1">1× speed</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select><ChevronDown size={11} /></label><span className="control-divider" /><button className="volume-button" aria-label={muted ? 'Unmute recording' : 'Mute recording'} aria-pressed={muted} onClick={() => { setMuted(!muted); if (audio.current) audio.current.muted = !muted; }}>{muted ? <VolumeX size={15} /> : <Volume2 size={15} />}</button></div></div>
-            {audioError ? <div className="audio-error" role="alert"><Info size={14} /><span>The recording couldn’t play.</span><button onClick={() => { setAudioError(false); audio.current?.load(); }}>Reload audio</button></div> : <p className="audio-footnote">Sample recording · Fictional conversation</p>}
+            {audioError ? <div className="audio-error" role="alert"><Info size={14} /><span>The recording couldn’t play.</span><button onClick={() => { setAudioError(false); audio.current?.load(); }}>Reload audio</button></div> : <div className="audio-footnote"><span><Info size={11} />Sample recording · Fictional conversation</span><span>{coveragePercent}% listened · Optional</span></div>}
 
-            <section id="quiz-panel" aria-labelledby="questionnaire-title">
+            <section id="listen-panel" role="tabpanel" aria-labelledby="listen-tab" hidden={tab !== 'listen'}>
+              <section className="lesson-action ready" aria-label="Next training step">
+                <div className="lesson-action-copy">
+                  <span className="lesson-action-label">{current.completed ? 'DEMO COMPLETE' : 'OPTIONAL · CALL RECORDING'}</span>
+                  <h3>{current.completed ? 'Ready for your next call' : 'Listen at your own pace'}</h3>
+                  <p>{current.completed ? `Best score: ${current.bestScore}%. Your answers and takeaway are saved.` : 'Play any part of the recording for context. Your questionnaire is ready whenever you are.'}</p>
+                </div>
+                <div className="lesson-action-buttons">
+                  {current.completed ? <><button className="button button-dark" onClick={nextCall}>Next demo<ArrowRight size={14} /></button><button className="text-button" onClick={openQuiz}>Review answers</button></> : <button className="button button-dark" onClick={openQuiz}>{submitted ? 'Review answers' : 'Take questionnaire'}<ArrowRight size={14} /></button>}
+                </div>
+              </section>
+            </section>
+
+            <section id="quiz-panel" role="tabpanel" aria-labelledby="quiz-tab" hidden={tab !== 'quiz'}>
               <div className="questionnaire-heading">
-                <div><h3 id="questionnaire-title" ref={quizHeading} tabIndex={-1}>Questionnaire</h3><p>{active.questions.length} questions and a written takeaway. Answer at least {Math.ceil(active.questions.length * 2 / 3)} questions correctly to complete this demo.</p></div>
+                <div><span className="questionnaire-eyebrow">CALL REVIEW</span><h3 id="questionnaire-title" ref={quizHeading} tabIndex={-1}>Questionnaire</h3><p>{active.questions.length} questions and a written takeaway.<br />Answer at least {Math.ceil(active.questions.length * 2 / 3)} questions correctly to complete this demo.</p></div>
                 <button type="button" className="quiz-expand-all" onClick={() => setExpandedTasks(expandedTasks.length === totalTasks ? [] : Array.from({ length: totalTasks }, (_, i) => i))}>{expandedTasks.length === totalTasks ? 'Collapse all' : 'Expand all'}<ChevronDown size={13} className={expandedTasks.length === totalTasks ? 'is-expanded' : ''} /></button>
               </div>
               <form onSubmit={submitQuiz}>
@@ -365,6 +421,10 @@ export default function App() {
                   </QuestionnaireTask>
                 </div>
                 <p className="questionnaire-save-note"><CheckCheck size={13} />{saveError ? 'Available for this session' : 'Your answers are saved as you go'}</p>
+                <details className="confidence-details" key={`confidence-${activeId}`}>
+                  <summary>How confident do you feel?<span>Optional<ChevronDown size={14} /></span></summary>
+                  <section className="confidence-section"><div><strong>How confident would you feel handling this call?</strong><span>Just for you · Not scored</span></div><div className="confidence-options">{[1, 2, 3, 4, 5].map(value => <button type="button" key={value} aria-label={`Confidence ${value} of 5`} aria-pressed={current.confidence === value} className={current.confidence === value ? 'selected' : ''} onClick={() => update(activeId, { confidence: value })}>{value}</button>)}</div><div className="confidence-labels"><span>Still practicing</span><span>Ready to try</span></div></section>
+                </details>
                 {formError && <p className="form-error" role="alert"><Info size={15} />{formError}</p>}
                 <div className="quiz-actions">{submitted ? <><button type="button" className="text-button" onClick={retryQuiz}><RotateCcw size={14} />{result.score < 100 ? 'Retry missed questions' : 'Review answers again'}</button>{result.passed && <button type="button" className="button button-dark" onClick={nextCall}>{completed === calls.length ? 'Explore the calls' : 'Continue to next demo'}<ArrowRight size={15} /></button>}</> : <><span>{answered === totalTasks ? 'All set. Submit when you’re ready.' : `${answered} of ${totalTasks} answered`}</span><button type="submit" className="button button-dark">Submit questionnaire<ArrowRight size={15} /></button></>}</div>
               </form>
@@ -376,5 +436,6 @@ export default function App() {
       <footer className="page-footer"><span><Target size={14} />Better conversations start with practice.</span><span><span className="local-save-dot" />{saveError ? 'Browser storage unavailable. Keep this tab open to preserve progress.' : 'Progress saved on this browser'}</span></footer>
     </main>
 
+    <dialog aria-labelledby="course-guide-title" className="guide-dialog" ref={guide} onClick={event => { if (event.target === event.currentTarget) guide.current?.close(); }}><button className="dialog-close" aria-label="Close course guide" onClick={() => guide.current?.close()}><X size={20} /></button><span className="guide-illustration"><Headphones size={32} /></span><span className="section-eyebrow">YOUR FIRST 10 CONVERSATIONS</span><h2 id="course-guide-title">Listen. Reflect. Get ready.</h2><p className="guide-intro">A little practice before the real thing. Work through the demos at your own pace.</p><ol><li><span>01</span><div><strong>Listen with intention</strong><p>Play each demo and notice the techniques the manager uses. Listening is optional; the questionnaire is available from the start.</p></div></li><li><span>02</span><div><strong>Make the learning stick</strong><p>Answer three questions and write a takeaway. Get at least two answers right to complete the demo. You can retry anytime.</p></div></li><li><span>03</span><div><strong>Build your own approach</strong><p>Complete all 10 demos and revisit any call for more practice. Your progress and notes stay in this browser.</p></div></li></ol><div className="guide-note"><Info size={16} /><span>This preview uses fictional, voice-generated sample conversations. Replace them with your team’s recordings for live onboarding.</span></div><button className="button button-dark" onClick={() => { guide.current?.close(); startTraining(); }}>Let’s get started<ArrowRight size={15} /></button></dialog>
   </>;
 }
