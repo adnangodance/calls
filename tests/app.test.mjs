@@ -215,7 +215,7 @@ test('the first questionnaire can be completed without listening and its result 
   assert.equal(document.getElementById('quiz-task-0-body').hidden, false);
 });
 
-test('two correct answers show Passed while keeping a retry for the missed question', async () => {
+test('two correct answers use the same passed layout as a perfect score', async () => {
   await mount();
   await answer();
   const missedQuestion = first.questions[2];
@@ -225,12 +225,14 @@ test('two correct answers show Passed while keeping a retry for the missed quest
   assert.equal(saved().progress[first.id].completed, true);
   assert.equal(saved().progress[first.id].bestScore, 67);
   assert.equal(document.querySelector('.quiz-result .review-badge').textContent, 'Passed');
-  assert.equal(document.querySelector('.quiz-result .review-retry-button').textContent, 'Retry missed questions');
+  assert.equal(document.querySelector('.quiz-result .review-retry-button'), null);
+  assert.ok(button('Review answers again'));
+  assert.ok(button('Continue to next demo'));
 
   await unmount();
   await mount({}, true);
   assert.equal(document.querySelector('.quiz-result .review-badge').textContent, 'Passed');
-  await interact(() => button('Retry missed questions').click());
+  await interact(() => button('Review answers again').click());
   assert.deepEqual(saved().progress[first.id].answers, [first.questions[0].correct, first.questions[1].correct, -1]);
 });
 

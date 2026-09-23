@@ -408,7 +408,7 @@ export default function App() {
                   <ReviewRing label={result.score} progress={result.score} />
                   <div className="review-summary-copy"><strong>{result.passed ? 'Demo complete' : 'Review your answers'}</strong><p>{result.correct} of {result.total} correct · {result.score}% score</p><span>{result.passed ? 'Open any answer to revisit the feedback.' : 'Open the marked answers, then try again.'}</span></div>
                   {result.passed && <span className="review-badge is-correct">Passed</span>}
-                  {result.score < 100 && <button type="button" className="button button-dark review-retry-button" onClick={retryQuiz}><RotateCcw size={14} aria-hidden="true" />Retry missed questions</button>}
+                  {!result.passed && <button type="button" className="button button-dark review-retry-button" onClick={retryQuiz}><RotateCcw size={14} aria-hidden="true" />Retry missed questions</button>}
                 </div>}
                 <div className={`questionnaire-tasks ${submitted ? 'answer-review-list' : ''}`}>
                   {!submitted && <p className="questionnaire-queue-heading" role="status">{answered === totalTasks ? <CircleCheck size={14} aria-hidden="true" /> : <CircleDashed size={14} aria-hidden="true" />}<span>{answered === totalTasks ? 'All questions answered' : `${totalTasks - answered} ${totalTasks - answered === 1 ? 'question' : 'questions'} remaining`}</span></p>}
@@ -444,7 +444,7 @@ export default function App() {
                 </div>
                 <p className="questionnaire-save-note"><CheckCheck size={13} />{saveError ? 'Available for this session' : 'Your answers are saved as you go'}</p>
                 {formError && <p className="form-error" role="alert"><Info size={15} />{formError}</p>}
-                {(!submitted || result.passed) && <div className="quiz-actions">{submitted ? <>{result.score === 100 && <button type="button" className="text-button" onClick={retryQuiz}><RotateCcw size={14} />Review answers again</button>}<button type="button" className="button button-dark" onClick={nextCall}>{completed === calls.length ? 'Explore the calls' : 'Continue to next demo'}</button></> : <><span>{answered === totalTasks ? 'All set. Submit when you’re ready.' : `${answered} of ${totalTasks} answered`}</span><button type="submit" className="button button-dark">Submit questionnaire<ArrowRight size={15} /></button></>}</div>}
+                {(!submitted || result.passed) && <div className="quiz-actions">{submitted ? <>{result.passed && <button type="button" className="text-button" onClick={retryQuiz}><RotateCcw size={14} />Review answers again</button>}<button type="button" className="button button-dark" onClick={nextCall}>{completed === calls.length ? 'Explore the calls' : 'Continue to next demo'}</button></> : <><span>{answered === totalTasks ? 'All set. Submit when you’re ready.' : `${answered} of ${totalTasks} answered`}</span><button type="submit" className="button button-dark">Submit questionnaire<ArrowRight size={15} /></button></>}</div>}
               </form>
             </section>
           </div>
