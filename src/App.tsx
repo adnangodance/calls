@@ -317,7 +317,6 @@ export default function App() {
 
       <div className="learning-layout">
         <aside className="library" aria-label="Training call library">
-          <div className="library-section-heading"><h2>Call library</h2><span>{calls.length} demos</span></div>
           <div className="library-tools">
             <label className="search-box">
               <Search size={16} />

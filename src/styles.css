@@ -442,9 +442,6 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
 }
 .library { min-width: 0; }
-.library-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 3px 2px 13px; }
-.library-section-heading h2 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; color: #72727c; }
-.library-section-heading > span { font-size: 10px; color: #a1a1aa; }
 
 .library-tools { padding: 12px 13px; margin-bottom: 10px; background: #fff; border-radius: 12px; }
 .search-box { display: flex; align-items: center; gap: 9px; padding: 10px 11px; background: #fafafa; border: 1px solid #e9e9ed; border-radius: 8px; color: #96969f; }
@@ -491,13 +488,11 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .empty-state button { margin-top: 13px; }
 @media (max-width: 899px) {
   .library { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 12px; align-items: start; grid-row: 2; }
-  .library-section-heading { grid-column: 1 / -1; margin-bottom: 0; }
   .library-tools { margin-bottom: 0; }
   .call-list { max-height: 320px; }
 }
 @media (max-width: 600px) {
   .library { display: block; }
-  .library-section-heading { margin-bottom: 12px; }
   .library-tools { margin-bottom: 10px; }
   .search-box { padding: 10px; }
   .search-box input { font-size: 11px; }
