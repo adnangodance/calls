@@ -97,7 +97,6 @@ h1 { font-size: 29px; letter-spacing: -1.15px; font-weight: 650; line-height: 1.
 .lesson-level { color: #92929b; font-weight: 400; font-size: 10px; }
 .lesson-status { display: flex; align-items: center; gap: 6px; margin-left: auto; color: #7c7c84; font-size: 10px; font-weight: 400; white-space: nowrap; }
 .live-dot { width: 5px; height: 5px; background: #a3a3ab; border-radius: 50%; }
-.lesson-status.done { color: #408367; }
 .detail-title-row { display: flex; justify-content: space-between; gap: 18px; align-items: center; margin-top: 18px; }
 h2 { font-size: 21px; font-weight: 650; letter-spacing: -.7px; }
 .detail-title-row h2 { font-size: 27px; font-weight: 600; line-height: 1.3; letter-spacing: -.8px; color: #242429; }
@@ -490,7 +489,7 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .call-duration { display: inline-flex; align-items: center; gap: 4px; color: #929993; font-size: 10px; line-height: 1.5; white-space: nowrap; }
 .call-description { display: block; margin-top: 5px; color: #848b85; font-size: 11px; line-height: 1.55; }
 .call-row-state { display: block; margin-top: 6px; color: #838e80; font-size: 10px; line-height: 1.5; }
-.call-row-state.complete { color: #4d8645; }
+.completion-badge { display: inline-flex; align-items: center; gap: 5px; width: fit-content; padding: 3px 8px; border-radius: 999px; background: #c8fac7; color: #2e6c32; font-size: 10px; font-weight: 600; line-height: 1.5; white-space: nowrap; }
 .call-row-state.needs-review { color: #9a7748; }
 .call-row-chevron { align-self: center; color: #bec6bd; }
 .active .call-row-chevron { color: #9caa98; }

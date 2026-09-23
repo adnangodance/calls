@@ -351,7 +351,7 @@ export default function App() {
                   <span className="call-row-copy">
                     <span className="call-item-title"><strong>{call.title}</strong><span className="call-duration"><Clock3 size={11} />{formatDuration(call.duration)}</span></span>
                     <span className="call-description">{call.topic}</span>
-                    {state && <span className={`call-row-state ${p.completed ? 'complete' : p.submitted ? 'needs-review' : ''}`}>{state}</span>}
+                    {state && <span className={`call-row-state ${p.completed ? 'complete completion-badge' : p.submitted ? 'needs-review' : ''}`}>{state}{p.completed && <CircleCheck size={12} strokeWidth={2} aria-hidden="true" />}</span>}
                   </span>
                   <ChevronRight size={14} className="call-row-chevron" aria-hidden="true" />
                 </button>
@@ -363,7 +363,7 @@ export default function App() {
 
         <section className="call-detail" ref={detail} aria-label="Selected training call">
           <div className="detail-header">
-            <div className="detail-kicker"><span>Demo {String(index + 1).padStart(2, '0')} <span className="muted">/ {calls.length}</span></span><span className="kicker-dot">·</span><span className="lesson-level">{active.level}</span><span className={`lesson-status ${current.completed ? 'done' : ''}`}>{current.completed ? <><CircleCheck size={12} />Completed</> : answered > 0 ? 'In progress' : 'Not started'}</span></div>
+            <div className="detail-kicker"><span>Demo {String(index + 1).padStart(2, '0')} <span className="muted">/ {calls.length}</span></span><span className="kicker-dot">·</span><span className="lesson-level">{active.level}</span><span className={`lesson-status ${current.completed ? 'done completion-badge' : ''}`}>{current.completed ? <>Completed<CircleCheck size={12} strokeWidth={2} aria-hidden="true" /></> : answered > 0 ? 'In progress' : 'Not started'}</span></div>
             <div className="detail-title-row"><div><h2 id="call-title" tabIndex={-1}>{active.title}</h2><p className="detail-subtitle">{active.topic}</p></div><div className="rating-block" title="Illustrative manager rating for this sample call"><div className="rating-score"><Star size={15} strokeWidth={1.6} /><strong>{active.rating.toFixed(1)}</strong><span>/ 10</span></div><span>Manager rating</span></div></div>
             <div className="call-information"><span className={`manager-avatar ${managerClass(active.manager)}`}>{active.manager[0]}</span><strong>{active.manager}</strong><span className="metadata-separator" /><span className="specialty-tag">{active.specialty}</span><span className="location"><MapPin size={12} />{active.location}</span></div>
           </div>
