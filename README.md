@@ -25,7 +25,7 @@ Vite's `/calls/` base path applies to scripts, styles, the favicon, and recordin
 
 ## Training flow
 
-- 10 fictional, voice-generated demo calls with listening objectives and questionnaires.
+- 10 fictional, voice-generated demo calls with questionnaires.
 - Listen to at least 90% of each recording to unlock its questionnaire. Finishing the recording opens the questionnaire automatically once this threshold is met. Playback ranges are captured from the browser, so pausing, replaying, changing speed, and returning later preserve listening progress. Seeking or replaying the same segment does not add duplicate credit.
 - Each questionnaire contains three multiple-choice questions and a required written takeaway. Two correct answers complete the demo; missed questions can be retried.
 - Search, manager filters, sorting, playback speed, and audio seeking are available.
@@ -34,7 +34,7 @@ Vite's `/calls/` base path applies to scripts, styles, the favicon, and recordin
 
 ## Replace sample recordings
 
-Edit `src/calls.json` for the calls, learning objectives, and questionnaires. The source transcripts are retained for regenerating sample audio and are not displayed in the app. Replace WAV files under `public/audio/`, and update the matching audio path, duration in seconds, and each transcript line's `at` timestamp. Each question's `correct` value is the zero-based index of its correct option. The current course is designed for 10 demos with three scored questions each.
+Edit `src/calls.json` for the calls and questionnaires. The source transcripts are retained for regenerating sample audio and are not displayed in the app. Replace WAV files under `public/audio/`, and update the matching audio path, duration in seconds, and each transcript line's `at` timestamp. Each question's `correct` value is the zero-based index of its correct option. The current course is designed for 10 demos with three scored questions each.
 
 The sample recordings can be regenerated on macOS with `python3 scripts/generate-audio.py`, using the local Daniel and Samantha voices.
 

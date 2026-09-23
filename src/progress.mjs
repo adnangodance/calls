@@ -52,7 +52,6 @@ export function sanitizeProgress(raw, calls) {
         return mergeCoverage(ranges, value[0], value[1], call.duration);
       }, []) : [],
       position: Number.isFinite(saved.position) ? Math.max(0, Math.min(saved.position, call.duration)) : 0,
-      checked: Array.isArray(saved.checked) ? saved.checked.filter(i => Number.isInteger(i) && i >= 0 && i < call.objectives.length) : [],
       answers: Array.isArray(saved.answers) ? call.questions.map((q, i) => Number.isInteger(saved.answers[i]) && saved.answers[i] >= 0 && saved.answers[i] < q.options.length ? saved.answers[i] : -1) : [],
       reflection: typeof saved.reflection === 'string' ? saved.reflection.slice(0, 5000) : '',
       confidence: Number.isInteger(saved.confidence) && saved.confidence >= 1 && saved.confidence <= 5 ? saved.confidence : 0,

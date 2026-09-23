@@ -12,7 +12,7 @@ test('replaying audio does not count the same segment twice', () => {
 test('revisiting earlier audio fills gaps instead of losing listening progress', () => {
   assert.deepEqual(mergeCoverage([[0, 5], [95, 100]], 5, 95, 100), [[0, 100]]);
   assert.deepEqual(mergeCoverage([[40, 70]], 0, 40, 100), [[0, 70]]);
-  const restored = sanitizeProgress({ call: { coverage: [[60, 100], [0, 60]] } }, [{ id: 'call', duration: 100, objectives: [], questions: [] }]);
+  const restored = sanitizeProgress({ call: { coverage: [[60, 100], [0, 60]] } }, [{ id: 'call', duration: 100, questions: [] }]);
   assert.deepEqual(restored.call.coverage, [[0, 100]]);
 });
 
@@ -50,18 +50,17 @@ test('quiz requires two correct answers and does not count unanswered questions'
 });
 
 test('malformed saved progress is safe to load', () => {
-  const calls = [{ id: 'test', duration: 100, objectives: ['opening'], questions: [{ options: ['a', 'b'] }] }];
+  const calls = [{ id: 'test', duration: 100, questions: [{ options: ['a', 'b'] }] }];
   assert.deepEqual(sanitizeProgress(null, calls), {});
   const cleaned = sanitizeProgress({ test: { coverage: [[0, 200], ['bad', 50], null], answers: [99], completed: true, bestScore: 12, reflection: {}, checked: [0, 50] } }, calls).test;
   assert.deepEqual(cleaned.coverage, [[0, 100]]);
   assert.deepEqual(cleaned.answers, [-1]);
   assert.equal(cleaned.completed, false);
   assert.equal(cleaned.reflection, '');
-  assert.deepEqual(cleaned.checked, [0]);
 });
 
 test('submitted questionnaires retain feedback after reopening the app', () => {
-  const calls = [{ id: 'test', duration: 100, objectives: [], questions: [{ options: ['a', 'b'] }] }];
+  const calls = [{ id: 'test', duration: 100, questions: [{ options: ['a', 'b'] }] }];
   const saved = { answers: [1], reflection: 'Ask a clarifying question.', submitted: true, bestScore: 100, completed: true };
   const restored = sanitizeProgress(JSON.parse(JSON.stringify({ test: saved })), calls).test;
   assert.equal(restored.submitted, true);

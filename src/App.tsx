@@ -4,11 +4,11 @@ import callData from './calls.json';
 import { canTakeQuiz, firstUnplayedPosition, gradeQuiz, listenedSeconds, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
 
 type Call = (typeof callData)[number];
-type Progress = { coverage: number[][]; position: number; checked: number[]; answers: number[]; reflection: string; confidence: number; bestScore?: number; completed: boolean; submitted?: boolean };
+type Progress = { coverage: number[][]; position: number; answers: number[]; reflection: string; confidence: number; bestScore?: number; completed: boolean; submitted?: boolean };
 type Saved = { activeId?: string; progress: Record<string, Progress> };
 type Filter = 'all' | 'todo' | 'completed';
 const calls = callData as Call[];
-const EMPTY: Progress = { coverage: [], position: 0, checked: [], answers: [], reflection: '', confidence: 0, completed: false };
+const EMPTY: Progress = { coverage: [], position: 0, answers: [], reflection: '', confidence: 0, completed: false };
 const STORAGE_KEY = 'targetone-training-v1';
 const managers = [...new Set(calls.map(c => c.manager))];
 const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
@@ -405,7 +405,7 @@ export default function App() {
               <section className={`lesson-action ${quizUnlocked ? 'ready' : ''}`} aria-label="Next training step">
                 <div className="lesson-action-copy">
                   <span className="lesson-action-label">{current.completed ? 'DEMO COMPLETE' : quizUnlocked ? 'NEXT · QUESTIONNAIRE' : 'STEP 1 OF 2 · LISTEN'}</span>
-                  <h3>{current.completed ? 'Ready for your next call' : quizUnlocked ? 'Put what you heard into practice' : playing ? 'Listen for the techniques below' : playbackEnded ? 'Finish the parts you haven’t heard' : 'Start with the recording'}</h3>
+                  <h3>{current.completed ? 'Ready for your next call' : quizUnlocked ? 'Put what you heard into practice' : playing ? 'Listen to the manager’s approach' : playbackEnded ? 'Finish the parts you haven’t heard' : 'Start with the recording'}</h3>
                   <p>{current.completed ? `Best score: ${current.bestScore}%. Your answers and takeaway are saved.` : quizUnlocked ? '3 questions and a short takeaway. About 2 minutes.' : playbackEnded ? `${listeningRemaining}s of listening left to unlock your questions.` : 'Listen to 90% to unlock the questions. Your place is saved.'}</p>
                   {!quizUnlocked && <div className="listening-meter" role="progressbar" aria-label="Listening progress" aria-valuenow={coveragePercent} aria-valuemin={0} aria-valuemax={100}><span style={{ width: `${coveragePercent}%` }} /></div>}
                 </div>
@@ -414,7 +414,6 @@ export default function App() {
                 </div>
               </section>
 
-              <section className="objectives-section"><div className="section-title"><h3>What to listen for</h3><span>{current.checked.length} / {active.objectives.length}</span></div><div className="objective-list">{active.objectives.map((objective, i) => <label key={`${active.id}-${i}`} className={current.checked.includes(i) ? 'checked' : ''}><input type="checkbox" checked={current.checked.includes(i)} onChange={() => update(activeId, { checked: current.checked.includes(i) ? current.checked.filter(item => item !== i) : [...current.checked, i] })} /><span className="custom-checkbox"><Check size={11} strokeWidth={3} /></span>{objective}</label>)}</div></section>
             </div> : <div id="quiz-panel" role="tabpanel" aria-labelledby="quiz-tab">
               <div className="questionnaire-heading">
                 <div><span className="questionnaire-eyebrow">CALL REVIEW</span><h3 ref={quizHeading} tabIndex={-1}>Questionnaire</h3><p>{active.questions.length} questions and a written takeaway.<br />Answer at least {Math.ceil(active.questions.length * 2 / 3)} questions correctly to complete this demo.</p></div>

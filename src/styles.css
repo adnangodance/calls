@@ -221,20 +221,9 @@ h2 { font-size: 21px; font-weight: 650; letter-spacing: -.7px; }
 .audio-footnote > span { display: flex; align-items: center; gap: 4px; }
 .audio-error { display: flex; gap: 7px; align-items: center; margin: 10px 0; font-size: 11px; color: #b15d42; }
 .audio-error button { text-decoration: underline; }
-.section-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
-.section-title > span { font-size: 10px; color: #91919a; }
-.objectives-section { margin-top: 27px; }
-.objective-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 14px; padding: 4px; background: #f8f8fa; border: 1px solid #ededf0; border-radius: 7px; }
-.objective-list label { display: flex; align-items: center; gap: 8px; position: relative; border-radius: 4px; padding: 10px 9px; color: #72727c; font-size: 11px; line-height: 1.5; cursor: pointer; }
-.objective-list label:hover { background: #efeff3; }
-.objective-list label.checked { color: #393940; }
-.objective-list input, .answer-option input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.custom-checkbox { width: 14px; height: 14px; flex-shrink: 0; background: #fff; border: 1px solid #cfcfd7; border-radius: 3px; display: grid; place-items: center; }
-.custom-checkbox svg { opacity: 0; }
-.checked .custom-checkbox { background: #52525e; color: #fff; border-color: #52525e; }
-.checked .custom-checkbox svg { opacity: 1; }
-.objective-list label:has(input:focus-visible), .answer-option:has(input:focus-visible) { outline: 2px solid #858591; outline-offset: 2px; }
+.answer-option input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.answer-option:has(input:focus-visible) { outline: 2px solid #858591; outline-offset: 2px; }
 .library-extra-filters summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; list-style: none; cursor: pointer; }
 .library-extra-filters summary::-webkit-details-marker { display: none; }
 .library-extra-filters[open] summary > span:last-child svg { transform: rotate(180deg); }
@@ -414,8 +403,6 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
   .learning-steps { gap: 9px; }
   .detail-header, .detail-body { padding-left: 22px; padding-right: 22px; }
   .lesson-tabs, .detail-footer { padding-left: 22px; padding-right: 22px; }
-  .objective-list { grid-template-columns: 1fr; }
-  .objective-list label { padding: 9px 11px; }
 }
 @media (max-width: 1030px) {
   .workspace-nav .workspace-placeholder:nth-child(-n+3) { display: none; }
@@ -437,7 +424,6 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
   .call-list { max-height: 320px; }
   .stat-card { padding: 19px 20px; }
   .stat-chart { width: 54px; }
-  .objective-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .location { margin-left: auto; }
 }
 @media (max-width: 600px) {
@@ -504,9 +490,6 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
   .audio-footnote { align-items: flex-start; font-size: 8px; gap: 8px; line-height: 1.5; }
   .audio-footnote > span:first-child { max-width: 200px; }
   .audio-footnote > span:last-child { text-align: right; white-space: nowrap; }
-  .objectives-section { margin-top: 24px; }
-  .objective-list { grid-template-columns: 1fr; }
-  .objective-list label { font-size: 11px; padding: 10px; }
   .detail-footer { padding: 13px 16px; gap: 8px; }
   .previous-next { gap: 10px; }
   .previous-next button { font-size: 9px; }
