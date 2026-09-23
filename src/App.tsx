@@ -231,6 +231,21 @@ export default function App() {
     requestAnimationFrame(() => document.querySelector<HTMLInputElement>(`input[name="question-${activeId}-${Math.max(0, firstMissed)}"]`)?.focus());
   }
 
+  function answerQuestion(questionIndex: number, optionIndex: number) {
+    const answers = active.questions.map((_, i) => i === questionIndex ? optionIndex : current.answers[i] ?? -1);
+    update(activeId, { answers });
+    setFormError('');
+    const nextUnanswered = answers.findIndex((answer, i) => i > questionIndex && answer < 0);
+    const remaining = nextUnanswered >= 0 ? nextUnanswered : answers.findIndex(answer => answer < 0);
+    const nextTask = remaining >= 0 ? remaining : active.questions.length;
+    setExpandedTasks([nextTask]);
+    requestAnimationFrame(() => {
+      const heading = document.getElementById(`quiz-task-${nextTask}-heading`);
+      heading?.focus({ preventScroll: true });
+      heading?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  }
+
   function toggleQuizTask(task: number) {
     setExpandedTasks(previous => previous.includes(task) ? previous.filter(item => item !== task) : [...previous, task]);
   }
@@ -411,13 +426,12 @@ export default function App() {
                           const chosen = current.answers[questionIndex] === optionIndex;
                           const correct = question.correct === optionIndex;
                           return <label key={option} className={`answer-option ${chosen ? 'chosen' : ''} ${submitted && correct ? 'correct' : ''} ${submitted && chosen && !correct ? 'incorrect' : ''}`}>
-                            <input type="radio" name={`question-${activeId}-${questionIndex}`} value={optionIndex} checked={chosen} disabled={submitted} onChange={() => { const answers = active.questions.map((_, i) => current.answers[i] ?? -1); answers[questionIndex] = optionIndex; update(activeId, { answers }); setFormError(''); }} />
+                            <input type="radio" name={`question-${activeId}-${questionIndex}`} value={optionIndex} checked={chosen} disabled={submitted} onChange={() => answerQuestion(questionIndex, optionIndex)} />
                             <span className="answer-letter" aria-hidden="true">{String.fromCharCode(65 + optionIndex)}</span><span className="answer-text">{option}</span><span className="custom-radio" aria-hidden="true">{submitted && correct ? <Check size={11} /> : submitted && chosen && !correct ? <X size={11} /> : chosen ? <Check size={11} /> : null}</span>
                           </label>;
                         })}</div>
                         {submitted && <p className={`answer-feedback ${isCorrect ? 'right' : 'wrong'}`}><Info size={13} />{question.explanation}</p>}
                       </fieldset>
-                      {!submitted && <button type="button" className="task-next" onClick={() => { setExpandedTasks([questionIndex + 1]); requestAnimationFrame(() => document.getElementById(`quiz-task-${questionIndex + 1}-heading`)?.focus()); }}>{questionIndex === active.questions.length - 1 ? 'Add your takeaway' : 'Next question'}<ArrowRight size={12} /></button>}
                     </QuestionnaireTask>;
                   })}
                   <QuestionnaireTask id={`quiz-task-${active.questions.length}`} number={totalTasks} title="Your takeaway" description={submitted ? 'Your written reflection · Not scored' : active.reflection}

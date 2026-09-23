@@ -185,8 +185,6 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .task-chevron { align-self: center; color: #909098; transition: transform .15s; }
 .is-open .task-chevron { transform: rotate(90deg); color: #414148; }
 .task-body { padding: 0 0 23px 43px; }
-.task-next { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 18px 0 0 auto; min-height: 36px; padding: 8px 15px; border-radius: 999px; font-size: 11px; font-weight: 500; color: #45454d; background: #f2f3f6; transition: background .15s, color .15s; }
-.task-next:hover { color: #24242b; background: #e8eaef; }
 .questionnaire-save-note { display: flex; align-items: center; gap: 7px; margin: 16px 0 0; color: #74747c; font-size: 11px; }
 .review-summary, .answer-review-card { --review-color: #63b59c; --review-track: #e1eee9; }
 .review-summary.retry, .answer-review-card.task-review { --review-color: #ea7b72; --review-track: #f7e4e0; }
@@ -355,7 +353,6 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
   .task-meta { font-size: 10px; }
   .task-description { font-size: 14px; }
   .task-body { padding: 0 0 20px; }
-  .task-next { min-height: 40px; }
   .review-summary { padding: 13px 10px; gap: 9px; }
   .answer-review-card .task-toggle { padding: 12px 10px; gap: 8px; }
   .answer-review-card .task-body { padding: 0 12px 14px; }

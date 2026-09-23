@@ -133,7 +133,6 @@ test('recording and questionnaire stay together while playing, answering, and re
   assert.equal(audio.paused, false);
   const chosen = document.querySelector(`input[name="question-${first.id}-0"][value="${first.questions[0].correct}"]`);
   await interact(() => chosen.click());
-  await interact(() => button('Next question').click());
   assert.equal(audio.paused, false);
   assert.equal(questionnaire.hidden, false);
   assert.equal(chosen.checked, true);
@@ -239,13 +238,15 @@ test('finishing or skipping audio leaves the active question and answer in place
   await mount();
   const radio = document.querySelector(`input[name="question-${first.id}-0"][value="${first.questions[0].correct}"]`);
   await interact(() => { radio.focus(); radio.click(); });
+  const focusedQuestion = document.activeElement;
+  assert.equal(focusedQuestion.id, 'quiz-task-1-heading');
   await finish([[0, 5], [first.duration - 1, first.duration]]);
   assert.ok(document.querySelector('#quiz-panel form'));
-  assert.equal(document.activeElement, radio);
+  assert.equal(document.activeElement, focusedQuestion);
   assert.equal(radio.checked, true);
   assert.deepEqual(saved().progress[first.id].coverage, [[0, 5], [first.duration - 1, first.duration]]);
   await finish();
-  assert.equal(document.activeElement, radio);
+  assert.equal(document.activeElement, focusedQuestion);
   assert.equal(saved().progress[first.id].answers[0], first.questions[0].correct);
 });
 
@@ -356,13 +357,12 @@ test('incomplete answers get focused validation and a failed attempt can be retr
   assert.equal(saved().progress[first.id].completed, true);
 });
 
-test('task navigation preserves answers and reveals a missing takeaway on submit', async () => {
+test('selecting answers automatically opens the next question and then the takeaway', async () => {
   await mount();
   assert.match(document.querySelector('.questionnaire-queue-heading').textContent, /4 questions remaining/);
   for (let index = 0; index < first.questions.length; index++) {
     assert.equal(document.getElementById(`quiz-task-${index}-body`).hidden, false);
     await interact(() => document.querySelector(`input[name="question-${first.id}-${index}"][value="${first.questions[index].correct}"]`).click());
-    await interact(() => document.querySelector(`#quiz-task-${index}-body .task-next`).click());
     assert.equal(document.getElementById(`quiz-task-${index}-body`).hidden, true);
     assert.equal(document.activeElement.id, `quiz-task-${index + 1}-heading`);
   }
@@ -375,6 +375,23 @@ test('task navigation preserves answers and reveals a missing takeaway on submit
   assert.equal(document.getElementById('quiz-task-3-body').hidden, false);
   assert.equal(document.activeElement.id, 'takeaway');
   assert.deepEqual(saved().progress[first.id].answers, first.questions.map(question => question.correct));
+});
+
+test('automatic advance skips answers already saved during a retry', async () => {
+  await mount({ [first.id]: {
+    answers: first.questions.map((q, i) => i === 1 ? q.correct : (q.correct + 1) % q.options.length),
+    reflection: 'Keep the conversation focused.', bestScore: 33, completed: false, submitted: true,
+  } });
+  await interact(() => button('Retry missed questions').click());
+  assert.equal(document.getElementById('quiz-task-0-body').hidden, false);
+  await interact(() => document.querySelector(`input[name="question-${first.id}-0"][value="${first.questions[0].correct}"]`).click());
+  assert.equal(document.getElementById('quiz-task-1-body').hidden, true);
+  assert.equal(document.getElementById('quiz-task-2-body').hidden, false);
+  assert.equal(document.activeElement.id, 'quiz-task-2-heading');
+  await interact(() => document.querySelector(`input[name="question-${first.id}-2"][value="${first.questions[2].correct}"]`).click());
+  assert.equal(document.getElementById('quiz-task-3-body').hidden, false);
+  assert.equal(document.getElementById('takeaway').value, 'Keep the conversation focused.');
+  assert.deepEqual(saved().progress[first.id].answers, first.questions.map(q => q.correct));
 });
 
 test('previously submitted questionnaires stay available with incomplete legacy listening data', async () => {
