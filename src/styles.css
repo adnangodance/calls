@@ -56,7 +56,7 @@ h1 { font-size: 29px; letter-spacing: -1.15px; font-weight: 650; line-height: 1.
 .heading-actions { display: flex; align-items: center; gap: 22px; }
 .text-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 7px 0; font-size: 11px; font-weight: 500; }
 .text-button:hover { color: var(--green); }
-.button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 37px; padding: 10px 15px; border-radius: 6px; font-size: 11px; font-weight: 550; white-space: nowrap; transition: background .15s; }
+.button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 37px; padding: 10px 15px; border-radius: 999px; font-size: 11px; font-weight: 550; white-space: nowrap; transition: background .15s; }
 .button-dark { background: #202722; color: #fff; border: 1px solid #202722; }
 .button-dark:hover { background: #334a3b; }
 .heading-actions .start-training-button { min-height: 40px; padding: 11px 18px; border-radius: 999px; background: #191919; border-color: #191919; color: #fff; gap: 8px; font-size: 12px; font-weight: 600; }
@@ -161,7 +161,7 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .lesson-action h3 { font-size: 15px; font-weight: 600; color: #34343d; line-height: 1.5; letter-spacing: -.3px; }
 .lesson-action p { color: #7c7c88; font-size: 11px; line-height: 1.7; margin-top: 4px; }
 .lesson-action-buttons { display: flex; flex-direction: column; align-items: center; gap: 5px; flex-shrink: 0; }
-.lesson-action-buttons .button { min-height: 39px; font-size: 11px; border-radius: 7px; }
+.lesson-action-buttons .button { min-height: 39px; font-size: 11px; }
 .lesson-action-buttons .text-button { font-size: 10px; color: #777784; }
 .call-detail .button-dark { background: #3f3f47; border-color: #3f3f47; }
 .call-detail .button-dark:hover { background: #27272d; }
@@ -206,7 +206,7 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .task-chevron { align-self: center; color: #909098; transition: transform .15s; }
 .is-open .task-chevron { transform: rotate(90deg); color: #414148; }
 .task-body { padding: 0 0 23px 43px; }
-.task-next { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px 0 0 auto; min-height: 34px; padding: 7px 12px; border: 1px solid #dedee2; border-radius: 5px; font-size: 11px; font-weight: 500; color: #45454d; background: #fff; }
+.task-next { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px 0 0 auto; min-height: 34px; padding: 7px 12px; border: 1px solid #dedee2; border-radius: 999px; font-size: 11px; font-weight: 500; color: #45454d; background: #fff; }
 .task-next:hover { color: #161619; border-color: #acacb3; background: #fafafa; }
 .questionnaire-save-note { display: flex; align-items: center; gap: 7px; margin: 16px 0 0; color: #74747c; font-size: 11px; }
 .review-summary, .answer-review-card { --review-color: #63b59c; --review-track: #e1eee9; }
@@ -230,7 +230,7 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .review-badge.needs-review { background: #ffe0dc; color: #a0483c; }
 .review-badge.needs-practice { background: #ffebc6; color: #8b6326; }
 .review-badge.is-saved { background: #f0f1f3; color: #727581; }
-.review-retry-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; flex-shrink: 0; min-height: 35px; padding: 8px 11px; border: 1px solid #ebd1a4; border-radius: 6px; background: #fff2da; color: #825b22; font-size: 11px; font-weight: 500; line-height: 1.4; white-space: nowrap; transition: background .15s, border-color .15s; }
+.review-retry-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; flex-shrink: 0; min-height: 35px; padding: 8px 11px; border: 1px solid #ebd1a4; border-radius: 999px; background: #fff2da; color: #825b22; font-size: 11px; font-weight: 500; line-height: 1.4; white-space: nowrap; transition: background .15s, border-color .15s; }
 .review-retry-button:hover { background: #ffe7bb; border-color: #dcb67a; }
 .questionnaire-tasks.answer-review-list { padding: 0; background: none; border-radius: 0; }
 .answer-review-list > .task-list-heading { display: none; }
@@ -278,14 +278,14 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .confidence-section strong { font-size: 12px; font-weight: 400; color: #55555f; line-height: 1.6; }
 .confidence-section > div:first-child span { font-size: 10px; color: #787880; }
 .confidence-options { display: flex; gap: 6px; }
-.confidence-options button { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid #dedee4; color: #65656f; border-radius: 5px; font-size: 12px; }
+.confidence-options button { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid #dedee4; color: #65656f; border-radius: 999px; font-size: 12px; }
 .confidence-options button:hover { border-color: #aaaab3; background: #f5f5f6; }
 .confidence-options .selected { background: #414149; color: #fff; border-color: #414149; }
 .confidence-labels { display: flex; justify-content: space-between; font-size: 9px; color: #777780; }
 .quiz-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 24px; }
 .quiz-actions > span { color: #71717a; font-size: 11px; line-height: 1.7; }
 .quiz-actions .text-button { color: #5c5c66; font-size: 11px; }
-.quiz-actions .button-dark { min-height: 42px; border-radius: 6px; background: #242428; border-color: #242428; padding: 12px 17px; font-size: 12px; }
+.quiz-actions .button-dark { min-height: 42px; background: #242428; border-color: #242428; padding: 12px 17px; font-size: 12px; }
 .form-error { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #995f4b; margin-top: 18px; line-height: 1.7; }
 .guide-dialog { border: 1px solid #dfe6d6; border-radius: 13px; padding: 32px; width: 450px; max-width: calc(100vw - 32px); max-height: calc(100dvh - 40px); color: #61794c; box-shadow: 0 25px 90px #122d2022; }
 .guide-dialog::backdrop { background: #17221bb0; backdrop-filter: blur(3px); }
