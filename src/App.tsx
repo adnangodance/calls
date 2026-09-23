@@ -71,13 +71,12 @@ function ReviewRing({ label, progress = 100 }: { label: React.ReactNode; progres
   </span>;
 }
 
-function QuestionnaireTask({ id, number, title, description, status, meta, expanded, onToggle, children, reviewMode = false }: {
-  id: string; number: number; title: string; description: string; status: 'todo' | 'answered' | 'correct' | 'review';
+function QuestionnaireTask({ id, title, description, status, meta, expanded, onToggle, children, reviewMode = false }: {
+  id: string; title: string; description: string; status: 'todo' | 'answered' | 'correct' | 'review';
   meta: string; expanded: boolean; onToggle: () => void; children: React.ReactNode; reviewMode?: boolean;
 }) {
   return <section className={`questionnaire-task ${expanded ? 'is-open' : ''} task-${status} ${reviewMode ? 'answer-review-card' : ''}`}>
     <h4 className="task-heading"><button type="button" id={`${id}-heading`} className="task-toggle" aria-expanded={expanded} aria-controls={`${id}-body`} onClick={onToggle}>
-      {reviewMode ? <ReviewRing label={String(number).padStart(2, '0')} /> : <span className="task-status-icon" aria-hidden="true">{status === 'answered' || status === 'correct' ? <Check size={14} strokeWidth={2} /> : status === 'review' ? <span>!</span> : String(number).padStart(2, '0')}</span>}
       <span className="task-copy"><span className="task-title-line"><strong>{title}</strong>{!reviewMode && <span className="task-meta">{meta}</span>}</span><span className="task-description">{description}</span></span>
       {reviewMode && <span className={`review-badge ${status === 'correct' ? 'is-correct' : status === 'review' ? 'needs-review' : 'is-saved'}`}>{meta}</span>}
       <ChevronRight size={15} className="task-chevron" aria-hidden="true" />
@@ -285,7 +284,7 @@ export default function App() {
             <p className="stat-progress-copy">{completed} of {calls.length} demos complete.<br />{completed === calls.length ? 'Revisit any call to practice.' : completed > 0 ? 'Finish the rest at your own pace.' : 'Start with your first demo.'}</p>
             <StatBars value={completed} total={calls.length} label="Course completion" gradient />
           </div>
-          <h2 className="stat-label" id="stat-completion-label"><CircleCheck size={15} />Demos completed</h2>
+          <h2 className="stat-label" id="stat-completion-label">Demos completed</h2>
         </article>
         <article className="stat-card stat-scores" aria-labelledby="stat-scores-label">
           <div className="stat-card-body">
@@ -293,7 +292,7 @@ export default function App() {
             <p className="stat-context">{scores.length ? `Best scores across ${scores.length} ${scores.length === 1 ? 'demo' : 'demos'}` : 'Submit a quiz to see your score'}</p>
             <ScoreSparkline values={calls.map(call => progress[call.id]?.bestScore)} />
           </div>
-          <h2 className="stat-label" id="stat-scores-label"><Target size={15} />Quiz average</h2>
+          <h2 className="stat-label" id="stat-scores-label">Quiz average</h2>
         </article>
         <article className="stat-card stat-answers" aria-labelledby="stat-answers-label">
           <div className="stat-card-body">
@@ -301,11 +300,11 @@ export default function App() {
             <p className="stat-context"><span className="stat-highlight">{totalQuestions - answeredQuestions}</span>{totalQuestions - answeredQuestions === 1 ? 'question remaining' : 'questions remaining'}</p>
             <StatBars value={answeredQuestions} total={totalQuestions} label="Questions answered" segments={totalQuestions} />
           </div>
-          <h2 className="stat-label" id="stat-answers-label"><CheckCheck size={15} />Questions answered</h2>
+          <h2 className="stat-label" id="stat-answers-label">Questions answered</h2>
         </article>
         <article className="stat-card stat-demo-score" aria-labelledby="stat-demo-score-label">
           <div className="stat-card-body"><ScoreGauge score={current.bestScore} demo={index + 1} /></div>
-          <h2 className="stat-label" id="stat-demo-score-label"><Trophy size={15} />Demo score</h2>
+          <h2 className="stat-label" id="stat-demo-score-label">Demo score</h2>
         </article>
       </section>
       {completed === calls.length && <div className="course-complete" role="status"><Trophy size={24} /><div><strong>All demos completed</strong><p>Revisit any call or review your answers whenever you need a refresher.</p></div></div>}
@@ -415,7 +414,7 @@ export default function App() {
                   {active.questions.map((question, questionIndex) => {
                     const isAnswered = current.answers[questionIndex] >= 0;
                     const isCorrect = current.answers[questionIndex] === question.correct;
-                    return <QuestionnaireTask key={`${activeId}-${questionIndex}`} id={`quiz-task-${questionIndex}`} number={questionIndex + 1} title={`Question ${questionIndex + 1}`} description={question.prompt}
+                    return <QuestionnaireTask key={`${activeId}-${questionIndex}`} id={`quiz-task-${questionIndex}`} title={`Question ${questionIndex + 1}`} description={question.prompt}
                       status={submitted ? isCorrect ? 'correct' : 'review' : isAnswered ? 'answered' : 'todo'}
                       reviewMode={submitted} meta={submitted ? isCorrect ? 'Correct' : 'Review' : isAnswered ? 'Answered' : 'Choose one answer'}
                       expanded={expandedTasks.includes(questionIndex)} onToggle={() => toggleQuizTask(questionIndex)}>
@@ -432,7 +431,7 @@ export default function App() {
                       </fieldset>
                     </QuestionnaireTask>;
                   })}
-                  <QuestionnaireTask id={`quiz-task-${active.questions.length}`} number={totalTasks} title="Your takeaway" description={submitted ? 'Your written reflection · Not scored' : active.reflection}
+                  <QuestionnaireTask id={`quiz-task-${active.questions.length}`} title="Your takeaway" description={submitted ? 'Your written reflection · Not scored' : active.reflection}
                     reviewMode={submitted} status={current.reflection.trim() ? 'answered' : 'todo'} meta={submitted ? 'Saved' : current.reflection.trim() ? 'Added · Not scored' : 'Required · Not scored'}
                     expanded={expandedTasks.includes(active.questions.length)} onToggle={() => toggleQuizTask(active.questions.length)}>
                     <div className="reflection-section">
