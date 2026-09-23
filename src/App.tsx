@@ -91,7 +91,22 @@ function CompletionPage({ average, onPractice, onReview }: { average: number | n
   return <main id="main" className="page-shell journey-page">
     <div className="breadcrumbs"><span>Learning & development</span><ChevronRight size={12} /><span>Training complete</span></div>
     <section className="completion-card" aria-labelledby="completion-title">
-      <div className="completion-emblem" aria-hidden="true"><Check size={38} strokeWidth={1.7} /></div>
+      <div className="completion-emblem" aria-hidden="true">
+        <span className="celebration-emoji">🎉</span>
+        {Array.from({ length: 28 }, (_, index) => {
+          const angle = index * Math.PI * 2 / 28;
+          const distance = 65 + index % 4 * 17;
+          const y = Math.sin(angle) * distance;
+          return <span key={index} className="celebration-confetti" style={{
+            '--confetti-x': `${Math.cos(angle) * distance}px`,
+            '--confetti-y': `${y}px`,
+            '--confetti-fall': `${y + 42}px`,
+            '--confetti-turn': `${index % 2 ? 240 : -240}deg`,
+            backgroundColor: ['#a58ae4', '#ffad72', '#e9c45c', '#ea93b0', '#7ebfa7'][index % 5],
+            animationDelay: `${180 + index % 5 * 25}ms`,
+          } as React.CSSProperties} />;
+        })}
+      </div>
       <span className="journey-eyebrow">ALL DEMOS COMPLETE</span>
       <h1 id="completion-title" data-journey-heading tabIndex={-1}>Congratulations,<br />you’ve passed.</h1>
       <p className="completion-intro">You’ve passed all {calls.length} demos. Now put what you’ve learned into a conversation with an AI practice partner.</p>
