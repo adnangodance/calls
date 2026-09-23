@@ -69,16 +69,6 @@ h1 { font-size: 29px; letter-spacing: -1.15px; font-weight: 650; line-height: 1.
 .course-complete p { font-size: 11px; margin-top: 5px; }
 .course-complete > span { display: flex; gap: 10px; align-items: center; margin-left: auto; white-space: nowrap; }
 
-.learning-strip { display: flex; justify-content: space-between; align-items: center; gap: 20px; min-height: 43px; padding: 8px 10px 8px 13px; margin-bottom: 22px; border: 1px solid transparent; border-radius: 8px; background: linear-gradient(105deg, #fcfdf5 0%, #fffaf9 32%, #fafdf4 62%, #f2fbf8 100%) padding-box, linear-gradient(105deg, #bdd15a 0%, #dfba7c 18%, #d892af 33%, #cccf64 53%, #88c98b 76%, #43b6a1 100%) border-box; font-size: 11px; color: #747d73; }
-.learning-note { display: flex; align-items: center; gap: 10px; color: #687269; font-weight: 400; line-height: 1.5; }
-.learning-icon { display: flex; color: #4bb59d; }
-.learning-extras { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
-.learning-guide { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 5px; background: #e9f0e9; color: #59645c; transition: background .15s, color .15s; }
-.learning-guide:hover { background: #dcece2; color: #258364; }
-.learning-steps { display: flex; align-items: center; gap: 15px; font-size: 9px; color: #788477; }
-.learning-steps > span { display: flex; align-items: center; gap: 6px; }
-.learning-steps i { width: 16px; height: 16px; background: #ffffffa6; border: 1px solid #dfe7db; border-radius: 50%; display: grid; place-items: center; font-size: 8px; font-style: normal; }
-.learning-steps > svg { color: #b2bcae; }
 /* Call library and lesson share the same quiet, neutral surfaces. */
 .learning-layout { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 22px; align-items: start; --lesson-text: #29292d; --lesson-secondary: #717178; --lesson-border: #e9e9ec; }
 .section-eyebrow { display: flex; align-items: center; justify-content: space-between; font-size: 8px; font-weight: 600; letter-spacing: 1px; color: #6d776e; margin-bottom: 14px; }
@@ -274,14 +264,12 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
   .workspace-nav { gap: 15px; }
   .secondary-nav, .user-name { display: none; }
   .learning-layout { grid-template-columns: 330px minmax(0, 1fr); gap: 18px; }
-  .learning-steps { gap: 9px; }
   .detail-header, .detail-body { padding-left: 22px; padding-right: 22px; }
   .detail-footer { padding-left: 22px; padding-right: 22px; }
 }
 @media (max-width: 1030px) {
   .workspace-nav .workspace-placeholder:nth-child(-n+3) { display: none; }
   .page-shell { padding: 24px; }
-  .learning-steps > span:last-child, .learning-steps > svg:last-of-type { display: none; }
   .course-badge { display: none; }
   .heading-actions { gap: 15px; }
   .location { margin-left: 0; }
@@ -307,9 +295,6 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
   .page-heading p { font-size: 10px; line-height: 1.8; max-width: 210px; }
   .heading-actions { padding-top: 2px; }
   .heading-actions .button { font-size: 9px; padding: 9px 10px; gap: 6px; }
-  .learning-strip { padding: 8px 9px 8px 12px; gap: 12px; margin-bottom: 16px; }
-  .learning-note { font-size: 10px; }
-  .learning-steps { display: none; }
   .section-eyebrow { margin-bottom: 11px; }
   .learning-layout { gap: 19px; }
   .detail-header { padding: 19px 16px 17px; }

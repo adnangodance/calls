@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleDashed, CirclePlay, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Sparkles, Star, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleDashed, CirclePlay, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Star, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
 import callData from './calls.json';
 import { gradeQuiz, listenedSeconds, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
 
@@ -308,14 +308,6 @@ export default function App() {
         </article>
       </section>
       {completed === calls.length && <div className="course-complete" role="status"><Trophy size={24} /><div><strong>All demos completed</strong><p>Revisit any call or review your answers whenever you need a refresher.</p></div></div>}
-
-      <div className="learning-strip">
-        <span className="learning-note"><span className="learning-icon"><Sparkles size={16} strokeWidth={1.5} /></span>A little listening. A lot of learning.</span>
-        <div className="learning-extras">
-          <div className="learning-steps"><span><i>1</i>Listen if helpful</span><ChevronRight size={12} /><span><i>2</i>Complete the questionnaire</span><ChevronRight size={12} /><span><i>3</i>Build your confidence</span></div>
-          <button className="learning-guide" aria-label="How training works" title="How training works" onClick={() => guide.current?.showModal()}><Sparkles size={14} strokeWidth={1.5} /></button>
-        </div>
-      </div>
 
       <div className="learning-layout">
         <aside className="library" aria-label="Training call library">
