@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Sparkles, Star, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleDashed, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Sparkles, Star, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
 import callData from './calls.json';
 import { gradeQuiz, listenedSeconds, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
 
@@ -304,7 +304,7 @@ export default function App() {
 
       <div className="learning-layout">
         <aside className="library" aria-label="Training call library">
-          <div className="library-section-heading"><h2>Call library</h2><span>{completed} of {calls.length} completed</span></div>
+          <div className="library-section-heading"><h2>Call library</h2><span>{calls.length} demos</span></div>
           <div className="library-tools">
             <label className="search-box">
               <Search size={16} />
@@ -320,18 +320,31 @@ export default function App() {
             </div>
           </div>
 
-          <div className="call-list" aria-label="Calls">
+          <div className="call-list-panel">
+          <p className="library-queue-heading" role="status">{completed === calls.length ? <CircleCheck size={14} /> : <CircleDashed size={14} />}<span>{completed === calls.length ? 'All demos completed' : `${calls.length - completed} ${calls.length - completed === 1 ? 'demo' : 'demos'} remaining`}</span></p>
+          <ol className="call-list" aria-label="Calls">
             {visibleCalls.length ? visibleCalls.map(call => {
               const p = progress[call.id] || EMPTY;
               const selected = call.id === activeId;
-              return <div className={`call-item ${selected ? 'active' : ''} ${p.completed ? 'is-complete' : ''}`} key={call.id}>
+              const responses = call.questions.filter((_, i) => p.answers[i] >= 0).length + Number(Boolean(p.reflection.trim()));
+              const responseTotal = call.questions.length + 1;
+              const state = p.completed ? 'Completed' : p.submitted ? 'Review answers' : responses === responseTotal ? 'Ready to submit' : responses > 0 ? `${responses} of ${responseTotal} answered` : '';
+              return <li className={`call-item ${selected ? 'active' : ''} ${p.completed ? 'is-complete' : ''}`} key={call.id}>
                 <button className="call-select" aria-current={selected ? 'true' : undefined} onClick={() => selectCall(call.id)}>
-                  <div className="call-item-title"><span className="call-number">{calls.indexOf(call) + 1}</span><strong>{call.title}</strong></div>
-                  <div className="call-description"><i className={`manager-dot ${managerClass(call.manager)}`} /><strong>{call.manager}</strong><span className="call-meta-dot">·</span><span className="call-specialty">{call.specialty}</span></div>
-                  <div className="call-item-meta"><span><Clock3 size={12} />{formatDuration(call.duration)}</span>{p.completed ? <span className="call-progress-label complete"><CircleCheck size={12} />Completed</span> : (p.answers.some(answer => answer >= 0) || p.reflection.trim()) && <span className="call-progress-label">In progress</span>}</div>
+                  <span className={`call-step ${selected || responses > 0 ? 'has-progress' : ''} ${p.completed ? 'is-complete' : ''}`} aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle className="call-step-track" cx="12" cy="12" r="9" /><circle className="call-step-fill" cx="12" cy="12" r="9" pathLength="100" strokeDasharray={`${p.completed ? 100 : responses / responseTotal * 100} 100`} /></svg>
+                    <span className="call-number">{calls.indexOf(call) + 1}</span>{p.completed && <Check size={11} strokeWidth={2.2} />}
+                  </span>
+                  <span className="call-row-copy">
+                    <span className="call-item-title"><strong>{call.title}</strong><span className="call-duration"><Clock3 size={11} />{formatDuration(call.duration)}</span></span>
+                    <span className="call-description">{call.topic}</span>
+                    {state && <span className={`call-row-state ${p.completed ? 'complete' : p.submitted ? 'needs-review' : ''}`}>{state}</span>}
+                  </span>
+                  <ChevronRight size={14} className="call-row-chevron" aria-hidden="true" />
                 </button>
-              </div>;
-            }) : <div className="empty-state"><Search size={25} /><strong>No calls found</strong><p>{query || manager !== 'all' ? 'Try a different search or filter.' : filter === 'completed' ? 'Your completed demos will appear here.' : 'All demos are complete. Revisit any call to practice.'}</p><button className="text-button" onClick={() => { setQuery(''); setFilter('all'); setManager('all'); }}>Show all calls<ArrowRight size={13} /></button></div>}
+              </li>;
+            }) : <li className="empty-state"><Search size={25} /><strong>No calls found</strong><p>{query || manager !== 'all' ? 'Try a different search or filter.' : filter === 'completed' ? 'Your completed demos will appear here.' : 'All demos are complete. Revisit any call to practice.'}</p><button className="text-button" onClick={() => { setQuery(''); setFilter('all'); setManager('all'); }}>Show all calls<ArrowRight size={13} /></button></li>}
+          </ol>
           </div>
         </aside>
 
