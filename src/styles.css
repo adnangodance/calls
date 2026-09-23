@@ -212,8 +212,8 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .review-badge.needs-review { background: #ffe0dc; color: #a0483c; }
 .review-badge.needs-practice { background: #ffebc6; color: #8b6326; }
 .review-badge.is-saved { background: #f0f1f3; color: #727581; }
-.review-retry-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; flex-shrink: 0; min-height: 35px; padding: 8px 11px; border: 1px solid #ebd1a4; border-radius: 999px; background: #fff2da; color: #825b22; font-size: 11px; font-weight: 500; line-height: 1.4; white-space: nowrap; transition: background .15s, border-color .15s; }
-.review-retry-button:hover { background: #ffe7bb; border-color: #dcb67a; }
+.review-retry-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex-shrink: 0; min-height: 35px; padding: 8px 0; background: none; color: #71717a; font-size: 11px; font-weight: 500; line-height: 1.4; white-space: nowrap; transition: color .15s; }
+.review-retry-button:hover { color: #303037; text-decoration: underline; text-underline-offset: 3px; }
 .questionnaire-tasks.answer-review-list { padding: 0; background: none; border-radius: 0; }
 .answer-review-list > .task-list-heading { display: none; }
 .questionnaire-task.answer-review-card { background: #fff; border: 1px solid #e5e5e9; border-radius: 10px; box-shadow: 0 1px 3px #24242c08; }
