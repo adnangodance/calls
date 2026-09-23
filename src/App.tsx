@@ -397,11 +397,7 @@ export default function App() {
                   {result.passed ? <span className="review-badge is-correct">Passed</span> : <button type="button" className="review-retry-button" onClick={retryQuiz}><RotateCcw size={14} aria-hidden="true" />Retry missed questions</button>}
                 </div>}
                 <div className={`questionnaire-tasks ${submitted ? 'answer-review-list' : ''}`}>
-                  <div className="task-list-heading">
-                    <span aria-live="polite">{submitted ? 'Questionnaire submitted' : answered === totalTasks ? 'Ready to submit' : `${totalTasks - answered} ${totalTasks - answered === 1 ? 'task' : 'tasks'} remaining`}</span>
-                    <span>{answered} / {totalTasks} answered</span>
-                  </div>
-                  {!submitted && <div className="questionnaire-progress" role="progressbar" aria-label="Questionnaire answers completed" aria-valuemin={0} aria-valuemax={totalTasks} aria-valuenow={answered}>{Array.from({ length: totalTasks }, (_, i) => <span key={i} className={(i < active.questions.length ? current.answers[i] >= 0 : Boolean(current.reflection.trim())) ? 'is-complete' : ''} />)}</div>}
+                  {!submitted && <p className="questionnaire-queue-heading" role="status">{answered === totalTasks ? <CircleCheck size={14} aria-hidden="true" /> : <CircleDashed size={14} aria-hidden="true" />}<span>{answered === totalTasks ? 'All questions answered' : `${totalTasks - answered} ${totalTasks - answered === 1 ? 'question' : 'questions'} remaining`}</span></p>}
                   {active.questions.map((question, questionIndex) => {
                     const isAnswered = current.answers[questionIndex] >= 0;
                     const isCorrect = current.answers[questionIndex] === question.correct;
@@ -415,7 +411,7 @@ export default function App() {
                           const correct = question.correct === optionIndex;
                           return <label key={option} className={`answer-option ${chosen ? 'chosen' : ''} ${submitted && correct ? 'correct' : ''} ${submitted && chosen && !correct ? 'incorrect' : ''}`}>
                             <input type="radio" name={`question-${activeId}-${questionIndex}`} value={optionIndex} checked={chosen} disabled={submitted} onChange={() => { const answers = active.questions.map((_, i) => current.answers[i] ?? -1); answers[questionIndex] = optionIndex; update(activeId, { answers }); setFormError(''); }} />
-                            <span className="answer-letter" aria-hidden="true">{String.fromCharCode(65 + optionIndex)}</span><span className="answer-text">{option}</span><span className="custom-radio" aria-hidden="true">{submitted && correct ? <Check size={11} /> : submitted && chosen && !correct ? <X size={11} /> : <i />}</span>
+                            <span className="answer-letter" aria-hidden="true">{String.fromCharCode(65 + optionIndex)}</span><span className="answer-text">{option}</span><span className="custom-radio" aria-hidden="true">{submitted && correct ? <Check size={11} /> : submitted && chosen && !correct ? <X size={11} /> : chosen ? <Check size={11} /> : null}</span>
                           </label>;
                         })}</div>
                         {submitted && <p className={`answer-feedback ${isCorrect ? 'right' : 'wrong'}`}><Info size={13} />{question.explanation}</p>}

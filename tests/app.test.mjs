@@ -355,7 +355,7 @@ test('incomplete answers get focused validation and a failed attempt can be retr
 
 test('task navigation preserves answers and reveals a missing takeaway on submit', async () => {
   await mount();
-  assert.match(document.querySelector('.task-list-heading').textContent, /4 tasks remaining/);
+  assert.match(document.querySelector('.questionnaire-queue-heading').textContent, /4 questions remaining/);
   for (let index = 0; index < first.questions.length; index++) {
     assert.equal(document.getElementById(`quiz-task-${index}-body`).hidden, false);
     await interact(() => document.querySelector(`input[name="question-${first.id}-${index}"][value="${first.questions[index].correct}"]`).click());
@@ -363,7 +363,7 @@ test('task navigation preserves answers and reveals a missing takeaway on submit
     assert.equal(document.getElementById(`quiz-task-${index}-body`).hidden, true);
     assert.equal(document.activeElement.id, `quiz-task-${index + 1}-heading`);
   }
-  assert.match(document.querySelector('.task-list-heading').textContent, /1 task remaining/);
+  assert.match(document.querySelector('.questionnaire-queue-heading').textContent, /1 question remaining/);
   await interact(() => button('Expand all').click());
   await interact(() => button('Collapse all').click());
   assert.ok([...document.querySelectorAll('.task-body')].every(body => body.hidden));
