@@ -148,7 +148,9 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .call-detail .button-dark { background: #3f3f47; border-color: #3f3f47; }
 .call-detail .button-dark:hover { background: #27272d; }
 .call-detail .button-light { border-color: #dedee7; color: #71717e; }
-.detail-footer { padding: 17px 26px; display: flex; align-items: center; justify-content: flex-end; gap: 15px; border-top: 1px solid var(--lesson-border); }
+.detail-footer { padding: 17px 26px; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 15px; border-top: 1px solid var(--lesson-border); }
+.detail-footer .footer-retry { margin-right: auto; background: #242428; border-color: #242428; }
+.detail-footer .footer-retry:hover { background: #111114; border-color: #111114; }
 .previous-next { display: flex; align-items: center; gap: 17px; color: #aaaab5; font-size: 10px; }
 .previous-next button { display: flex; align-items: center; gap: 5px; padding: 7px 0; color: #656571; font-size: 11px; }
 .previous-next > span { font-variant-numeric: tabular-nums; font-size: 10px; }
@@ -209,8 +211,6 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .review-badge.needs-review { background: #ffe0dc; color: #a0483c; }
 .review-badge.needs-practice { background: #ffebc6; color: #8b6326; }
 .review-badge.is-saved { background: #f0f1f3; color: #727581; }
-.review-retry-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex-shrink: 0; min-height: 35px; padding: 8px 0; background: none; color: #71717a; font-size: 11px; font-weight: 500; line-height: 1.4; white-space: nowrap; transition: color .15s; }
-.review-retry-button:hover { color: #303037; text-decoration: underline; text-underline-offset: 3px; }
 .questionnaire-tasks.answer-review-list { padding: 0; background: none; border-radius: 0; }
 .questionnaire-task.answer-review-card { background: #fff; border: 1px solid #e5e5e9; border-radius: 10px; box-shadow: 0 1px 3px #24242c08; }
 .answer-review-card + .answer-review-card { margin-top: 8px; }
@@ -251,7 +251,7 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .quiz-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 24px; }
 .quiz-actions > span { color: #71717a; font-size: 11px; line-height: 1.7; }
 .quiz-actions .text-button { color: #5c5c66; font-size: 11px; }
-.quiz-actions .button-dark { min-height: 42px; background: #242428; border-color: #242428; padding: 12px 17px; font-size: 12px; }
+.quiz-actions .button-dark { margin-left: auto; min-height: 42px; background: #242428; border-color: #242428; padding: 12px 17px; font-size: 12px; }
 .form-error { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #995f4b; margin-top: 18px; line-height: 1.7; }
 .guide-dialog { border: 1px solid #dfe6d6; border-radius: 13px; padding: 32px; width: 450px; max-width: calc(100vw - 32px); max-height: calc(100dvh - 40px); color: #61794c; box-shadow: 0 25px 90px #122d2022; }
 .guide-dialog::backdrop { background: #17221bb0; backdrop-filter: blur(3px); }
@@ -364,7 +364,7 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
   .reflection-section textarea { font-size: 16px; }
   .quiz-actions { flex-direction: column; align-items: stretch; gap: 12px; }
   .quiz-actions > span { text-align: center; }
-  .quiz-actions .button { min-height: 44px; }
+  .quiz-actions .button { margin-left: 0; min-height: 44px; }
   .page-footer { flex-direction: column; align-items: center; gap: 9px; font-size: 8px; line-height: 1.7; }
   .course-complete { padding: 16px; }
   .course-complete > span { display: none; }
@@ -375,8 +375,7 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 @media (max-width: 480px) {
   .review-summary { display: grid; grid-template-columns: 36px minmax(0, 1fr); }
   .review-summary > .review-ring { width: 36px; height: 36px; }
-  .review-summary > .review-badge, .review-summary > .review-retry-button { grid-column: 2; justify-self: start; }
-  .review-retry-button { min-height: 40px; }
+  .review-summary > .review-badge { grid-column: 2; justify-self: start; }
   .answer-review-card .task-toggle { grid-template-columns: 32px minmax(0, 1fr) 12px; gap: 7px; }
   .answer-review-card .review-ring { width: 32px; height: 32px; }
   .answer-review-card .review-badge { grid-row: 2; grid-column: 2; justify-self: start; }
