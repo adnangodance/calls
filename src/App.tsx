@@ -345,7 +345,7 @@ export default function App() {
               return <li className={`call-item ${selected ? 'active' : ''} ${p.completed ? 'is-complete' : ''}`} key={call.id} ref={selected ? activeDemo : null}>
                 <button className="call-select" aria-current={selected ? 'true' : undefined} onClick={() => selectCall(call.id)}>
                   <span className={`call-lesson-icon ${p.completed ? 'is-complete' : ''}`} aria-hidden="true">
-                    {p.completed ? <CircleCheck size={15} strokeWidth={1.7} /> : <CirclePlay size={15} strokeWidth={1.6} />}
+                    <CirclePlay size={15} strokeWidth={1.6} />
                   </span>
                   <span className="call-row-copy">
                     <span className="call-item-title"><strong>{call.title}</strong><span className="call-duration"><Clock3 size={11} />{formatDuration(call.duration)}</span></span>
