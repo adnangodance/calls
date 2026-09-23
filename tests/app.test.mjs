@@ -263,8 +263,10 @@ test('returning to an unfinished demo resumes the next unanswered question', asy
   assert.equal(saved().progress[first.id].answers[0], first.questions[0].correct);
 });
 
-test('moving between demos reveals the active row inside the scrollable library', async () => {
+test('switching demos keeps the page in place while revealing the active library row', async () => {
   await mount();
+  let pageScrolls = 0;
+  document.querySelector('.call-detail').scrollIntoView = () => { pageScrolls++; };
   const list = document.querySelector('.call-list');
   const rows = [...document.querySelectorAll('.call-item')];
   list.getBoundingClientRect = () => ({ top: 100, bottom: 300 });
@@ -280,6 +282,9 @@ test('moving between demos reveals the active row inside the scrollable library'
   await interact(() => button('Previous demo').click());
   assert.ok(list.scrollTop < previousScroll);
   assert.equal(rows[0].querySelector('.call-select').getAttribute('aria-current'), 'true');
+  await interact(() => rows[2].querySelector('.call-select').click());
+  assert.equal(saved().activeId, calls[2].id);
+  assert.equal(pageScrolls, 0);
 });
 
 test('the step list keeps every demo available and restores the selected demo after reload', async () => {

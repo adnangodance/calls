@@ -108,7 +108,6 @@ export default function App() {
     return [missing < 0 ? call.questions.length : missing];
   });
   const audio = useRef<HTMLAudioElement>(null);
-  const detail = useRef<HTMLElement>(null);
   const demoList = useRef<HTMLOListElement>(null);
   const activeDemo = useRef<HTMLLIElement>(null);
   const guide = useRef<HTMLDialogElement>(null);
@@ -150,7 +149,6 @@ export default function App() {
   function selectCall(id: string) {
     requestAnimationFrame(() => {
       document.getElementById('call-title')?.focus({ preventScroll: true });
-      detail.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
     if (id === activeId) return;
     audio.current?.pause();
@@ -364,7 +362,7 @@ export default function App() {
           </div>
         </aside>
 
-        <section className="call-detail" ref={detail} aria-label="Selected training call">
+        <section className="call-detail" aria-label="Selected training call">
           <div className="detail-header">
             <div className="detail-kicker"><span>Demo {String(index + 1).padStart(2, '0')} <span className="muted">/ {calls.length}</span></span><span className="kicker-dot">·</span><span className="lesson-level">{active.level}</span><span className={`lesson-status ${current.completed ? 'done completion-badge' : ''}`}>{current.completed ? <>Completed<CircleCheck size={12} strokeWidth={2} aria-hidden="true" /></> : answered > 0 ? 'In progress' : 'Not started'}</span></div>
             <div className="detail-title-row"><div><h2 id="call-title" tabIndex={-1}>{active.title}</h2><p className="detail-subtitle">{active.topic}</p></div><div className="rating-block" title="Illustrative manager rating for this sample call"><div className="rating-score"><Star size={15} strokeWidth={1.6} /><strong>{active.rating.toFixed(1)}</strong><span>/ 10</span></div><span>Manager rating</span></div></div>
