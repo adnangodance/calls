@@ -407,7 +407,8 @@ export default function App() {
                 {submitted && <div className={`quiz-result review-summary ${result.passed ? 'passed' : 'retry'}`} role="status">
                   <ReviewRing label={result.score} progress={result.score} />
                   <div className="review-summary-copy"><strong>{result.passed ? 'Demo complete' : 'Review your answers'}</strong><p>{result.correct} of {result.total} correct · {result.score}% score</p><span>{result.passed ? 'Open any answer to revisit the feedback.' : 'Open the marked answers, then try again.'}</span></div>
-                  {result.score < 100 ? <button type="button" className="button button-dark review-retry-button" onClick={retryQuiz}><RotateCcw size={14} aria-hidden="true" />Retry missed questions</button> : <span className="review-badge is-correct">Passed</span>}
+                  {result.passed && <span className="review-badge is-correct">Passed</span>}
+                  {result.score < 100 && <button type="button" className="button button-dark review-retry-button" onClick={retryQuiz}><RotateCcw size={14} aria-hidden="true" />Retry missed questions</button>}
                 </div>}
                 <div className={`questionnaire-tasks ${submitted ? 'answer-review-list' : ''}`}>
                   {!submitted && <p className="questionnaire-queue-heading" role="status">{answered === totalTasks ? <CircleCheck size={14} aria-hidden="true" /> : <CircleDashed size={14} aria-hidden="true" />}<span>{answered === totalTasks ? 'All questions answered' : `${totalTasks - answered} ${totalTasks - answered === 1 ? 'question' : 'questions'} remaining`}</span></p>}

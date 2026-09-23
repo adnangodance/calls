@@ -197,6 +197,7 @@ test('the first questionnaire can be completed without listening and its result 
   assert.equal(saved().progress[first.id].bestScore, 100);
   assert.equal(document.querySelector('.score-gauge-number').textContent, '100');
   assert.match(document.querySelector('.quiz-result').textContent, /Demo complete/);
+  assert.equal(document.querySelector('.quiz-result .review-badge').textContent, 'Passed');
   assert.equal(document.querySelectorAll('.answer-review-card .review-badge.is-correct').length, first.questions.length);
   assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => body.hidden));
   await interact(() => document.getElementById('quiz-task-0-heading').click());
@@ -212,6 +213,25 @@ test('the first questionnaire can be completed without listening and its result 
   assert.equal(saved().activeId, calls[1].id);
   assert.ok(document.querySelector('#quiz-panel form'));
   assert.equal(document.getElementById('quiz-task-0-body').hidden, false);
+});
+
+test('two correct answers show Passed while keeping a retry for the missed question', async () => {
+  await mount();
+  await answer();
+  const missedQuestion = first.questions[2];
+  const wrongAnswer = (missedQuestion.correct + 1) % missedQuestion.options.length;
+  await interact(() => document.querySelector(`input[name="question-${first.id}-2"][value="${wrongAnswer}"]`).click());
+  await submit();
+  assert.equal(saved().progress[first.id].completed, true);
+  assert.equal(saved().progress[first.id].bestScore, 67);
+  assert.equal(document.querySelector('.quiz-result .review-badge').textContent, 'Passed');
+  assert.equal(document.querySelector('.quiz-result .review-retry-button').textContent, 'Retry missed questions');
+
+  await unmount();
+  await mount({}, true);
+  assert.equal(document.querySelector('.quiz-result .review-badge').textContent, 'Passed');
+  await interact(() => button('Retry missed questions').click());
+  assert.deepEqual(saved().progress[first.id].answers, [first.questions[0].correct, first.questions[1].correct, -1]);
 });
 
 test('optional listening resumes across reloads and records the final playback event', async () => {
@@ -346,6 +366,7 @@ test('incomplete answers get focused validation and a failed attempt can be retr
   await submit();
   assert.equal(saved().progress[first.id].completed, false);
   assert.match(document.querySelector('.quiz-result').textContent, /Review your answers/);
+  assert.equal(document.querySelector('.quiz-result .review-badge'), null);
   assert.equal(document.querySelectorAll('.answer-review-card .review-badge.needs-review').length, first.questions.length - 1);
   const retry = document.querySelector('.quiz-result .review-retry-button');
   assert.equal(document.querySelector('.detail-footer .footer-retry'), null);
