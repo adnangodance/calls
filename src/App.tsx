@@ -15,9 +15,10 @@ const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Ma
 const formatDuration = (seconds: number) => `${Math.floor(seconds / 60)}m ${String(Math.floor(seconds % 60)).padStart(2, '0')}s`;
 const managerClass = (manager: string) => manager.startsWith('Zee') ? 'zee' : manager.startsWith('Edrin') ? 'edrin' : 'will';
 
-function StatBars({ value, total, label, segments = 40 }: { value: number; total: number; label: string; segments?: number }) {
+function StatBars({ value, total, label, segments = 40, gradient = false }: { value: number; total: number; label: string; segments?: number; gradient?: boolean }) {
+  const filled = Math.round(value / total * segments);
   return <div className="stat-bars" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={total} aria-valuenow={value}>
-    {Array.from({ length: segments }, (_, i) => <span key={i} className={i < Math.round(value / total * segments) ? 'is-filled' : ''} />)}
+    {Array.from({ length: segments }, (_, i) => <span key={i} className={i < filled ? 'is-filled' : ''} style={gradient && i < filled ? { backgroundColor: `hsl(${Math.round(i / Math.max(1, filled - 1) * 36)} 95% 58%)` } : undefined} />)}
   </div>;
 }
 
@@ -264,9 +265,9 @@ export default function App() {
       <section className="training-stats" aria-label="Your training progress" tabIndex={0}>
         <article className="stat-card stat-completion" aria-labelledby="stat-completion-label">
           <div className="stat-card-body">
-            <p className="stat-value">{completed}<span> / {calls.length}</span></p>
-            <p className="stat-context"><span className="stat-highlight">{Math.round(completed / calls.length * 100)}%</span>of the course</p>
-            <StatBars value={completed} total={calls.length} label="Course completion" />
+            <div className="stat-progress-heading"><strong>{completed === calls.length ? 'All complete!' : completed >= calls.length * .7 ? 'Almost there!' : completed > 0 ? 'Keep going!' : 'Get started'}</strong><span className="stat-percent-badge">{Math.round(completed / calls.length * 100)}%</span></div>
+            <p className="stat-progress-copy">{completed} of {calls.length} demos complete.<br />{completed === calls.length ? 'Revisit any call to practice.' : completed > 0 ? 'Finish the rest at your own pace.' : 'Start with your first demo.'}</p>
+            <StatBars value={completed} total={calls.length} label="Course completion" gradient />
           </div>
           <h2 className="stat-label" id="stat-completion-label"><CircleCheck size={15} />Demos completed</h2>
         </article>
