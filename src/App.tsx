@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Sparkles, Star, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
 import callData from './calls.json';
 import { gradeQuiz, listenedSeconds, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
@@ -35,6 +35,24 @@ function ScoreSparkline({ values }: { values: (number | undefined)[] }) {
     <path className="stat-chart-line" d={path} />
     {values.map((value, i) => value === undefined ? null : <circle className="stat-chart-point" key={i} cx={point(value, i).x} cy={point(value, i).y} r="2.5" />)}
   </svg>;
+}
+
+function ScoreGauge({ score, demo }: { score?: number; demo: number }) {
+  const gradientId = useId();
+  const arc = 'M46.16 119.84 A62 62 0 1 1 133.84 119.84';
+  const angle = (135 + (score ?? 0) * 2.7) * Math.PI / 180;
+  const status = score === undefined ? 'unscored' : score >= 67 ? 'passed' : 'retry';
+  return <div className={`score-gauge ${status}`} role="img" aria-label={score === undefined ? `Demo ${demo} has no quiz score yet` : `Best quiz score for demo ${demo}: ${score} out of 100. ${status === 'passed' ? 'Passed' : 'Try again'}.`}>
+    <svg viewBox="0 0 180 130" aria-hidden="true">
+      <defs><linearGradient id={gradientId} x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stopColor="#ffa928" /><stop offset="55%" stopColor="#ff713d" /><stop offset="100%" stopColor="#f44f82" /></linearGradient></defs>
+      <path className="score-gauge-halo" d={arc} />
+      <path className="score-gauge-track" d={arc} />
+      <path className="score-gauge-fill" d={arc} pathLength="100" stroke={`url(#${gradientId})`} strokeDasharray={`${score ?? 0} 100`} />
+      {score !== undefined && <circle className="score-gauge-marker" cx={90 + 62 * Math.cos(angle)} cy={76 + 62 * Math.sin(angle)} r="4" />}
+    </svg>
+    <div className="score-gauge-readout" aria-hidden="true"><span className="score-gauge-number">{score ?? '—'}</span><span className="score-gauge-caption">Best · Demo {String(demo).padStart(2, '0')}</span></div>
+    <span className="score-gauge-status" aria-hidden="true">{status === 'unscored' ? 'Not scored' : status === 'passed' ? 'Passed' : 'Try again'}</span>
+  </div>;
 }
 
 function readSaved(): Saved {
@@ -267,6 +285,10 @@ export default function App() {
             <StatBars value={answeredQuestions} total={totalQuestions} label="Questions answered" segments={totalQuestions} />
           </div>
           <h2 className="stat-label" id="stat-answers-label"><CheckCheck size={15} />Questions answered</h2>
+        </article>
+        <article className="stat-card stat-demo-score" aria-labelledby="stat-demo-score-label">
+          <div className="stat-card-body"><ScoreGauge score={current.bestScore} demo={index + 1} /></div>
+          <h2 className="stat-label" id="stat-demo-score-label"><Trophy size={15} />Demo score</h2>
         </article>
       </section>
       {completed === calls.length && <div className="course-complete" role="status"><Trophy size={24} /><div><strong>All demos completed</strong><p>Revisit any call or review your answers whenever you need a refresher.</p></div></div>}

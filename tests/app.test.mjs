@@ -144,7 +144,10 @@ test('restored lesson tabs keep draft answers and support keyboard navigation', 
 
 test('training stats use saved scores and draft answers across the whole course', async () => {
   await mount();
+  assert.equal(document.querySelectorAll('.training-stats .stat-card').length, 4);
   assert.equal(document.querySelector('.stat-scores .stat-value').textContent, '—');
+  assert.equal(document.querySelector('.score-gauge-number').textContent, '—');
+  assert.equal(document.querySelector('.score-gauge-status').textContent, 'Not scored');
   assert.equal(document.querySelector('.stat-completion [role=progressbar]').getAttribute('aria-valuenow'), '0');
   assert.equal(document.querySelectorAll('.stat-chart-point').length, 0);
   await unmount();
@@ -156,10 +159,19 @@ test('training stats use saved scores and draft answers across the whole course'
     [third.id]: { answers: [third.questions[0].correct], reflection: '', completed: false },
   });
   assert.equal(document.querySelector('.stat-scores .stat-value').textContent, '67%');
+  assert.equal(document.querySelector('.score-gauge-number').textContent, '100');
+  assert.equal(document.querySelector('.score-gauge-status').textContent, 'Passed');
   assert.equal(document.querySelector('.stat-completion [role=progressbar]').getAttribute('aria-valuenow'), '1');
   assert.equal(document.querySelector('.stat-answers [role=progressbar]').getAttribute('aria-valuenow'), '7');
   assert.equal(document.querySelectorAll('.stat-chart-point').length, 2);
   assert.match(document.querySelector('.stat-sparkline').getAttribute('aria-label'), /Demo 1: 100%, Demo 2: 33%/);
+
+  await interact(() => document.querySelectorAll('.call-select')[1].click());
+  assert.equal(document.querySelector('.score-gauge-number').textContent, '33');
+  assert.equal(document.querySelector('.score-gauge-status').textContent, 'Try again');
+  await interact(() => document.querySelectorAll('.call-select')[2].click());
+  assert.equal(document.querySelector('.score-gauge-number').textContent, '—');
+  assert.equal(document.querySelector('.stat-scores .stat-value').textContent, '67%');
 
   await interact(() => button('Completed').click());
   assert.equal(document.querySelectorAll('.call-select').length, 1);
@@ -177,6 +189,7 @@ test('the first questionnaire can be completed without listening and its result 
   assert.equal(saved().progress[first.id].completed, true);
   assert.deepEqual(saved().progress[first.id].coverage, []);
   assert.equal(saved().progress[first.id].bestScore, 100);
+  assert.equal(document.querySelector('.score-gauge-number').textContent, '100');
   assert.match(document.querySelector('.quiz-result').textContent, /Demo complete/);
   assert.equal(document.querySelectorAll('.answer-review-card .review-badge.is-correct').length, first.questions.length);
   assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => body.hidden));
