@@ -112,31 +112,41 @@ test('every demo opens its questionnaire immediately and resolves its recording 
     assert.equal(document.querySelector('audio').paused, true);
     assert.ok(document.querySelector('#quiz-panel form'));
     assert.equal(document.getElementById('quiz-panel').hidden, false);
-    assert.equal(document.getElementById('quiz-tab').getAttribute('aria-selected'), 'true');
+    assert.equal(document.querySelector('audio').closest('[hidden]'), null);
+    assert.equal(document.querySelector('[role=tablist]'), null);
     assert.equal(document.getElementById('quiz-task-0-body').hidden, false);
     assert.equal(document.querySelector('input[type=radio]').disabled, false);
     if (index < calls.length - 1) await interact(() => button('Next demo').click());
   }
 });
 
-test('restored lesson tabs keep draft answers and support keyboard navigation', async () => {
+test('recording and questionnaire stay together while playing, answering, and reloading', async () => {
   await mount();
+  const audio = document.querySelector('audio');
+  const questionnaire = document.getElementById('quiz-panel');
+  assert.equal(document.querySelector('[role=tablist]'), null);
+  assert.equal(document.querySelector('[role=tabpanel]'), null);
+  assert.equal(document.getElementById('listen-panel'), null);
+  assert.equal(questionnaire.getAttribute('aria-labelledby'), 'questionnaire-title');
+  assert.equal(questionnaire.hidden, false);
+  await interact(() => button('Play recording').click());
+  assert.equal(audio.paused, false);
   const chosen = document.querySelector(`input[name="question-${first.id}-0"][value="${first.questions[0].correct}"]`);
   await interact(() => chosen.click());
-  await interact(() => document.getElementById('listen-tab').click());
-  assert.equal(document.getElementById('listen-panel').hidden, false);
-  assert.equal(document.getElementById('quiz-panel').hidden, true);
-  assert.equal(document.querySelector('audio').paused, true);
-  assert.ok(button('Take questionnaire'));
-  await interact(() => document.getElementById('listen-tab').dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
-  assert.equal(document.getElementById('quiz-panel').hidden, false);
-  assert.equal(document.getElementById('quiz-tab').getAttribute('aria-selected'), 'true');
-  assert.equal(document.activeElement.id, 'quiz-tab');
+  await interact(() => button('Next question').click());
+  assert.equal(audio.paused, false);
+  assert.equal(questionnaire.hidden, false);
   assert.equal(chosen.checked, true);
+  assert.equal(document.getElementById('quiz-task-1-body').hidden, false);
+  await interact(() => button('Pause recording').click());
+  assert.equal(audio.paused, true);
+  assert.equal(document.getElementById('quiz-task-1-body').hidden, false);
 
   await unmount();
   await mount({}, true);
   assert.equal(saved().progress[first.id].answers[0], first.questions[0].correct);
+  assert.equal(document.getElementById('quiz-task-1-body').hidden, false);
+  assert.equal(document.querySelector('audio').closest('[hidden]'), null);
 });
 
 test('training stats use saved scores and draft answers across the whole course', async () => {

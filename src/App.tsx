@@ -92,7 +92,6 @@ export default function App() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [manager, setManager] = useState('all');
-  const [tab, setTab] = useState<'listen' | 'quiz'>('quiz');
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
   const [speed, setSpeed] = useState(1);
@@ -148,7 +147,6 @@ export default function App() {
   }
 
   function selectCall(id: string) {
-    setTab('quiz');
     requestAnimationFrame(() => {
       document.getElementById('call-title')?.focus({ preventScroll: true });
       detail.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -166,18 +164,9 @@ export default function App() {
     setActiveId(id);
   }
 
-  function openQuiz() {
-    setTab('quiz');
-    requestAnimationFrame(() => {
-      quizHeading.current?.focus({ preventScroll: true });
-      quizHeading.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  }
-
   function startTraining() {
     const next = calls.find(call => !progress[call.id]?.completed) || calls[0];
     selectCall(next.id);
-    openQuiz();
   }
 
   async function togglePlay() {
@@ -366,16 +355,6 @@ export default function App() {
             <div className="call-information"><span className={`manager-avatar ${managerClass(active.manager)}`}>{active.manager[0]}</span><strong>{active.manager}</strong><span className="metadata-separator" /><span className="specialty-tag">{active.specialty}</span><span className="location"><MapPin size={12} />{active.location}</span></div>
           </div>
 
-          <div className="lesson-tabs" role="tablist" aria-label="Demo learning steps">
-            <button id="listen-tab" role="tab" aria-selected={tab === 'listen'} aria-controls="listen-panel" tabIndex={tab === 'listen' ? 0 : -1} className={tab === 'listen' ? 'active' : ''} onClick={() => setTab('listen')} onKeyDown={event => { if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') { event.preventDefault(); setTab('quiz'); document.getElementById('quiz-tab')?.focus(); } }}>
-              <span className={`step-number ${coveragePercent >= 100 ? 'done' : ''}`}>{coveragePercent >= 100 ? <Check size={12} /> : '1'}</span>Listen to the call
-            </button>
-            <button id="quiz-tab" role="tab" aria-selected={tab === 'quiz'} aria-controls="quiz-panel" tabIndex={tab === 'quiz' ? 0 : -1} className={tab === 'quiz' ? 'active' : ''} onClick={openQuiz} onKeyDown={event => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); setTab('listen'); document.getElementById('listen-tab')?.focus(); } }}>
-              <span className={`step-number ${current.completed ? 'done' : ''}`}>{current.completed ? <Check size={12} /> : '2'}</span>Questionnaire
-              {!current.completed && <span className="tab-ready">Ready</span>}
-            </button>
-          </div>
-
           <div className="detail-body">
             <div className={`audio-player ${playing ? 'is-playing' : ''}`}>
               <audio
@@ -406,20 +385,7 @@ export default function App() {
             <div className="player-controls"><div className="transport"><button aria-label="Rewind 10 seconds" onClick={() => seek(time - 10)}><RotateCcw size={16} /><span>10</span></button><button aria-label="Forward 10 seconds" onClick={() => seek(time + 10)}><RotateCw size={16} /><span>10</span></button></div><div className="audio-options"><label className="speed-select"><select aria-label="Playback speed" value={speed} onChange={e => { const value = Number(e.target.value); setSpeed(value); if (audio.current) { recordPlayback(audio.current); audio.current.playbackRate = value; } }}><option value="0.75">0.75×</option><option value="1">1× speed</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select><ChevronDown size={11} /></label><span className="control-divider" /><button className="volume-button" aria-label={muted ? 'Unmute recording' : 'Mute recording'} aria-pressed={muted} onClick={() => { setMuted(!muted); if (audio.current) audio.current.muted = !muted; }}>{muted ? <VolumeX size={15} /> : <Volume2 size={15} />}</button></div></div>
             {audioError ? <div className="audio-error" role="alert"><Info size={14} /><span>The recording couldn’t play.</span><button onClick={() => { setAudioError(false); audio.current?.load(); }}>Reload audio</button></div> : <div className="audio-footnote"><span><Info size={11} />Sample recording · Fictional conversation</span><span>{coveragePercent}% listened · Optional</span></div>}
 
-            <section id="listen-panel" role="tabpanel" aria-labelledby="listen-tab" hidden={tab !== 'listen'}>
-              <section className="lesson-action ready" aria-label="Next training step">
-                <div className="lesson-action-copy">
-                  <span className="lesson-action-label">{current.completed ? 'DEMO COMPLETE' : 'OPTIONAL · CALL RECORDING'}</span>
-                  <h3>{current.completed ? 'Ready for your next call' : 'Listen at your own pace'}</h3>
-                  <p>{current.completed ? `Best score: ${current.bestScore}%. Your answers and takeaway are saved.` : 'Play any part of the recording for context. Your questionnaire is ready whenever you are.'}</p>
-                </div>
-                <div className="lesson-action-buttons">
-                  {current.completed ? <><button className="button button-dark" onClick={nextCall}>Next demo<ArrowRight size={14} /></button><button className="text-button" onClick={openQuiz}>Review answers</button></> : <button className="button button-dark" onClick={openQuiz}>{submitted ? 'Review answers' : 'Take questionnaire'}<ArrowRight size={14} /></button>}
-                </div>
-              </section>
-            </section>
-
-            <section id="quiz-panel" role="tabpanel" aria-labelledby="quiz-tab" hidden={tab !== 'quiz'}>
+            <section id="quiz-panel" aria-labelledby="questionnaire-title">
               <div className="questionnaire-heading">
                 <div><span className="questionnaire-eyebrow">CALL REVIEW</span><h3 id="questionnaire-title" ref={quizHeading} tabIndex={-1}>Questionnaire</h3><p>{active.questions.length} questions and a written takeaway.<br />Answer at least {Math.ceil(active.questions.length * 2 / 3)} questions correctly to complete this demo.</p></div>
                 <button type="button" className="quiz-expand-all" onClick={() => setExpandedTasks(expandedTasks.length === totalTasks ? [] : Array.from({ length: totalTasks }, (_, i) => i))}>{expandedTasks.length === totalTasks ? 'Collapse all' : 'Expand all'}<ChevronDown size={13} className={expandedTasks.length === totalTasks ? 'is-expanded' : ''} /></button>
