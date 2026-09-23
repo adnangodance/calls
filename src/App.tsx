@@ -468,10 +468,6 @@ export default function App() {
                   </QuestionnaireTask>
                 </div>
                 <p className="questionnaire-save-note"><CheckCheck size={13} />{saveError ? 'Available for this session' : 'Your answers are saved as you go'}</p>
-                <details className="confidence-details" key={`confidence-${activeId}`}>
-                  <summary>How confident do you feel?<span>Optional<ChevronDown size={14} /></span></summary>
-                  <section className="confidence-section"><div><strong>How confident would you feel handling this call?</strong><span>Just for you · Not scored</span></div><div className="confidence-options">{[1, 2, 3, 4, 5].map(value => <button type="button" key={value} aria-label={`Confidence ${value} of 5`} aria-pressed={current.confidence === value} className={current.confidence === value ? 'selected' : ''} onClick={() => update(activeId, { confidence: value })}>{value}</button>)}</div><div className="confidence-labels"><span>Still practicing</span><span>Ready to try</span></div></section>
-                </details>
                 {formError && <p className="form-error" role="alert"><Info size={15} />{formError}</p>}
                 {(!submitted || result.passed) && <div className="quiz-actions">{submitted ? <><button type="button" className="text-button" onClick={retryQuiz}><RotateCcw size={14} />{result.score < 100 ? 'Retry missed questions' : 'Review answers again'}</button><button type="button" className="button button-dark" onClick={nextCall}>{completed === calls.length ? 'Explore the calls' : 'Continue to next demo'}</button></> : <><span>{answered === totalTasks ? 'All set. Submit when you’re ready.' : `${answered} of ${totalTasks} answered`}</span><button type="submit" className="button button-dark">Submit questionnaire<ArrowRight size={15} /></button></>}</div>}
               </form>

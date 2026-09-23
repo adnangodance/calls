@@ -134,11 +134,8 @@ test('restored lesson tabs keep draft answers and support keyboard navigation', 
   assert.equal(document.activeElement.id, 'quiz-tab');
   assert.equal(chosen.checked, true);
 
-  document.querySelector('.confidence-details').open = true;
-  await interact(() => button('Confidence 4 of 5').click());
   await unmount();
   await mount({}, true);
-  assert.equal(button('Confidence 4 of 5').getAttribute('aria-pressed'), 'true');
   assert.equal(saved().progress[first.id].answers[0], first.questions[0].correct);
 });
 
