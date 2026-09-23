@@ -15,6 +15,28 @@ const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Ma
 const formatDuration = (seconds: number) => `${Math.floor(seconds / 60)}m ${String(Math.floor(seconds % 60)).padStart(2, '0')}s`;
 const managerClass = (manager: string) => manager.startsWith('Zee') ? 'zee' : manager.startsWith('Edrin') ? 'edrin' : 'will';
 
+function StatBars({ value, total, label, segments = 40 }: { value: number; total: number; label: string; segments?: number }) {
+  return <div className="stat-bars" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={total} aria-valuenow={value}>
+    {Array.from({ length: segments }, (_, i) => <span key={i} className={i < Math.round(value / total * segments) ? 'is-filled' : ''} />)}
+  </div>;
+}
+
+function ScoreSparkline({ values }: { values: (number | undefined)[] }) {
+  const point = (value: number, index: number) => ({ x: 4 + index / (values.length - 1) * 312, y: 34 - value / 100 * 28 });
+  const path = values.map((value, i) => {
+    if (value === undefined) return '';
+    const { x, y } = point(value, i);
+    return `${i > 0 && values[i - 1] !== undefined ? 'L' : 'M'}${x},${y}`;
+  }).join(' ');
+  const description = values.flatMap((value, i) => value === undefined ? [] : [`Demo ${i + 1}: ${value}%`]).join(', ');
+  return <svg className="stat-sparkline" viewBox="0 0 320 40" preserveAspectRatio="none" role="img" aria-label={description ? `Best quiz scores in demo order. ${description}` : 'No quiz scores yet'}>
+    <path className="stat-chart-baseline" d="M4,35 H316" />
+    {values.map((_, i) => <path className="stat-chart-tick" key={i} d={`M${point(0, i).x},36 v3`} />)}
+    <path className="stat-chart-line" d={path} />
+    {values.map((value, i) => value === undefined ? null : <circle className="stat-chart-point" key={i} cx={point(value, i).x} cy={point(value, i).y} r="2.5" />)}
+  </svg>;
+}
+
 function readSaved(): Saved {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
@@ -74,6 +96,8 @@ export default function App() {
   const completed = calls.filter(c => progress[c.id]?.completed).length;
   const scores = calls.map(c => progress[c.id]?.bestScore).filter((s): s is number => s !== undefined);
   const average = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+  const totalQuestions = calls.reduce((total, call) => total + call.questions.length, 0);
+  const answeredQuestions = calls.reduce((total, call) => total + call.questions.filter((_, i) => (progress[call.id]?.answers[i] ?? -1) >= 0).length, 0);
   const submitted = Boolean(current.submitted);
   const result = gradeQuiz(active.questions, current.answers);
   const answered = active.questions.filter((_, i) => current.answers[i] >= 0).length + (current.reflection.trim() ? 1 : 0);
@@ -193,9 +217,31 @@ export default function App() {
         <div><h1 id="page-title">Training Calls</h1><p>Practice at your pace. Play the recording whenever you need context.</p></div>
       </section>
 
-      <section className="course-progress" aria-label="Your training progress">
-        <div className="course-progress-copy"><strong>{completed} of {calls.length} demos completed</strong>{average !== null && <span>Quiz average · {average}%</span>}</div>
-        <div className="course-progress-track" role="progressbar" aria-label="Course completion" aria-valuemin={0} aria-valuemax={calls.length} aria-valuenow={completed}><span style={{ width: `${completed / calls.length * 100}%` }} /></div>
+      <section className="training-stats" aria-label="Your training progress" tabIndex={0}>
+        <article className="stat-card stat-completion" aria-labelledby="stat-completion-label">
+          <div className="stat-card-body">
+            <p className="stat-value">{completed}<span> / {calls.length}</span></p>
+            <p className="stat-context"><span className="stat-highlight">{Math.round(completed / calls.length * 100)}%</span>of the course</p>
+            <StatBars value={completed} total={calls.length} label="Course completion" />
+          </div>
+          <h2 className="stat-label" id="stat-completion-label"><CircleCheck size={15} />Demos completed</h2>
+        </article>
+        <article className="stat-card stat-scores" aria-labelledby="stat-scores-label">
+          <div className="stat-card-body">
+            <p className={`stat-value ${average === null ? 'is-empty' : ''}`}>{average === null ? '—' : <>{average}<span>%</span></>}</p>
+            <p className="stat-context">{scores.length ? `Best scores across ${scores.length} ${scores.length === 1 ? 'demo' : 'demos'}` : 'Submit a quiz to see your score'}</p>
+            <ScoreSparkline values={calls.map(call => progress[call.id]?.bestScore)} />
+          </div>
+          <h2 className="stat-label" id="stat-scores-label"><Target size={15} />Quiz average</h2>
+        </article>
+        <article className="stat-card stat-answers" aria-labelledby="stat-answers-label">
+          <div className="stat-card-body">
+            <p className="stat-value">{answeredQuestions}<span> / {totalQuestions}</span></p>
+            <p className="stat-context"><span className="stat-highlight">{totalQuestions - answeredQuestions}</span>{totalQuestions - answeredQuestions === 1 ? 'question remaining' : 'questions remaining'}</p>
+            <StatBars value={answeredQuestions} total={totalQuestions} label="Questions answered" segments={totalQuestions} />
+          </div>
+          <h2 className="stat-label" id="stat-answers-label"><CheckCheck size={15} />Questions answered</h2>
+        </article>
       </section>
       {completed === calls.length && <div className="course-complete" role="status"><Trophy size={24} /><div><strong>All demos completed</strong><p>Revisit any call or review your answers whenever you need a refresher.</p></div></div>}
 

@@ -29,7 +29,7 @@ Vite's `/calls/` base path applies to scripts, styles, the favicon, and recordin
 - Questionnaires are available immediately. New visitors start on demo 1 with the first question expanded; returning visitors resume their saved demo and next unanswered question.
 - Listening is optional. The recording stays above the questions, with seeking, speed, and volume controls. Playing or finishing it does not interrupt the questionnaire.
 - Each questionnaire contains three multiple-choice questions and a required written takeaway. Two correct answers complete the demo; missed questions can be retried.
-- Search, manager filters, and completion filters help find a call. Course progress and quiz average summarize results.
+- Search, manager filters, and completion filters help find a call. Stats cards show completed demos, the average of saved best quiz scores, and questions answered, including drafts. The score chart follows demo order; unanswered demos have no score. On mobile, the cards scroll horizontally.
 - Answers, feedback, notes, playback position, and progress are saved in this browser using local storage. There is no server or shared employee reporting. Use the same browser and URL to resume saved progress.
 
 ## Replace sample recordings

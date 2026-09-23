@@ -117,6 +117,30 @@ test('every demo opens its questionnaire immediately and resolves its recording 
   }
 });
 
+test('training stats use saved scores and draft answers across the whole course', async () => {
+  await mount();
+  assert.equal(document.querySelector('.stat-scores .stat-value').textContent, '—');
+  assert.equal(document.querySelector('.stat-completion [role=progressbar]').getAttribute('aria-valuenow'), '0');
+  assert.equal(document.querySelectorAll('.stat-chart-point').length, 0);
+  await unmount();
+
+  const [first, second, third] = calls;
+  await mount({
+    [first.id]: { answers: first.questions.map(q => q.correct), reflection: 'Ask before pitching.', bestScore: 100, completed: true, submitted: true },
+    [second.id]: { answers: second.questions.map((q, i) => i === 0 ? q.correct : (q.correct + 1) % q.options.length), reflection: 'Find the underlying concern.', bestScore: 33, completed: false, submitted: true },
+    [third.id]: { answers: [third.questions[0].correct], reflection: '', completed: false },
+  });
+  assert.equal(document.querySelector('.stat-scores .stat-value').textContent, '67%');
+  assert.equal(document.querySelector('.stat-completion [role=progressbar]').getAttribute('aria-valuenow'), '1');
+  assert.equal(document.querySelector('.stat-answers [role=progressbar]').getAttribute('aria-valuenow'), '7');
+  assert.equal(document.querySelectorAll('.stat-chart-point').length, 2);
+  assert.match(document.querySelector('.stat-sparkline').getAttribute('aria-label'), /Demo 1: 100%, Demo 2: 33%/);
+
+  await interact(() => button('Completed').click());
+  assert.equal(document.querySelectorAll('.call-select').length, 1);
+  assert.equal(document.querySelector('.stat-answers [role=progressbar]').getAttribute('aria-valuenow'), '7');
+});
+
 test('the first questionnaire can be completed without listening and its result survives reload', async () => {
   await mount();
   assert.equal(saved().activeId, first.id);
