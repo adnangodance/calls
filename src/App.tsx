@@ -417,7 +417,7 @@ export default function App() {
                 {submitted && <div className={`quiz-result review-summary ${result.passed ? 'passed' : 'retry'}`} role="status">
                   <ReviewRing label={result.score} progress={result.score} />
                   <div className="review-summary-copy"><strong>{result.passed ? 'Demo complete' : 'Review your answers'}</strong><p>{result.correct} of {result.total} correct · {result.score}% score</p><span>{result.passed ? 'Open any answer to revisit the feedback.' : 'Open the marked answers, then try again.'}</span></div>
-                  <span className={`review-badge ${result.passed ? 'is-correct' : result.correct === 0 ? 'needs-review' : 'needs-practice'}`}>{result.passed ? 'Passed' : 'Try again'}</span>
+                  {result.passed ? <span className="review-badge is-correct">Passed</span> : <button type="button" className="review-retry-button" onClick={retryQuiz}><RotateCcw size={14} aria-hidden="true" />Retry missed questions</button>}
                 </div>}
                 <div className={`questionnaire-tasks ${submitted ? 'answer-review-list' : ''}`}>
                   <div className="task-list-heading">
@@ -462,7 +462,7 @@ export default function App() {
                   <section className="confidence-section"><div><strong>How confident would you feel handling this call?</strong><span>Just for you · Not scored</span></div><div className="confidence-options">{[1, 2, 3, 4, 5].map(value => <button type="button" key={value} aria-label={`Confidence ${value} of 5`} aria-pressed={current.confidence === value} className={current.confidence === value ? 'selected' : ''} onClick={() => update(activeId, { confidence: value })}>{value}</button>)}</div><div className="confidence-labels"><span>Still practicing</span><span>Ready to try</span></div></section>
                 </details>
                 {formError && <p className="form-error" role="alert"><Info size={15} />{formError}</p>}
-                <div className="quiz-actions">{submitted ? <><button type="button" className="text-button" onClick={retryQuiz}><RotateCcw size={14} />{result.score < 100 ? 'Retry missed questions' : 'Review answers again'}</button>{result.passed && <button type="button" className="button button-dark" onClick={nextCall}>{completed === calls.length ? 'Explore the calls' : 'Continue to next demo'}<ArrowRight size={15} /></button>}</> : <><span>{answered === totalTasks ? 'All set. Submit when you’re ready.' : `${answered} of ${totalTasks} answered`}</span><button type="submit" className="button button-dark">Submit questionnaire<ArrowRight size={15} /></button></>}</div>
+                {(!submitted || result.passed) && <div className="quiz-actions">{submitted ? <><button type="button" className="text-button" onClick={retryQuiz}><RotateCcw size={14} />{result.score < 100 ? 'Retry missed questions' : 'Review answers again'}</button><button type="button" className="button button-dark" onClick={nextCall}>{completed === calls.length ? 'Explore the calls' : 'Continue to next demo'}<ArrowRight size={15} /></button></> : <><span>{answered === totalTasks ? 'All set. Submit when you’re ready.' : `${answered} of ${totalTasks} answered`}</span><button type="submit" className="button button-dark">Submit questionnaire<ArrowRight size={15} /></button></>}</div>}
               </form>
             </section>
           </div>
