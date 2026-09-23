@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Square, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
 import callData from './calls.json';
 import { gradeQuiz, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
 
@@ -13,7 +13,7 @@ const STORAGE_KEY = 'targetone-training-v1';
 const managers = [...new Set(calls.map(c => c.manager))];
 const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
 const formatDuration = (seconds: number) => `${Math.floor(seconds / 60)}m ${String(Math.floor(seconds % 60)).padStart(2, '0')}s`;
-const initials = (name: string) => name.split(' ').map(part => part[0]).slice(0, 2).join('');
+const managerClass = (manager: string) => manager.startsWith('Zee') ? 'zee' : manager.startsWith('Edrin') ? 'edrin' : 'will';
 
 function readSaved(): Saved {
   try {
@@ -89,10 +89,6 @@ export default function App() {
   }
 
   function selectCall(id: string) {
-    requestAnimationFrame(() => {
-      document.getElementById('call-title')?.focus({ preventScroll: true });
-      detail.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
     if (id === activeId) return;
     audio.current?.pause();
     setFormError('');
@@ -104,6 +100,10 @@ export default function App() {
     const firstUnanswered = call.questions.findIndex((_, i) => !(saved?.answers[i] >= 0));
     setExpandedTasks(saved?.submitted ? [] : [firstUnanswered < 0 ? call.questions.length : firstUnanswered]);
     setActiveId(id);
+    requestAnimationFrame(() => {
+      document.getElementById('call-title')?.focus({ preventScroll: true });
+      detail.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }
 
   async function togglePlay() {
@@ -184,30 +184,28 @@ export default function App() {
 
   return <>
     <header className="app-header">
-      <div className="app-header-inner">
-        <a className="brand" href="#main" aria-label="TargetOne home"><span className="brand-mark"><Target size={21} strokeWidth={1.6} /></span><span>Target<span className="brand-one">One</span></span></a>
-        <span className="app-section">Sales training</span>
-      </div>
+      <a className="brand" href="#main" aria-label="TargetOne home"><Target size={20} strokeWidth={1.8} /><span>Target<span className="brand-one">One</span></span></a>
+      <span className="app-section">Sales training</span>
     </header>
 
     <main id="main" className="page-shell">
       <section className="page-heading" aria-labelledby="page-title">
-        <div className="page-heading-copy"><h1 id="page-title">Training calls</h1><p>Listen for context. Practice at your own pace.</p><a className="browse-calls" href="#call-library">Browse demos<ChevronDown size={14} /></a></div>
-        <section className="course-progress" aria-label="Your training progress">
-          <div className="course-progress-copy"><span>Your progress</span><span><strong>{completed}</strong> / {calls.length}</span></div>
-          <div className="course-progress-track" role="progressbar" aria-label="Course completion" aria-valuemin={0} aria-valuemax={calls.length} aria-valuenow={completed} aria-valuetext={`${completed} of ${calls.length} demos completed`}>{calls.map((call, i) => <span key={call.id} className={i < completed ? 'is-complete' : ''} />)}</div>
-          <div className="course-progress-caption"><span>Demos completed</span>{average !== null && <span>Quiz average <strong>{average}%</strong></span>}</div>
-        </section>
+        <div><h1 id="page-title">Training Calls</h1><p>Practice at your pace. Play the recording whenever you need context.</p></div>
+      </section>
+
+      <section className="course-progress" aria-label="Your training progress">
+        <div className="course-progress-copy"><strong>{completed} of {calls.length} demos completed</strong>{average !== null && <span>Quiz average · {average}%</span>}</div>
+        <div className="course-progress-track" role="progressbar" aria-label="Course completion" aria-valuemin={0} aria-valuemax={calls.length} aria-valuenow={completed}><span style={{ width: `${completed / calls.length * 100}%` }} /></div>
       </section>
       {completed === calls.length && <div className="course-complete" role="status"><Trophy size={24} /><div><strong>All demos completed</strong><p>Revisit any call or review your answers whenever you need a refresher.</p></div></div>}
 
       <div className="learning-layout">
-        <aside id="call-library" className="library" aria-label="Training call library">
-          <div className="library-section-heading"><h2>Call library</h2><span>{calls.length} demos</span></div>
+        <aside className="library" aria-label="Training call library">
+          <div className="library-section-heading"><h2>Call library</h2><span>{completed} of {calls.length} completed</span></div>
           <div className="library-tools">
             <label className="search-box">
               <Search size={16} />
-              <input aria-label="Search training calls" placeholder="Search calls…" value={query} onChange={e => setQuery(e.target.value)} />
+              <input aria-label="Search training calls" placeholder="Search target, manager or topic…" value={query} onChange={e => setQuery(e.target.value)} />
               {query && <button aria-label="Clear search" onClick={() => setQuery('')}><X size={14} /></button>}
             </label>
             <div className="filter-pills library-filters" role="group" aria-label="Filter by review status">
@@ -225,8 +223,8 @@ export default function App() {
               const selected = call.id === activeId;
               return <div className={`call-item ${selected ? 'active' : ''} ${p.completed ? 'is-complete' : ''}`} key={call.id}>
                 <button className="call-select" aria-current={selected ? 'true' : undefined} onClick={() => selectCall(call.id)}>
-                  <div className="call-item-title"><span className="call-number">{String(calls.indexOf(call) + 1).padStart(2, '0')}</span><strong>{call.title}</strong><ChevronRight size={14} className="call-current-icon" aria-hidden="true" /></div>
-                  <div className="call-description"><strong>{call.manager}</strong><span className="call-meta-dot">·</span><span className="call-specialty">{call.specialty}</span></div>
+                  <div className="call-item-title"><span className="call-number">{calls.indexOf(call) + 1}</span><strong>{call.title}</strong></div>
+                  <div className="call-description"><i className={`manager-dot ${managerClass(call.manager)}`} /><strong>{call.manager}</strong><span className="call-meta-dot">·</span><span className="call-specialty">{call.specialty}</span></div>
                   <div className="call-item-meta"><span><Clock3 size={12} />{formatDuration(call.duration)}</span>{p.completed ? <span className="call-progress-label complete"><CircleCheck size={12} />Completed</span> : (p.answers.some(answer => answer >= 0) || p.reflection.trim()) && <span className="call-progress-label">In progress</span>}</div>
                 </button>
               </div>;
@@ -238,45 +236,43 @@ export default function App() {
           <div className="detail-header">
             <div className="detail-kicker"><span>Demo {String(index + 1).padStart(2, '0')} <span className="muted">/ {calls.length}</span></span><span className="kicker-dot">·</span><span className="lesson-level">{active.level}</span><span className={`lesson-status ${current.completed ? 'done' : ''}`}>{current.completed ? <><CircleCheck size={12} />Completed</> : answered > 0 ? 'In progress' : 'Not started'}</span></div>
             <div className="detail-title-row"><div><h2 id="call-title" tabIndex={-1}>{active.title}</h2><p className="detail-subtitle">{active.topic}</p></div></div>
-            <div className="call-information"><span className="manager-avatar" aria-hidden="true">{initials(active.manager)}</span><strong>{active.manager}</strong><span className="metadata-separator" /><span className="specialty-tag">{active.specialty}</span><span className="location"><MapPin size={13} />{active.location}</span></div>
+            <div className="call-information"><span className={`manager-avatar ${managerClass(active.manager)}`}>{active.manager[0]}</span><strong>{active.manager}</strong><span className="metadata-separator" /><span className="specialty-tag">{active.specialty}</span><span className="location"><MapPin size={12} />{active.location}</span></div>
           </div>
 
           <div className="detail-body">
-            <section className="recording" aria-label="Optional call recording">
-              <div className="recording-heading"><span><Headphones size={15} />Call recording</span><span>Optional listening</span></div>
-              <div className={`audio-player ${playing ? 'is-playing' : ''}`}>
-                <audio
-                  key={active.id} ref={audio} src={`${import.meta.env.BASE_URL}${active.audio.replace(/^\//, '')}`} preload="metadata"
-                  onLoadedMetadata={() => {
-                    if (!audio.current) return;
-                    audio.current.playbackRate = speed;
-                    audio.current.muted = muted;
-                    const resume = current.position < active.duration - 0.5 ? current.position : 0;
-                    audio.current.currentTime = resume;
-                    setTime(resume);
-                  }}
-                  onPlay={() => setPlaying(true)}
-                  onPause={event => { recordPlayback(event.currentTarget); setPlaying(false); }}
-                  onEnded={event => { recordPlayback(event.currentTarget); setPlaying(false); }}
-                  onSeeked={event => recordPlayback(event.currentTarget)}
-                  onTimeUpdate={event => recordPlayback(event.currentTarget)}
-                  onError={() => { setAudioError(true); setPlaying(false); }}
-                />
-                <div className="waveform-row">
-                  <button className="play-button" aria-label={playing ? 'Pause recording' : 'Play recording'} onClick={togglePlay}>{playing ? <Pause size={14} fill="currentColor" strokeWidth={1.5} /> : <Play size={14} fill="currentColor" strokeWidth={1.5} className="play-icon" />}</button>
-                  <span className="player-timestamp" aria-label="Elapsed time">{formatTime(time)}</span>
-                  <div className="waveform"><svg viewBox="0 0 576 32" preserveAspectRatio="none" aria-hidden="true">{Array.from({ length: 96 }, (_, i) => { const height = 4 + Math.abs(Math.sin(i * 2.37 + index) * Math.cos(i * 0.41)) * 24; return <rect key={i} className={i / 96 < time / active.duration ? 'is-played' : ''} x={i * 6 + 1} y={(32 - height) / 2} width="2.5" height={height} rx="1.25" />; })}</svg><input type="range" aria-label="Seek recording" aria-valuetext={`${formatTime(time)} of ${formatTime(active.duration)}`} min={0} max={active.duration} step={0.1} value={time} onChange={e => seek(Number(e.target.value))} /></div>
-                  <span className="player-timestamp player-duration" aria-label="Recording duration">{formatTime(active.duration)}</span>
-                  <button className="stop-button" aria-label="Stop playback and return to start" title="Stop and return to start" onClick={() => { audio.current?.pause(); seek(0); }}><Square size={12} fill="currentColor" strokeWidth={1.6} /></button>
-                </div>
+            <div className="recording-heading"><span><Headphones size={14} />Call recording</span><span>Optional</span></div>
+            <div className={`audio-player ${playing ? 'is-playing' : ''}`}>
+              <audio
+                key={active.id} ref={audio} src={`${import.meta.env.BASE_URL}${active.audio.replace(/^\//, '')}`} preload="metadata"
+                onLoadedMetadata={() => {
+                  if (!audio.current) return;
+                  audio.current.playbackRate = speed;
+                  audio.current.muted = muted;
+                  const resume = current.position < active.duration - 0.5 ? current.position : 0;
+                  audio.current.currentTime = resume;
+                  setTime(resume);
+                }}
+                onPlay={() => setPlaying(true)}
+                onPause={event => { recordPlayback(event.currentTarget); setPlaying(false); }}
+                onEnded={event => { recordPlayback(event.currentTarget); setPlaying(false); }}
+                onSeeked={event => recordPlayback(event.currentTarget)}
+                onTimeUpdate={event => recordPlayback(event.currentTarget)}
+                onError={() => { setAudioError(true); setPlaying(false); }}
+              />
+              <div className="waveform-row">
+                <button className="play-button" aria-label={playing ? 'Pause recording' : 'Play recording'} onClick={togglePlay}>{playing ? <Pause size={14} fill="currentColor" strokeWidth={1.5} /> : <Play size={14} fill="currentColor" strokeWidth={1.5} className="play-icon" />}</button>
+                <span className="player-timestamp" aria-label="Elapsed time">{formatTime(time)}</span>
+                <div className="waveform"><svg viewBox="0 0 576 32" preserveAspectRatio="none" aria-hidden="true">{Array.from({ length: 96 }, (_, i) => { const height = 4 + Math.abs(Math.sin(i * 2.37 + index) * Math.cos(i * 0.41)) * 24; return <rect key={i} x={i * 6 + 1} y={(32 - height) / 2} width="2.5" height={height} rx="1.25" fill={i / 96 < time / active.duration ? '#555557' : '#c8c8ca'} />; })}</svg><input type="range" aria-label="Seek recording" aria-valuetext={`${formatTime(time)} of ${formatTime(active.duration)}`} min={0} max={active.duration} step={0.1} value={time} onChange={e => seek(Number(e.target.value))} /></div>
+                <span className="player-timestamp player-duration" aria-label="Recording duration">{formatTime(active.duration)}</span>
+                <button className="stop-button" aria-label="Stop playback and return to start" title="Stop and return to start" onClick={() => { audio.current?.pause(); seek(0); }}><X size={15} strokeWidth={1.6} /></button>
               </div>
-              <div className="player-controls"><div className="transport"><button aria-label="Rewind 10 seconds" onClick={() => seek(time - 10)}><RotateCcw size={16} /><span>10</span></button><button aria-label="Forward 10 seconds" onClick={() => seek(time + 10)}><RotateCw size={16} /><span>10</span></button></div><div className="audio-options"><label className="speed-select"><select aria-label="Playback speed" value={speed} onChange={e => { const value = Number(e.target.value); setSpeed(value); if (audio.current) { recordPlayback(audio.current); audio.current.playbackRate = value; } }}><option value="0.75">0.75×</option><option value="1">1× speed</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select><ChevronDown size={11} /></label><span className="control-divider" /><button className="volume-button" aria-label={muted ? 'Unmute recording' : 'Mute recording'} aria-pressed={muted} onClick={() => { setMuted(!muted); if (audio.current) audio.current.muted = !muted; }}>{muted ? <VolumeX size={15} /> : <Volume2 size={15} />}</button></div></div>
-              {audioError ? <div className="audio-error" role="alert"><Info size={14} /><span>The recording couldn’t play.</span><button onClick={() => { setAudioError(false); audio.current?.load(); }}>Reload audio</button></div> : <p className="audio-footnote">Sample recording · Fictional conversation</p>}
-            </section>
+            </div>
+            <div className="player-controls"><div className="transport"><button aria-label="Rewind 10 seconds" onClick={() => seek(time - 10)}><RotateCcw size={16} /><span>10</span></button><button aria-label="Forward 10 seconds" onClick={() => seek(time + 10)}><RotateCw size={16} /><span>10</span></button></div><div className="audio-options"><label className="speed-select"><select aria-label="Playback speed" value={speed} onChange={e => { const value = Number(e.target.value); setSpeed(value); if (audio.current) { recordPlayback(audio.current); audio.current.playbackRate = value; } }}><option value="0.75">0.75×</option><option value="1">1× speed</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select><ChevronDown size={11} /></label><span className="control-divider" /><button className="volume-button" aria-label={muted ? 'Unmute recording' : 'Mute recording'} aria-pressed={muted} onClick={() => { setMuted(!muted); if (audio.current) audio.current.muted = !muted; }}>{muted ? <VolumeX size={15} /> : <Volume2 size={15} />}</button></div></div>
+            {audioError ? <div className="audio-error" role="alert"><Info size={14} /><span>The recording couldn’t play.</span><button onClick={() => { setAudioError(false); audio.current?.load(); }}>Reload audio</button></div> : <p className="audio-footnote">Sample recording · Fictional conversation</p>}
 
             <section id="quiz-panel" aria-labelledby="questionnaire-title">
               <div className="questionnaire-heading">
-                <div><h3 id="questionnaire-title" ref={quizHeading} tabIndex={-1}>Questionnaire</h3><p>{active.questions.length} questions · 1 written takeaway<span className="questionnaire-requirement">Get {Math.ceil(active.questions.length * 2 / 3)} of {active.questions.length} answers right to complete this demo.</span></p></div>
+                <div><h3 id="questionnaire-title" ref={quizHeading} tabIndex={-1}>Questionnaire</h3><p>{active.questions.length} questions and a written takeaway. Answer at least {Math.ceil(active.questions.length * 2 / 3)} questions correctly to complete this demo.</p></div>
                 <button type="button" className="quiz-expand-all" onClick={() => setExpandedTasks(expandedTasks.length === totalTasks ? [] : Array.from({ length: totalTasks }, (_, i) => i))}>{expandedTasks.length === totalTasks ? 'Collapse all' : 'Expand all'}<ChevronDown size={13} className={expandedTasks.length === totalTasks ? 'is-expanded' : ''} /></button>
               </div>
               <form onSubmit={submitQuiz}>
