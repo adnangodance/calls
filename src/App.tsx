@@ -1,34 +1,19 @@
-import { useEffect, useId, useRef, useState } from 'react';
-import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleHelp, ClipboardCheck, Clock3, Headphones, Info, LockKeyhole, MapPin, Pause, Play, RotateCcw, RotateCw, Search, SlidersHorizontal, Sparkles, Star, Target, Timer, TrendingUp, Trophy, Volume2, VolumeX, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
 import callData from './calls.json';
-import { canTakeQuiz, firstUnplayedPosition, gradeQuiz, listenedSeconds, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
+import { gradeQuiz, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
 
 type Call = (typeof callData)[number];
-type Progress = { coverage: number[][]; position: number; answers: number[]; reflection: string; confidence: number; bestScore?: number; completed: boolean; submitted?: boolean };
+type Progress = { coverage: number[][]; position: number; answers: number[]; reflection: string; bestScore?: number; completed: boolean; submitted?: boolean };
 type Saved = { activeId?: string; progress: Record<string, Progress> };
 type Filter = 'all' | 'todo' | 'completed';
 const calls = callData as Call[];
-const EMPTY: Progress = { coverage: [], position: 0, answers: [], reflection: '', confidence: 0, completed: false };
+const EMPTY: Progress = { coverage: [], position: 0, answers: [], reflection: '', completed: false };
 const STORAGE_KEY = 'targetone-training-v1';
 const managers = [...new Set(calls.map(c => c.manager))];
 const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
 const formatDuration = (seconds: number) => `${Math.floor(seconds / 60)}m ${String(Math.floor(seconds % 60)).padStart(2, '0')}s`;
 const managerClass = (manager: string) => manager.startsWith('Zee') ? 'zee' : manager.startsWith('Edrin') ? 'edrin' : 'will';
-
-function StatSparkline({ values, color, label, maximum }: { values: number[]; color: string; label: string; maximum?: number }) {
-  const gradientId = useId();
-  const points = values.length > 1 ? values : [values[0] || 0, values[0] || 0];
-  const ceiling = maximum || Math.max(1, ...points);
-  const line = points.map((value, i) => `${i ? 'L' : 'M'}${2 + i / (points.length - 1) * 96},${62 - value / ceiling * 54}`).join(' ');
-
-  return <div className="stat-chart" title={label}>
-    <svg viewBox="0 0 100 66" preserveAspectRatio="none" aria-hidden="true">
-      <defs><linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity=".15" /><stop offset="100%" stopColor={color} stopOpacity="0" /></linearGradient></defs>
-      <path d={`${line} L98,66 L2,66 Z`} fill={`url(#${gradientId})`} />
-      <path d={line} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-    </svg>
-  </div>;
-}
 
 function readSaved(): Saved {
   try {
@@ -66,46 +51,31 @@ export default function App() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [manager, setManager] = useState('all');
-  const [sort, setSort] = useState('rating');
-  const [minRating, setMinRating] = useState(0);
-  const [minDuration, setMinDuration] = useState(0);
-  const [tab, setTab] = useState<'listen' | 'quiz'>('listen');
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [muted, setMuted] = useState(false);
-  const [playbackEnded, setPlaybackEnded] = useState(false);
   const [audioError, setAudioError] = useState(false);
-  const [notice, setNotice] = useState('');
   const [saveError, setSaveError] = useState(false);
   const [formError, setFormError] = useState('');
-  const [expandedTasks, setExpandedTasks] = useState<number[]>([0]);
+  const [expandedTasks, setExpandedTasks] = useState<number[]>(() => {
+    const saved = initial.progress[activeId];
+    if (saved?.submitted) return [];
+    const call = calls.find(item => item.id === activeId)!;
+    const missing = call.questions.findIndex((_, i) => !(saved?.answers[i] >= 0));
+    return [missing < 0 ? call.questions.length : missing];
+  });
   const audio = useRef<HTMLAudioElement>(null);
   const detail = useRef<HTMLElement>(null);
-  const guide = useRef<HTMLDialogElement>(null);
   const quizHeading = useRef<HTMLHeadingElement>(null);
-  const playOnLoad = useRef(false);
   const active = calls.find(c => c.id === activeId)!;
   const index = calls.findIndex(c => c.id === activeId);
   const current = progress[activeId] || EMPTY;
   const completed = calls.filter(c => progress[c.id]?.completed).length;
-  const totalListened = calls.reduce((total, c) => total + listenedSeconds(progress[c.id]?.coverage), 0);
   const scores = calls.map(c => progress[c.id]?.bestScore).filter((s): s is number => s !== undefined);
   const average = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
-  const coveragePercent = Math.min(100, Math.floor(listenedSeconds(current.coverage) / active.duration * 100));
-  const quizUnlocked = canTakeQuiz(current, active.duration);
-  const listeningRemaining = Math.max(0, Math.ceil(active.duration * 0.9 - listenedSeconds(current.coverage)));
   const submitted = Boolean(current.submitted);
   const result = gradeQuiz(active.questions, current.answers);
-  const totalDuration = calls.reduce((sum, call) => sum + call.duration, 0);
-  const listenedPercent = Math.min(100, Math.round(totalListened / totalDuration * 100));
-  // Sparklines summarize real course data; no fabricated weekly history.
-  const completedSeries = [0];
-  const listenedSeries = [0];
-  for (const call of calls) {
-    completedSeries.push(completedSeries[completedSeries.length - 1] + Number(Boolean(progress[call.id]?.completed)));
-    listenedSeries.push(listenedSeries[listenedSeries.length - 1] + listenedSeconds(progress[call.id]?.coverage));
-  }
   const answered = active.questions.filter((_, i) => current.answers[i] >= 0).length + (current.reflection.trim() ? 1 : 0);
   const totalTasks = active.questions.length + 1;
 
@@ -114,47 +84,33 @@ export default function App() {
     catch { setSaveError(true); }
   }, [activeId, progress]);
 
-  useEffect(() => {
-    if (!notice) return;
-    const timeout = window.setTimeout(() => setNotice(''), 2800);
-    return () => window.clearTimeout(timeout);
-  }, [notice]);
-
   function update(id: string, patch: Partial<Progress>) {
     setProgress(previous => ({ ...previous, [id]: { ...EMPTY, ...previous[id], ...patch } }));
   }
 
-  function selectCall(id: string, autoplay = false) {
-    setTab('listen');
+  function selectCall(id: string) {
+    if (id === activeId) return;
+    audio.current?.pause();
     setFormError('');
-    if (id === activeId) {
-      if (autoplay) void audio.current?.play().catch(() => setNotice('Press play to start the recording.'));
-    } else {
-      setExpandedTasks([0]);
-      audio.current?.pause();
-      setPlaying(false);
-      setPlaybackEnded(false);
-      setAudioError(false);
-      setTime(0);
-      playOnLoad.current = autoplay;
-      setActiveId(id);
-    }
-    if (window.innerWidth < 900) detail.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  function startTraining() {
-    const next = calls.find(c => !progress[c.id]?.completed) || calls[0];
-    const readyForQuiz = canTakeQuiz(progress[next.id], next.duration);
-    selectCall(next.id, !readyForQuiz);
-    if (readyForQuiz) openQuiz();
-    detail.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setPlaying(false);
+    setAudioError(false);
+    setTime(0);
+    const saved = progress[id];
+    const call = calls.find(item => item.id === id)!;
+    const firstUnanswered = call.questions.findIndex((_, i) => !(saved?.answers[i] >= 0));
+    setExpandedTasks(saved?.submitted ? [] : [firstUnanswered < 0 ? call.questions.length : firstUnanswered]);
+    setActiveId(id);
+    requestAnimationFrame(() => {
+      document.getElementById('call-title')?.focus({ preventScroll: true });
+      detail.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }
 
   async function togglePlay() {
     if (!audio.current) return;
     if (playing) audio.current.pause();
     else {
-      try { setPlaybackEnded(false); await audio.current.play(); }
+      try { await audio.current.play(); }
       catch { setAudioError(true); }
     }
   }
@@ -164,13 +120,12 @@ export default function App() {
     recordPlayback(audio.current);
     const next = Math.max(0, Math.min(active.duration, position));
     audio.current.currentTime = next;
-    setPlaybackEnded(false);
     setTime(next);
     update(activeId, { position: next });
   }
 
   function recordPlayback(element: HTMLAudioElement) {
-    if (element !== audio.current) return current;
+    if (element !== audio.current) return;
     const position = element.currentTime;
     // Snapshot mutable media properties before scheduling a React state update.
     const played = element.played;
@@ -180,36 +135,10 @@ export default function App() {
       const saved = all[activeId] || EMPTY;
       return { ...all, [activeId]: { ...saved, position, coverage: mergePlayedRanges(saved.coverage, ranges, active.duration) } };
     });
-    return { ...current, position, coverage: mergePlayedRanges(current.coverage, ranges, active.duration) };
-  }
-
-  function onPlaybackEnded(element: HTMLAudioElement) {
-    if (element !== audio.current) return;
-    const saved = recordPlayback(element);
-    setPlaying(false);
-    setPlaybackEnded(true);
-    if (canTakeQuiz(saved, active.duration) && !saved.completed) openQuiz();
-  }
-
-  function continueListening() {
-    if (playbackEnded || time >= active.duration - 0.5) seek(firstUnplayedPosition(current.coverage, active.duration));
-    setTab('listen');
-    if (!playing) void togglePlay();
-  }
-
-  function openQuiz() {
-    audio.current?.pause();
-    setTab('quiz');
-    setFormError('');
-    requestAnimationFrame(() => {
-      quizHeading.current?.focus({ preventScroll: true });
-      quizHeading.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
   }
 
   function submitQuiz(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!quizUnlocked) return;
     if (answered !== active.questions.length + 1) {
       const missing = active.questions.findIndex((_, i) => current.answers[i] === undefined || current.answers[i] < 0);
       const missingTask = missing >= 0 ? missing : active.questions.length;
@@ -222,11 +151,12 @@ export default function App() {
       });
       return;
     }
+    audio.current?.pause();
     const grade = gradeQuiz(active.questions, current.answers);
     setExpandedTasks([]);
     update(activeId, { submitted: true, bestScore: Math.max(current.bestScore ?? 0, grade.score), completed: current.completed || grade.passed });
     setFormError('');
-    requestAnimationFrame(() => quizHeading.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+    requestAnimationFrame(() => { quizHeading.current?.focus({ preventScroll: true }); quizHeading.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   }
 
   function retryQuiz() {
@@ -244,66 +174,30 @@ export default function App() {
   function nextCall() {
     const next = calls.slice(index + 1).find(c => !progress[c.id]?.completed) || calls.find(c => !progress[c.id]?.completed) || calls[(index + 1) % calls.length];
     selectCall(next.id);
-    detail.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   const visibleCalls = calls.filter(call => {
     const p = progress[call.id] || EMPTY;
     const matchesQuery = `${call.title} ${call.manager} ${call.specialty} ${call.topic}`.toLowerCase().includes(query.trim().toLowerCase());
-    return matchesQuery && call.rating >= minRating && call.duration >= minDuration && (manager === 'all' || call.manager === manager) && (filter === 'all' || (filter === 'todo' && !p.completed) || (filter === 'completed' && p.completed));
-  }).sort((a, b) => sort === 'rating' ? b.rating - a.rating : sort === 'shortest' ? a.duration - b.duration : sort === 'longest' ? b.duration - a.duration : calls.indexOf(a) - calls.indexOf(b));
+    return matchesQuery && (manager === 'all' || call.manager === manager) && (filter === 'all' || (filter === 'todo' && !p.completed) || (filter === 'completed' && p.completed));
+  });
 
   return <>
     <header className="app-header">
       <a className="brand" href="#main" aria-label="TargetOne home"><Target size={20} strokeWidth={1.8} /><span>Target<span className="brand-one">One</span></span></a>
-      <nav className="workspace-nav" aria-label="Workspace">
-        {['Routes', 'Users', 'AutoDialer', 'Analytics', 'Pipeline', 'Followup', 'Call History'].map(label => <span className="workspace-placeholder" key={label}>{label}</span>)}
-        <a className="nav-active" href="#main" aria-current="page">Training Calls</a>
-        <span className="workspace-placeholder secondary-nav">Customer Service</span>
-      </nav>
-      <div className="header-account"><span className="workspace-status"><i />Florida<ChevronDown size={11} /></span><span className="header-divider" /><span className="user-avatar">AG</span><span className="user-name">Adnan Goda</span></div>
+      <span className="app-section">Sales training</span>
     </header>
 
     <main id="main" className="page-shell">
-      <div className="breadcrumbs"><span>Workspace</span><ChevronRight size={12} /><span>Learning & development</span></div>
       <section className="page-heading" aria-labelledby="page-title">
-        <div><div className="heading-title"><h1 id="page-title">Training Calls</h1><span className="course-badge">SALES ONBOARDING</span></div><p>Listen to the experts. Find your approach. Make your next call count.</p></div>
-        <div className="heading-actions"><button className="text-button guide-button" onClick={() => guide.current?.showModal()}><CircleHelp size={16} />How it works</button><button className="button button-dark start-training-button" onClick={startTraining}><span className="start-play-icon" aria-hidden="true"><Play size={7} fill="currentColor" strokeWidth={0} /></span>{completed === 10 ? 'Revisit training' : totalListened > 0 ? 'Continue training' : 'Start training'}</button></div>
+        <div><h1 id="page-title">Training Calls</h1><p>Practice at your pace. Play the recording whenever you need context.</p></div>
       </section>
 
-      {completed === 10 && <div className="course-complete" role="status"><Trophy size={25} /><div><strong>You’re ready for your next conversation.</strong><p>All 10 demos completed. Your quiz average is {average}%. Revisit any call whenever you need a refresher.</p></div><span>10 / 10<CheckCheck size={18} /></span></div>}
-
-      <section className="stats-grid" aria-label="Your training statistics">
-        <div className="stat-card">
-          <h2 className="stat-label">Demos completed</h2>
-          <div className="stat-content"><div className="stat-copy">
-            <div className="stat-value-row"><div className="stat-value">{completed}<span> / 10</span></div><span className="stat-badge" aria-label={`${completed * 10}% of course completed`}><CircleCheck size={10} />{completed * 10}%</span></div>
-            <p className="stat-caption">of your training course</p>
-          </div><StatSparkline values={completedSeries} color="#a020e8" label="Cumulative completed demos in course order" /></div>
-        </div>
-        <div className="stat-card">
-          <h2 className="stat-label">Time listened</h2>
-          <div className="stat-content"><div className="stat-copy">
-            <div className="stat-value-row"><div className="stat-value">{Math.floor(totalListened / 60)}<span>m </span>{Math.floor(totalListened % 60)}<span>s</span></div><span className="stat-badge stat-badge-orange" aria-label={`${listenedPercent}% of recordings listened`}><Headphones size={10} />{listenedPercent}%</span></div>
-            <p className="stat-caption">of {Math.ceil(totalDuration / 60)} minutes of learning</p>
-          </div><StatSparkline values={listenedSeries} color="#ee7900" label="Cumulative listening time in course order" /></div>
-        </div>
-        <div className="stat-card">
-          <h2 className="stat-label">Quiz average</h2>
-          <div className="stat-content"><div className="stat-copy">
-            <div className="stat-value-row"><div className="stat-value">{average === null ? '—' : average}<span>{average !== null ? '%' : ''}</span></div>{scores.length > 0 && <span className="stat-badge"><ClipboardCheck size={10} />{scores.length} {scores.length === 1 ? 'quiz' : 'quizzes'}</span>}</div>
-            <p className="stat-caption">{scores.length ? 'across your answered demos' : 'Complete your first quiz'}</p>
-          </div><StatSparkline values={scores} maximum={100} color="#a020e8" label={scores.length ? 'Best quiz scores in course order' : 'No quiz scores yet'} /></div>
-        </div>
+      <section className="course-progress" aria-label="Your training progress">
+        <div className="course-progress-copy"><strong>{completed} of {calls.length} demos completed</strong>{average !== null && <span>Quiz average · {average}%</span>}</div>
+        <div className="course-progress-track" role="progressbar" aria-label="Course completion" aria-valuemin={0} aria-valuemax={calls.length} aria-valuenow={completed}><span style={{ width: `${completed / calls.length * 100}%` }} /></div>
       </section>
-
-      <div className="learning-strip">
-        <span className="learning-note"><span className="learning-icon"><Sparkles size={16} strokeWidth={1.5} /></span>A little listening. A lot of learning.</span>
-        <div className="learning-extras">
-          <div className="learning-steps"><span><i>1</i>Listen to the call</span><ChevronRight size={12} /><span><i>2</i>Complete the questionnaire</span><ChevronRight size={12} /><span><i>3</i>Build your confidence</span></div>
-          <button className="learning-guide" aria-label="How training works" title="How training works" onClick={() => guide.current?.showModal()}><Sparkles size={14} strokeWidth={1.5} /></button>
-        </div>
-      </div>
+      {completed === calls.length && <div className="course-complete" role="status"><Trophy size={24} /><div><strong>All demos completed</strong><p>Revisit any call or review your answers whenever you need a refresher.</p></div></div>}
 
       <div className="learning-layout">
         <aside className="library" aria-label="Training call library">
@@ -315,26 +209,11 @@ export default function App() {
               {query && <button aria-label="Clear search" onClick={() => setQuery('')}><X size={14} /></button>}
             </label>
             <div className="filter-pills library-filters" role="group" aria-label="Filter by review status">
-              {([['all', 'All'], ['todo', 'To review'], ['completed', 'Reviewed']] as const).map(([value, label]) => <button key={value} aria-pressed={filter === value} onClick={() => setFilter(value)} className={filter === value ? 'selected' : ''}>{label}</button>)}
+              {([['all', 'All'], ['todo', 'To do'], ['completed', 'Completed']] as const).map(([value, label]) => <button key={value} aria-pressed={filter === value} onClick={() => setFilter(value)} className={filter === value ? 'selected' : ''}>{label}</button>)}
             </div>
-            <details className="library-extra-filters">
-              <summary><span><SlidersHorizontal size={13} />More filters</span><span>{Number(manager !== 'all') + Number(minRating > 0) + Number(minDuration > 0) || ''}<ChevronDown size={13} /></span></summary>
-            <div className="filter-pills manager-filters" role="group" aria-label="Filter by manager">
-              <button className={manager === 'all' ? 'selected' : ''} aria-pressed={manager === 'all'} onClick={() => setManager('all')}>All managers</button>
-              {[...managers].sort((a, b) => ['zee', 'will', 'edrin'].indexOf(managerClass(a)) - ['zee', 'will', 'edrin'].indexOf(managerClass(b))).map(name => <button key={name} className={manager === name ? 'selected' : ''} aria-pressed={manager === name} onClick={() => setManager(name)}>{name}<span className="filter-count">{calls.filter(call => call.manager === name).length}</span></button>)}
-            </div>
-            <div className="library-criteria">
-              <div className="filter-pills" role="group" aria-label="Filter by rating">
-                {([[0, 'Any rating'], [8, '8+'], [6, '6+']] as const).map(([value, label]) => <button key={value} className={minRating === value ? 'selected' : ''} aria-pressed={minRating === value} onClick={() => setMinRating(value)}>{label}</button>)}
-              </div>
-              <div className="filter-pills" role="group" aria-label="Filter by recording length">
-                {([[0, 'Any length'], [60, '1m+'], [180, '3m+']] as const).map(([value, label]) => <button key={value} className={minDuration === value ? 'selected' : ''} aria-pressed={minDuration === value} onClick={() => setMinDuration(value)}>{label}</button>)}
-              </div>
-            </div>
-            </details>
-            <div className="library-sort-row">
-              <label className="select-wrap"><select aria-label="Sort calls" value={sort} onChange={e => setSort(e.target.value)}><option value="rating">Best examples first</option><option value="course">Course order</option><option value="longest">Longest first</option><option value="shortest">Shortest first</option></select><ChevronDown size={13} /></label>
-              <span className="library-result-count" role="status">{visibleCalls.length} of {calls.length}</span>
+            <div className="library-manager-row">
+              <label className="select-wrap"><select aria-label="Filter by manager" value={manager} onChange={event => setManager(event.target.value)}><option value="all">All managers</option>{managers.map(name => <option key={name} value={name}>{name}</option>)}</select><ChevronDown size={13} /></label>
+              <span className="library-result-count" role="status">{visibleCalls.length} {visibleCalls.length === 1 ? 'call' : 'calls'}</span>
             </div>
           </div>
 
@@ -346,28 +225,22 @@ export default function App() {
                 <button className="call-select" aria-current={selected ? 'true' : undefined} onClick={() => selectCall(call.id)}>
                   <div className="call-item-title"><span className="call-number">{calls.indexOf(call) + 1}</span><strong>{call.title}</strong></div>
                   <div className="call-description"><i className={`manager-dot ${managerClass(call.manager)}`} /><strong>{call.manager}</strong><span className="call-meta-dot">·</span><span className="call-specialty">{call.specialty}</span></div>
-                  <div className="call-item-meta"><span><Clock3 size={12} />{call.date}</span><span><Timer size={12} />{formatDuration(call.duration)}</span><span className={`call-rating ${call.rating >= 8 ? 'high-rating' : call.rating >= 6 ? 'mid-rating' : 'low-rating'}`} aria-label={`Manager rating ${call.rating.toFixed(1)} out of 10`}><TrendingUp size={12} />{call.rating.toFixed(1)}</span></div>
+                  <div className="call-item-meta"><span><Clock3 size={12} />{formatDuration(call.duration)}</span>{p.completed ? <span className="call-progress-label complete"><CircleCheck size={12} />Completed</span> : (p.answers.some(answer => answer >= 0) || p.reflection.trim()) && <span className="call-progress-label">In progress</span>}</div>
                 </button>
-                {p.completed && <span className="call-completed" role="img" aria-label="Demo completed" title="Demo completed"><CircleCheck size={13} fill="#16b34b" stroke="#fff" strokeWidth={2.5} /></span>}
               </div>;
-            }) : <div className="empty-state"><Search size={25} /><strong>No calls found</strong><p>{minDuration || minRating || query || manager !== 'all' ? 'Try a different search or filter.' : filter === 'completed' ? 'Your completed demos will appear here.' : 'Try a different search or filter.'}</p><button className="text-button" onClick={() => { setQuery(''); setFilter('all'); setManager('all'); setMinRating(0); setMinDuration(0); }}>Show all calls<ArrowRight size={13} /></button></div>}
+            }) : <div className="empty-state"><Search size={25} /><strong>No calls found</strong><p>{query || manager !== 'all' ? 'Try a different search or filter.' : filter === 'completed' ? 'Your completed demos will appear here.' : 'All demos are complete. Revisit any call to practice.'}</p><button className="text-button" onClick={() => { setQuery(''); setFilter('all'); setManager('all'); }}>Show all calls<ArrowRight size={13} /></button></div>}
           </div>
         </aside>
 
         <section className="call-detail" ref={detail} aria-label="Selected training call">
-          <div className="detail-header"><div className="detail-kicker"><span>Demo {String(index + 1).padStart(2, '0')} <span className="muted">/ 10</span></span><span className="kicker-dot">·</span><span className="lesson-level">{active.level}</span><span className={`lesson-status ${current.completed ? 'done' : ''}`}>{current.completed ? <><CircleCheck size={12} />Completed</> : quizUnlocked ? <><ClipboardCheck size={12} />Questionnaire ready</> : coveragePercent > 0 ? <><span className="live-dot" />In progress</> : <><span className="live-dot" />Not started</>}</span></div><div className="detail-title-row"><div><h2>{active.title}</h2><p className="detail-subtitle">{active.topic}</p></div><div className="rating-block" title="Illustrative manager rating for this sample call"><div className="rating-score"><Star size={15} strokeWidth={1.6} /><strong>{active.rating.toFixed(1)}</strong><span>/ 10</span></div><span>Manager rating</span></div></div><div className="call-information"><span className={`manager-avatar ${managerClass(active.manager)}`}>{active.manager[0]}</span><strong>{active.manager}</strong><span className="metadata-separator" /><span className="specialty-tag">{active.specialty}</span><span className="location"><MapPin size={12} />{active.location}</span></div></div>
-
-          <div className="lesson-tabs" role="tablist" aria-label="Demo learning steps">
-            <button id="listen-tab" role="tab" aria-selected={tab === 'listen'} aria-controls="listen-panel" tabIndex={tab === 'listen' ? 0 : -1} className={tab === 'listen' ? 'active' : ''} onClick={() => setTab('listen')} onKeyDown={event => { if (event.key === 'ArrowRight') { event.preventDefault(); setTab('quiz'); document.getElementById('quiz-tab')?.focus(); } }}>
-              <span className={`step-number ${quizUnlocked ? 'done' : ''}`}>{quizUnlocked ? <Check size={12} /> : '1'}</span>Listen to the call
-            </button>
-            <button id="quiz-tab" role="tab" aria-selected={tab === 'quiz'} aria-controls="quiz-panel" tabIndex={tab === 'quiz' ? 0 : -1} className={tab === 'quiz' ? 'active' : ''} onClick={openQuiz} onKeyDown={event => { if (event.key === 'ArrowLeft') { event.preventDefault(); setTab('listen'); document.getElementById('listen-tab')?.focus(); } }}>
-              <span className={`step-number ${current.completed ? 'done' : ''}`}>{current.completed ? <Check size={12} /> : '2'}</span>Questionnaire
-              {!quizUnlocked ? <LockKeyhole size={12} className="tab-lock" /> : !current.completed && <span className="tab-ready">Ready</span>}
-            </button>
+          <div className="detail-header">
+            <div className="detail-kicker"><span>Demo {String(index + 1).padStart(2, '0')} <span className="muted">/ {calls.length}</span></span><span className="kicker-dot">·</span><span className="lesson-level">{active.level}</span><span className={`lesson-status ${current.completed ? 'done' : ''}`}>{current.completed ? <><CircleCheck size={12} />Completed</> : answered > 0 ? 'In progress' : 'Not started'}</span></div>
+            <div className="detail-title-row"><div><h2 id="call-title" tabIndex={-1}>{active.title}</h2><p className="detail-subtitle">{active.topic}</p></div></div>
+            <div className="call-information"><span className={`manager-avatar ${managerClass(active.manager)}`}>{active.manager[0]}</span><strong>{active.manager}</strong><span className="metadata-separator" /><span className="specialty-tag">{active.specialty}</span><span className="location"><MapPin size={12} />{active.location}</span></div>
           </div>
 
           <div className="detail-body">
+            <div className="recording-heading"><span><Headphones size={14} />Call recording</span><span>Optional</span></div>
             <div className={`audio-player ${playing ? 'is-playing' : ''}`}>
               <audio
                 key={active.id} ref={audio} src={`${import.meta.env.BASE_URL}${active.audio.replace(/^\//, '')}`} preload="metadata"
@@ -378,14 +251,10 @@ export default function App() {
                   const resume = current.position < active.duration - 0.5 ? current.position : 0;
                   audio.current.currentTime = resume;
                   setTime(resume);
-                  if (playOnLoad.current) {
-                    playOnLoad.current = false;
-                    void audio.current.play().catch(() => setNotice('Press play to start the recording.'));
-                  }
                 }}
-                onPlay={() => { setPlaying(true); setPlaybackEnded(false); }}
+                onPlay={() => setPlaying(true)}
                 onPause={event => { recordPlayback(event.currentTarget); setPlaying(false); }}
-                onEnded={event => onPlaybackEnded(event.currentTarget)}
+                onEnded={event => { recordPlayback(event.currentTarget); setPlaying(false); }}
                 onSeeked={event => recordPlayback(event.currentTarget)}
                 onTimeUpdate={event => recordPlayback(event.currentTarget)}
                 onError={() => { setAudioError(true); setPlaying(false); }}
@@ -395,31 +264,18 @@ export default function App() {
                 <span className="player-timestamp" aria-label="Elapsed time">{formatTime(time)}</span>
                 <div className="waveform"><svg viewBox="0 0 576 32" preserveAspectRatio="none" aria-hidden="true">{Array.from({ length: 96 }, (_, i) => { const height = 4 + Math.abs(Math.sin(i * 2.37 + index) * Math.cos(i * 0.41)) * 24; return <rect key={i} x={i * 6 + 1} y={(32 - height) / 2} width="2.5" height={height} rx="1.25" fill={i / 96 < time / active.duration ? '#555557' : '#c8c8ca'} />; })}</svg><input type="range" aria-label="Seek recording" aria-valuetext={`${formatTime(time)} of ${formatTime(active.duration)}`} min={0} max={active.duration} step={0.1} value={time} onChange={e => seek(Number(e.target.value))} /></div>
                 <span className="player-timestamp player-duration" aria-label="Recording duration">{formatTime(active.duration)}</span>
-                <button className="stop-button" aria-label="Stop playback and return to start" title="Stop and return to start" onClick={() => { playOnLoad.current = false; audio.current?.pause(); seek(0); }}><X size={15} strokeWidth={1.6} /></button>
+                <button className="stop-button" aria-label="Stop playback and return to start" title="Stop and return to start" onClick={() => { audio.current?.pause(); seek(0); }}><X size={15} strokeWidth={1.6} /></button>
               </div>
             </div>
             <div className="player-controls"><div className="transport"><button aria-label="Rewind 10 seconds" onClick={() => seek(time - 10)}><RotateCcw size={16} /><span>10</span></button><button aria-label="Forward 10 seconds" onClick={() => seek(time + 10)}><RotateCw size={16} /><span>10</span></button></div><div className="audio-options"><label className="speed-select"><select aria-label="Playback speed" value={speed} onChange={e => { const value = Number(e.target.value); setSpeed(value); if (audio.current) { recordPlayback(audio.current); audio.current.playbackRate = value; } }}><option value="0.75">0.75×</option><option value="1">1× speed</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select><ChevronDown size={11} /></label><span className="control-divider" /><button className="volume-button" aria-label={muted ? 'Unmute recording' : 'Mute recording'} aria-pressed={muted} onClick={() => { setMuted(!muted); if (audio.current) audio.current.muted = !muted; }}>{muted ? <VolumeX size={15} /> : <Volume2 size={15} />}</button></div></div>
-            {audioError ? <div className="audio-error" role="alert"><Info size={14} /><span>The recording couldn’t play.</span><button onClick={() => { setAudioError(false); audio.current?.load(); }}>Reload audio</button></div> : <div className="audio-footnote"><span><Info size={11} />Sample recording · Fictional conversation</span><span className={quizUnlocked ? 'green' : ''}>{quizUnlocked ? <><CircleCheck size={12} />Listening complete</> : `${coveragePercent}% listened`}</span></div>}
+            {audioError ? <div className="audio-error" role="alert"><Info size={14} /><span>The recording couldn’t play.</span><button onClick={() => { setAudioError(false); audio.current?.load(); }}>Reload audio</button></div> : <p className="audio-footnote">Sample recording · Fictional conversation</p>}
 
-            {tab === 'listen' ? <div id="listen-panel" role="tabpanel" aria-labelledby="listen-tab">
-              <section className={`lesson-action ${quizUnlocked ? 'ready' : ''}`} aria-label="Next training step">
-                <div className="lesson-action-copy">
-                  <span className="lesson-action-label">{current.completed ? 'DEMO COMPLETE' : quizUnlocked ? 'NEXT · QUESTIONNAIRE' : 'STEP 1 OF 2 · LISTEN'}</span>
-                  <h3>{current.completed ? 'Ready for your next call' : quizUnlocked ? 'Put what you heard into practice' : playing ? 'Listen to the manager’s approach' : playbackEnded ? 'Finish the parts you haven’t heard' : 'Start with the recording'}</h3>
-                  <p>{current.completed ? `Best score: ${current.bestScore}%. Your answers and takeaway are saved.` : quizUnlocked ? '3 questions and a short takeaway. About 2 minutes.' : playbackEnded ? `${listeningRemaining}s of listening left to unlock your questions.` : 'Listen to 90% to unlock the questions. Your place is saved.'}</p>
-                  {!quizUnlocked && <div className="listening-meter" role="progressbar" aria-label="Listening progress" aria-valuenow={coveragePercent} aria-valuemin={0} aria-valuemax={100}><span style={{ width: `${coveragePercent}%` }} /></div>}
-                </div>
-                <div className="lesson-action-buttons">
-                  {current.completed ? <><button className="button button-dark" onClick={nextCall}>Next demo<ArrowRight size={14} /></button><button className="text-button" onClick={openQuiz}>Review answers</button></> : quizUnlocked ? <button className="button button-dark" onClick={openQuiz}>{submitted ? 'Review answers' : 'Take questionnaire'}<ArrowRight size={14} /></button> : <button className="button button-light" onClick={continueListening} disabled={playing}><Headphones size={14} />{playing ? 'Listening…' : coveragePercent > 0 ? 'Continue listening' : 'Play recording'}</button>}
-                </div>
-              </section>
-
-            </div> : <div id="quiz-panel" role="tabpanel" aria-labelledby="quiz-tab">
+            <section id="quiz-panel" aria-labelledby="questionnaire-title">
               <div className="questionnaire-heading">
-                <div><span className="questionnaire-eyebrow">CALL REVIEW</span><h3 ref={quizHeading} tabIndex={-1}>Questionnaire</h3><p>{active.questions.length} questions and a written takeaway.<br />Answer at least {Math.ceil(active.questions.length * 2 / 3)} questions correctly to complete this demo.</p></div>
-                {quizUnlocked && <button type="button" className="quiz-expand-all" onClick={() => setExpandedTasks(expandedTasks.length === totalTasks ? [] : Array.from({ length: totalTasks }, (_, i) => i))}>{expandedTasks.length === totalTasks ? 'Collapse all' : 'Expand all'}<ChevronDown size={13} className={expandedTasks.length === totalTasks ? 'is-expanded' : ''} /></button>}
+                <div><h3 id="questionnaire-title" ref={quizHeading} tabIndex={-1}>Questionnaire</h3><p>{active.questions.length} questions and a written takeaway. Answer at least {Math.ceil(active.questions.length * 2 / 3)} questions correctly to complete this demo.</p></div>
+                <button type="button" className="quiz-expand-all" onClick={() => setExpandedTasks(expandedTasks.length === totalTasks ? [] : Array.from({ length: totalTasks }, (_, i) => i))}>{expandedTasks.length === totalTasks ? 'Collapse all' : 'Expand all'}<ChevronDown size={13} className={expandedTasks.length === totalTasks ? 'is-expanded' : ''} /></button>
               </div>
-              {!quizUnlocked ? <div className="quiz-locked"><span><LockKeyhole size={28} /></span><h3>Listen to unlock the questionnaire</h3><p>Listen to at least 90% of the recording above, then come back to reflect on what you learned.</p><div className="locked-progress"><div style={{ width: `${coveragePercent}%` }} /></div><small>{coveragePercent}% of this call listened</small><button className="button button-dark" onClick={continueListening}><Headphones size={15} />Continue listening</button></div> : <form onSubmit={submitQuiz}>
+              <form onSubmit={submitQuiz}>
                 {submitted && <div className={`quiz-result review-summary ${result.passed ? 'passed' : 'retry'}`} role="status">
                   <ReviewRing label={result.score} progress={result.score} />
                   <div className="review-summary-copy"><strong>{result.passed ? 'Demo complete' : 'Review your answers'}</strong><p>{result.correct} of {result.total} correct · {result.score}% score</p><span>{result.passed ? 'Open any answer to revisit the feedback.' : 'Open the marked answers, then try again.'}</span></div>
@@ -463,22 +319,16 @@ export default function App() {
                   </QuestionnaireTask>
                 </div>
                 <p className="questionnaire-save-note"><CheckCheck size={13} />{saveError ? 'Available for this session' : 'Your answers are saved as you go'}</p>
-                <details className="confidence-details" key={`confidence-${activeId}`}>
-                  <summary>How confident do you feel?<span>Optional<ChevronDown size={14} /></span></summary>
-                  <section className="confidence-section"><div><strong>How confident would you feel handling this call?</strong><span>Just for you · Not scored</span></div><div className="confidence-options">{[1, 2, 3, 4, 5].map(value => <button type="button" key={value} aria-label={`Confidence ${value} of 5`} aria-pressed={current.confidence === value} className={current.confidence === value ? 'selected' : ''} onClick={() => update(activeId, { confidence: value })}>{value}</button>)}</div><div className="confidence-labels"><span>Still practicing</span><span>Ready to try</span></div></section>
-                </details>
                 {formError && <p className="form-error" role="alert"><Info size={15} />{formError}</p>}
-                <div className="quiz-actions">{submitted ? <><button type="button" className="text-button" onClick={retryQuiz}><RotateCcw size={14} />{result.score < 100 ? 'Retry missed questions' : 'Review answers again'}</button>{result.passed && <button type="button" className="button button-dark" onClick={nextCall}>{completed === 10 ? 'Explore the calls' : 'Continue to next demo'}<ArrowRight size={15} /></button>}</> : <><span>{answered === totalTasks ? 'All set. Submit when you’re ready.' : `${answered} of ${totalTasks} answered`}</span><button type="submit" className="button button-dark">Submit questionnaire<ArrowRight size={15} /></button></>}</div>
-              </form>}
-            </div>}
+                <div className="quiz-actions">{submitted ? <><button type="button" className="text-button" onClick={retryQuiz}><RotateCcw size={14} />{result.score < 100 ? 'Retry missed questions' : 'Review answers again'}</button>{result.passed && <button type="button" className="button button-dark" onClick={nextCall}>{completed === calls.length ? 'Explore the calls' : 'Continue to next demo'}<ArrowRight size={15} /></button>}</> : <><span>{answered === totalTasks ? 'All set. Submit when you’re ready.' : `${answered} of ${totalTasks} answered`}</span><button type="submit" className="button button-dark">Submit questionnaire<ArrowRight size={15} /></button></>}</div>
+              </form>
+            </section>
           </div>
-          <footer className="detail-footer"><div className="previous-next"><button aria-label="Previous demo" disabled={index === 0} onClick={() => selectCall(calls[index - 1].id)}><ChevronLeft size={15} /><span>Previous</span></button><span>{index + 1} / 10</span><button aria-label="Next demo" disabled={index === calls.length - 1} onClick={() => selectCall(calls[index + 1].id)}><span>Next demo</span><ChevronRight size={15} /></button></div></footer>
+          <footer className="detail-footer"><div className="previous-next"><button aria-label="Previous demo" disabled={index === 0} onClick={() => selectCall(calls[index - 1].id)}><ChevronLeft size={15} /><span>Previous</span></button><span>{index + 1} / {calls.length}</span><button aria-label="Next demo" disabled={index === calls.length - 1} onClick={() => selectCall(calls[index + 1].id)}><span>Next demo</span><ChevronRight size={15} /></button></div></footer>
         </section>
       </div>
       <footer className="page-footer"><span><Target size={14} />Better conversations start with practice.</span><span><span className="local-save-dot" />{saveError ? 'Browser storage unavailable. Keep this tab open to preserve progress.' : 'Progress saved on this browser'}</span></footer>
     </main>
 
-    {notice && <div className="toast" role="status"><CircleCheck size={16} />{notice}</div>}
-    <dialog className="guide-dialog" ref={guide} onClick={event => { if (event.target === event.currentTarget) guide.current?.close(); }}><button className="dialog-close" aria-label="Close course guide" onClick={() => guide.current?.close()}><X size={20} /></button><span className="guide-illustration"><Headphones size={32} /></span><span className="section-eyebrow">YOUR FIRST 10 CONVERSATIONS</span><h2>Listen. Reflect. Get ready.</h2><p className="guide-intro">A little practice before the real thing. Work through the demos at your own pace.</p><ol><li><span>01</span><div><strong>Listen with intention</strong><p>Play each demo and notice the techniques the manager uses. Listen to 90% to unlock the questions.</p></div></li><li><span>02</span><div><strong>Make the learning stick</strong><p>Answer three questions and write a takeaway. Get at least two answers right to complete the demo. You can retry anytime.</p></div></li><li><span>03</span><div><strong>Build your own approach</strong><p>Complete all 10 demos and revisit any call for more practice. Your progress and notes stay in this browser.</p></div></li></ol><div className="guide-note"><Info size={16} /><span>This preview uses fictional, voice-generated sample conversations. Replace them with your team’s recordings for live onboarding.</span></div><button className="button button-dark" onClick={() => { guide.current?.close(); startTraining(); }}>Let’s get started<ArrowRight size={15} /></button></dialog>
   </>;
 }

@@ -25,19 +25,19 @@ Vite's `/calls/` base path applies to scripts, styles, the favicon, and recordin
 
 ## Training flow
 
-- 10 fictional, voice-generated demo calls with questionnaires.
-- Listen to at least 90% of each recording to unlock its questionnaire. Finishing the recording opens the questionnaire automatically once this threshold is met. Playback ranges are captured from the browser, so pausing, replaying, changing speed, and returning later preserve listening progress. Seeking or replaying the same segment does not add duplicate credit.
+- 10 fictional, voice-generated demo calls, shown in demo order.
+- Questionnaires are available immediately. New visitors start on demo 1 with the first question expanded; returning visitors resume their saved demo and next unanswered question.
+- Listening is optional. The recording stays above the questions, with seeking, speed, and volume controls. Playing or finishing it does not interrupt the questionnaire.
 - Each questionnaire contains three multiple-choice questions and a required written takeaway. Two correct answers complete the demo; missed questions can be retried.
-- Search, manager filters, sorting, playback speed, and audio seeking are available.
-- Answers, feedback, notes, playback position, and progress are saved in this browser using local storage. There is no server or shared employee reporting yet. Use the same browser and local URL to resume saved progress.
-- The surrounding workspace navigation is visual context for this standalone preview.
+- Search, manager filters, and completion filters help find a call. Course progress and quiz average summarize results.
+- Answers, feedback, notes, playback position, and progress are saved in this browser using local storage. There is no server or shared employee reporting. Use the same browser and URL to resume saved progress.
 
 ## Replace sample recordings
 
-Edit `src/calls.json` for the calls and questionnaires. The source transcripts are retained for regenerating sample audio and are not displayed in the app. Replace WAV files under `public/audio/`, and update the matching audio path, duration in seconds, and each transcript line's `at` timestamp. Each question's `correct` value is the zero-based index of its correct option. The current course is designed for 10 demos with three scored questions each.
+Edit `src/calls.json` for the calls and questionnaires. Source transcripts are retained for regenerating sample audio and are not displayed in the app. Replace WAV files under `public/audio/`, and update the audio path and duration in seconds. Each question's `correct` value is the zero-based index of its correct option. The course currently contains 10 demos with three scored questions each.
 
 The sample recordings can be regenerated on macOS with `python3 scripts/generate-audio.py`, using the local Daniel and Samantha voices.
 
-## Recovery status
+## Verification
 
-Resumed after the interrupted September 22 session. Finished the responsive styling, resolved the TypeScript build failure, and fixed submitted questionnaire feedback not restoring after reload. Playback progress now merges ranges in timestamp order, including when replaying earlier sections. A prominent next-step panel links listening to its questionnaire; advanced filters are expandable. Automated React/DOM tests cover playback completion, quiz submission, validation, retries, and restoration across reloads. These tests simulate media events rather than decode audio. All 10 audio durations and transcript timestamps were verified. A full interactive browser walkthrough remains unverified because computer access to Chrome was not approved.
+Automated React/DOM tests cover immediate questionnaire access, submission without playback, validation, retries, optional playback, call navigation, and progress restoration. Media events are simulated rather than decoded. `node scripts/check-pages-build.mjs` verifies production asset paths and sample recordings after building.

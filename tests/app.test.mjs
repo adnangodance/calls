@@ -105,24 +105,28 @@ async function submit() {
   await interact(() => document.querySelector('#quiz-panel form').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true })));
 }
 
-test('every recording resolves under the GitHub Pages project path', async () => {
+test('every demo opens its questionnaire immediately and resolves its recording under the Pages path', async () => {
   await mount();
   for (const [index, call] of calls.entries()) {
     assert.equal(document.querySelector('audio').src, `http://localhost/calls${call.audio}`);
+    assert.equal(document.querySelector('audio').paused, true);
+    assert.ok(document.querySelector('#quiz-panel form'));
+    assert.equal(document.getElementById('quiz-task-0-body').hidden, false);
+    assert.equal(document.querySelector('input[type=radio]').disabled, false);
     if (index < calls.length - 1) await interact(() => button('Next demo').click());
   }
 });
 
-test('finishing playback opens the questionnaire, accepts answers, and restores the result', async () => {
+test('the first questionnaire can be completed without listening and its result survives reload', async () => {
   await mount();
-  document.querySelector('audio').playbackRate = 2;
-  await finish();
-  assert.equal(document.getElementById('quiz-tab').getAttribute('aria-selected'), 'true');
+  assert.equal(saved().activeId, first.id);
+  assert.equal(document.querySelector('.call-select').getAttribute('aria-current'), 'true');
+  assert.deepEqual([...document.querySelectorAll('.call-number')].map(node => Number(node.textContent)), calls.map((_, index) => index + 1));
   assert.ok(document.querySelector('#quiz-panel form'));
-  assert.equal(document.activeElement, document.querySelector('.questionnaire-heading h3'));
   await answer();
   await submit();
   assert.equal(saved().progress[first.id].completed, true);
+  assert.deepEqual(saved().progress[first.id].coverage, []);
   assert.equal(saved().progress[first.id].bestScore, 100);
   assert.match(document.querySelector('.quiz-result').textContent, /Demo complete/);
   assert.equal(document.querySelectorAll('.answer-review-card .review-badge.is-correct').length, first.questions.length);
@@ -133,16 +137,16 @@ test('finishing playback opens the questionnaire, accepts answers, and restores 
 
   await unmount();
   await mount({}, true);
-  await interact(() => document.getElementById('quiz-tab').click());
   assert.match(document.querySelector('.quiz-result').textContent, /100%/);
   assert.equal(document.getElementById('takeaway').value, 'Ask a clarifying question before offering a solution.');
   assert.ok([...document.querySelectorAll('#quiz-panel input')].every(input => input.disabled));
   await interact(() => button('Continue to next demo').click());
   assert.equal(saved().activeId, calls[1].id);
-  assert.equal(document.getElementById('listen-tab').getAttribute('aria-selected'), 'true');
+  assert.ok(document.querySelector('#quiz-panel form'));
+  assert.equal(document.getElementById('quiz-task-0-body').hidden, false);
 });
 
-test('listening across reloads merges played ranges and unlocks on the final event', async () => {
+test('optional listening resumes across reloads and records the final playback event', async () => {
   await mount();
   const audio = document.querySelector('audio');
   const half = first.duration / 2;
@@ -162,22 +166,35 @@ test('listening across reloads merges played ranges and unlocks on the final eve
   assert.ok(document.querySelector('#quiz-panel form'));
 });
 
-test('seeking to the end gives a clear resume action without crediting skipped audio', async () => {
+test('finishing or skipping audio leaves the active question and answer in place', async () => {
   await mount();
+  const radio = document.querySelector(`input[name="question-${first.id}-0"][value="${first.questions[0].correct}"]`);
+  await interact(() => { radio.focus(); radio.click(); });
   await finish([[0, 5], [first.duration - 1, first.duration]]);
-  assert.equal(document.getElementById('listen-tab').getAttribute('aria-selected'), 'true');
-  assert.match(document.querySelector('.lesson-action').textContent, /Finish the parts you haven’t heard/);
-  assert.equal(document.querySelector('#quiz-panel form'), null);
-  await interact(() => button('Continue listening').click());
-  assert.equal(document.querySelector('audio').currentTime, 5);
-  assert.equal(document.querySelector('audio').paused, false);
-  await finish([[5, first.duration]]);
-  assert.ok(document.querySelector('#quiz-panel form'), JSON.stringify({ progress: saved().progress[first.id], activeId: saved().activeId, tab: document.getElementById('quiz-tab').getAttribute('aria-selected'), panel: document.querySelector('.quiz-locked')?.textContent }));
+  assert.ok(document.querySelector('#quiz-panel form'));
+  assert.equal(document.activeElement, radio);
+  assert.equal(radio.checked, true);
+  assert.deepEqual(saved().progress[first.id].coverage, [[0, 5], [first.duration - 1, first.duration]]);
+  await finish();
+  assert.equal(document.activeElement, radio);
+  assert.equal(saved().progress[first.id].answers[0], first.questions[0].correct);
+});
+
+test('returning to an unfinished demo resumes the next unanswered question', async () => {
+  await mount();
+  await interact(() => document.querySelector(`input[name="question-${first.id}-0"][value="${first.questions[0].correct}"]`).click());
+  await interact(() => button('Next demo').click());
+  await interact(() => button('Previous demo').click());
+  assert.equal(document.getElementById('quiz-task-0-body').hidden, true);
+  assert.equal(document.getElementById('quiz-task-1-body').hidden, false);
+  await unmount();
+  await mount({}, true);
+  assert.equal(document.getElementById('quiz-task-1-body').hidden, false);
+  assert.equal(saved().progress[first.id].answers[0], first.questions[0].correct);
 });
 
 test('incomplete answers get focused validation and a failed attempt can be retried', async () => {
   await mount();
-  await finish();
   await interact(() => document.getElementById('quiz-task-0-heading').click());
   assert.equal(document.getElementById('quiz-task-0-body').hidden, true);
   await submit();
@@ -199,7 +216,6 @@ test('incomplete answers get focused validation and a failed attempt can be retr
 
 test('task navigation preserves answers and reveals a missing takeaway on submit', async () => {
   await mount();
-  await finish();
   assert.match(document.querySelector('.task-list-heading').textContent, /4 tasks remaining/);
   for (let index = 0; index < first.questions.length; index++) {
     assert.equal(document.getElementById(`quiz-task-${index}-body`).hidden, false);
@@ -221,7 +237,6 @@ test('task navigation preserves answers and reveals a missing takeaway on submit
 
 test('previously submitted questionnaires stay available with incomplete legacy listening data', async () => {
   await mount({ [first.id]: { coverage: [[0, 1]], answers: first.questions.map(question => question.correct), reflection: 'Saved takeaway.', bestScore: 100, completed: true, submitted: true } });
-  await interact(() => document.getElementById('quiz-tab').click());
   assert.ok(document.querySelector('#quiz-panel form'));
   assert.match(document.querySelector('.quiz-result').textContent, /Demo complete/);
 });

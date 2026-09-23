@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mergeCoverage, mergePlayedRanges, firstUnplayedPosition, listenedSeconds, canTakeQuiz, gradeQuiz, sanitizeProgress } from '../src/progress.mjs';
+import { mergeCoverage, mergePlayedRanges, listenedSeconds, gradeQuiz, sanitizeProgress } from '../src/progress.mjs';
 
 test('replaying audio does not count the same segment twice', () => {
   let ranges = mergeCoverage([], 0, 20, 100);
@@ -16,30 +16,14 @@ test('revisiting earlier audio fills gaps instead of losing listening progress',
   assert.deepEqual(restored.call.coverage, [[0, 100]]);
 });
 
-test('skipping to the end does not unlock the questionnaire', () => {
-  const coverage = mergeCoverage([[0, 5]], 95, 100, 100);
-  assert.equal(canTakeQuiz({ coverage }, 100), false);
-  assert.equal(canTakeQuiz({ coverage: [[0, 90]] }, 100), true);
-});
-
 test('native played ranges merge with earlier sessions without double counting', () => {
   const coverage = mergePlayedRanges([[0, 40]], [[20, 60], [60, 100]], 100);
   assert.deepEqual(coverage, [[0, 100]]);
-  assert.equal(canTakeQuiz({ coverage }, 100), true);
-  assert.equal(firstUnplayedPosition([[0, 25], [80, 100]], 100), 25);
-  assert.equal(firstUnplayedPosition([[50, 100]], 100), 0);
-});
-
-test('completed or submitted quizzes do not relock after restoring older progress', () => {
-  assert.equal(canTakeQuiz({ completed: true, coverage: [] }, 100), true);
-  assert.equal(canTakeQuiz({ submitted: true, coverage: [] }, 100), true);
-  assert.equal(canTakeQuiz({ coverage: [[0, 5]] }, 100), false);
 });
 
 test('coverage is bounded to the recording and rejects invalid time values', () => {
   assert.deepEqual(mergeCoverage([], -5, 120, 100), [[0, 100]]);
   assert.deepEqual(mergeCoverage([], 0, NaN, 100), []);
-  assert.equal(canTakeQuiz({}, 0), false);
 });
 
 test('quiz requires two correct answers and does not count unanswered questions', () => {
