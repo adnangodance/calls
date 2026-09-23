@@ -182,7 +182,7 @@ test('the first questionnaire can be completed without listening and its result 
   await mount();
   assert.equal(saved().activeId, first.id);
   assert.equal(document.querySelector('.call-select').getAttribute('aria-current'), 'true');
-  assert.deepEqual([...document.querySelectorAll('.call-number')].map(node => Number(node.textContent)), calls.map((_, index) => index + 1));
+  assert.deepEqual([...document.querySelectorAll('.call-item-title strong')].map(node => node.textContent), calls.map(call => call.title));
   assert.ok(document.querySelector('#quiz-panel form'));
   await answer();
   await submit();
@@ -303,7 +303,7 @@ test('search and filters keep the step list completion count and selection intac
   assert.match(document.querySelector('.library-queue-heading').textContent, /9 demos remaining/);
   await interact(() => button('Completed').click());
   assert.equal(document.querySelectorAll('.call-select').length, 1);
-  assert.equal(document.querySelectorAll('.call-step.is-complete').length, 1);
+  assert.equal(document.querySelectorAll('.call-lesson-icon.is-complete').length, 1);
   assert.match(document.querySelector('.call-row-state').textContent, /Completed/);
   await interact(() => button('All').click());
 

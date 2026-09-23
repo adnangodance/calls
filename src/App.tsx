@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleDashed, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Sparkles, Star, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleDashed, CirclePlay, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Sparkles, Star, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
 import callData from './calls.json';
 import { gradeQuiz, listenedSeconds, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
 
@@ -344,9 +344,8 @@ export default function App() {
               const state = p.completed ? 'Completed' : p.submitted ? 'Review answers' : responses === responseTotal ? 'Ready to submit' : responses > 0 ? `${responses} of ${responseTotal} answered` : '';
               return <li className={`call-item ${selected ? 'active' : ''} ${p.completed ? 'is-complete' : ''}`} key={call.id} ref={selected ? activeDemo : null}>
                 <button className="call-select" aria-current={selected ? 'true' : undefined} onClick={() => selectCall(call.id)}>
-                  <span className={`call-step ${selected || responses > 0 ? 'has-progress' : ''} ${p.completed ? 'is-complete' : ''}`} aria-hidden="true">
-                    <svg viewBox="0 0 24 24"><circle className="call-step-track" cx="12" cy="12" r="9" /><circle className="call-step-fill" cx="12" cy="12" r="9" pathLength="100" strokeDasharray={`${p.completed ? 100 : responses / responseTotal * 100} 100`} /></svg>
-                    <span className="call-number">{calls.indexOf(call) + 1}</span>{p.completed && <Check size={11} strokeWidth={2.2} />}
+                  <span className={`call-lesson-icon ${p.completed ? 'is-complete' : ''}`} aria-hidden="true">
+                    {p.completed ? <CircleCheck size={15} strokeWidth={1.7} /> : <CirclePlay size={15} strokeWidth={1.6} />}
                   </span>
                   <span className="call-row-copy">
                     <span className="call-item-title"><strong>{call.title}</strong><span className="call-duration"><Clock3 size={11} />{formatDuration(call.duration)}</span></span>
