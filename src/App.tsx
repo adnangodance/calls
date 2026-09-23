@@ -43,9 +43,10 @@ function ScoreGauge({ score, demo }: { score?: number; demo: number }) {
   const arc = 'M46.16 119.84 A62 62 0 1 1 133.84 119.84';
   const angle = (135 + (score ?? 0) * 2.7) * Math.PI / 180;
   const status = score === undefined ? 'unscored' : score >= 67 ? 'passed' : 'retry';
-  return <div className={`score-gauge ${status}`} role="img" aria-label={score === undefined ? `Demo ${demo} has no quiz score yet` : `Best quiz score for demo ${demo}: ${score} out of 100. ${status === 'passed' ? 'Passed' : 'Try again'}.`}>
+  const tone = score === undefined ? 'unscored' : score === 100 ? 'high' : score >= 67 ? 'medium' : 'low';
+  return <div className={`score-gauge ${status} score-${tone}`} role="img" aria-label={score === undefined ? `Demo ${demo} has no quiz score yet` : `Best quiz score for demo ${demo}: ${score} out of 100. ${status === 'passed' ? 'Passed' : 'Try again'}.`}>
     <svg viewBox="0 0 180 130" aria-hidden="true">
-      <defs><linearGradient id={gradientId} x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stopColor="#ffa928" /><stop offset="55%" stopColor="#ff713d" /><stop offset="100%" stopColor="#f44f82" /></linearGradient></defs>
+      <defs><linearGradient id={gradientId} x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stopColor="var(--gauge-start)" /><stop offset="55%" stopColor="var(--gauge-middle)" /><stop offset="100%" stopColor="var(--gauge-end)" /></linearGradient></defs>
       <path className="score-gauge-halo" d={arc} />
       <path className="score-gauge-track" d={arc} />
       <path className="score-gauge-fill" d={arc} pathLength="100" stroke={`url(#${gradientId})`} strokeDasharray={`${score ?? 0} 100`} />
@@ -394,7 +395,7 @@ export default function App() {
                 {submitted && <div className={`quiz-result review-summary ${result.passed ? 'passed' : 'retry'}`} role="status">
                   <ReviewRing label={result.score} progress={result.score} />
                   <div className="review-summary-copy"><strong>{result.passed ? 'Demo complete' : 'Review your answers'}</strong><p>{result.correct} of {result.total} correct · {result.score}% score</p><span>{result.passed ? 'Open any answer to revisit the feedback.' : 'Open the marked answers, then try again.'}</span></div>
-                  {result.passed && <span className="review-badge is-correct">Passed</span>}
+                  {result.score < 100 ? <button type="button" className="button button-dark review-retry-button" onClick={retryQuiz}><RotateCcw size={14} aria-hidden="true" />Retry missed questions</button> : <span className="review-badge is-correct">Passed</span>}
                 </div>}
                 <div className={`questionnaire-tasks ${submitted ? 'answer-review-list' : ''}`}>
                   {!submitted && <p className="questionnaire-queue-heading" role="status">{answered === totalTasks ? <CircleCheck size={14} aria-hidden="true" /> : <CircleDashed size={14} aria-hidden="true" />}<span>{answered === totalTasks ? 'All questions answered' : `${totalTasks - answered} ${totalTasks - answered === 1 ? 'question' : 'questions'} remaining`}</span></p>}
@@ -435,7 +436,7 @@ export default function App() {
               </form>
             </section>
           </div>
-          <footer className="detail-footer">{submitted && result.score < 100 && <button type="button" className="button button-dark footer-retry" onClick={retryQuiz}><RotateCcw size={14} aria-hidden="true" />Retry missed questions</button>}<div className="previous-next"><button aria-label="Previous demo" disabled={index === 0} onClick={() => selectCall(calls[index - 1].id)}><ChevronLeft size={15} /><span>Previous</span></button><span>{index + 1} / {calls.length}</span><button aria-label="Next demo" disabled={index === calls.length - 1} onClick={() => selectCall(calls[index + 1].id)}><span>Next demo</span><ChevronRight size={15} /></button></div></footer>
+          <footer className="detail-footer"><div className="previous-next"><button aria-label="Previous demo" disabled={index === 0} onClick={() => selectCall(calls[index - 1].id)}><ChevronLeft size={15} /><span>Previous</span></button><span>{index + 1} / {calls.length}</span><button aria-label="Next demo" disabled={index === calls.length - 1} onClick={() => selectCall(calls[index + 1].id)}><span>Next demo</span><ChevronRight size={15} /></button></div></footer>
         </section>
       </div>
       <footer className="page-footer"><span><Target size={14} />Better conversations start with practice.</span><span><span className="local-save-dot" />{saveError ? 'Browser storage unavailable. Keep this tab open to preserve progress.' : 'Progress saved on this browser'}</span></footer>

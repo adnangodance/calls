@@ -341,12 +341,12 @@ test('incomplete answers get focused validation and a failed attempt can be retr
   assert.equal(saved().progress[first.id].completed, false);
   assert.match(document.querySelector('.quiz-result').textContent, /Review your answers/);
   assert.equal(document.querySelectorAll('.answer-review-card .review-badge.needs-review').length, first.questions.length - 1);
-  const retry = document.querySelector('.detail-footer .footer-retry');
-  assert.equal(document.querySelector('.quiz-result button'), null);
+  const retry = document.querySelector('.quiz-result .review-retry-button');
+  assert.equal(document.querySelector('.detail-footer .footer-retry'), null);
   assert.ok(document.querySelector('.detail-footer .previous-next'));
   assert.equal(retry.textContent, 'Retry missed questions');
   await interact(() => retry.click());
-  assert.equal(document.querySelector('.footer-retry'), null);
+  assert.equal(document.querySelector('.review-retry-button'), null);
   assert.equal(document.querySelector('.answer-review-card'), null);
   assert.deepEqual(saved().progress[first.id].answers, [first.questions[0].correct, -1, -1]);
   assert.equal(document.activeElement.name, `question-${first.id}-1`);
