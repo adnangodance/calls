@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Sparkles, Star, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleDashed, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Sparkles, Star, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
 import callData from './calls.json';
 import { gradeQuiz, listenedSeconds, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
 
@@ -11,7 +11,6 @@ const calls = callData as Call[];
 const EMPTY: Progress = { coverage: [], position: 0, answers: [], reflection: '', confidence: 0, completed: false };
 const STORAGE_KEY = 'targetone-training-v1';
 const managers = [...new Set(calls.map(c => c.manager))];
-const modules = [...new Set(calls.map(call => call.level))];
 const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
 const formatDuration = (seconds: number) => `${Math.floor(seconds / 60)}m ${String(Math.floor(seconds % 60)).padStart(2, '0')}s`;
 const managerClass = (manager: string) => manager.startsWith('Zee') ? 'zee' : manager.startsWith('Edrin') ? 'edrin' : 'will';
@@ -90,7 +89,6 @@ export default function App() {
   const [initial] = useState(readSaved);
   const [progress, setProgress] = useState<Record<string, Progress>>(initial.progress);
   const [activeId, setActiveId] = useState(calls.some(c => c.id === initial.activeId) ? initial.activeId! : calls[0].id);
-  const [expandedModule, setExpandedModule] = useState<string | null>(() => calls.find(call => call.id === activeId)!.level);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [manager, setManager] = useState('all');
@@ -111,7 +109,7 @@ export default function App() {
   });
   const audio = useRef<HTMLAudioElement>(null);
   const detail = useRef<HTMLElement>(null);
-  const demoList = useRef<HTMLDivElement>(null);
+  const demoList = useRef<HTMLOListElement>(null);
   const activeDemo = useRef<HTMLLIElement>(null);
   const guide = useRef<HTMLDialogElement>(null);
   const quizHeading = useRef<HTMLHeadingElement>(null);
@@ -137,21 +135,19 @@ export default function App() {
   useEffect(() => {
     const list = demoList.current;
     const item = activeDemo.current;
-    if (!list || !item || item.closest('[hidden]')) return;
+    if (!list || !item) return;
     const listBounds = list.getBoundingClientRect();
     const itemBounds = item.getBoundingClientRect();
     // Reveal the selected row inside the library without moving the page.
     if (itemBounds.top < listBounds.top) list.scrollTop += itemBounds.top - listBounds.top - 6;
     else if (itemBounds.bottom > listBounds.bottom) list.scrollTop += itemBounds.bottom - listBounds.bottom + 6;
-  }, [activeId, expandedModule, filter, manager, query]);
+  }, [activeId, filter, manager, query]);
 
   function update(id: string, patch: Partial<Progress>) {
     setProgress(previous => ({ ...previous, [id]: { ...EMPTY, ...previous[id], ...patch } }));
   }
 
   function selectCall(id: string) {
-    const call = calls.find(item => item.id === id)!;
-    setExpandedModule(call.level);
     setTab('quiz');
     requestAnimationFrame(() => {
       document.getElementById('call-title')?.focus({ preventScroll: true });
@@ -164,6 +160,7 @@ export default function App() {
     setAudioError(false);
     setTime(0);
     const saved = progress[id];
+    const call = calls.find(item => item.id === id)!;
     const firstUnanswered = call.questions.findIndex((_, i) => !(saved?.answers[i] >= 0));
     setExpandedTasks(saved?.submitted ? [] : [firstUnanswered < 0 ? call.questions.length : firstUnanswered]);
     setActiveId(id);
@@ -258,7 +255,6 @@ export default function App() {
     const matchesQuery = `${call.title} ${call.manager} ${call.specialty} ${call.topic}`.toLowerCase().includes(query.trim().toLowerCase());
     return matchesQuery && (manager === 'all' || call.manager === manager) && (filter === 'all' || (filter === 'todo' && !p.completed) || (filter === 'completed' && p.completed));
   });
-  const isFiltering = Boolean(query.trim()) || manager !== 'all' || filter !== 'all';
 
   return <>
     <header className="app-header">
@@ -322,11 +318,6 @@ export default function App() {
       <div className="learning-layout">
         <aside className="library" aria-label="Training call library">
           <div className="library-section-heading"><h2>Call library</h2><span>{calls.length} demos</span></div>
-          <div className="library-course">
-          <div className="library-course-heading">
-            <span className="library-course-icon" aria-hidden="true"><Headphones size={18} strokeWidth={1.7} /></span>
-            <div><h3>Sales conversations</h3><p role="status"><CircleCheck size={11} aria-hidden="true" />{completed} / {calls.length} demos completed</p></div>
-          </div>
           <div className="library-tools">
             <label className="search-box">
               <Search size={16} />
@@ -343,45 +334,30 @@ export default function App() {
           </div>
 
           <div className="call-list-panel">
-          <div className="call-list" ref={demoList}>
-            {visibleCalls.length ? modules.map((level, moduleIndex) => {
-              const moduleCalls = visibleCalls.filter(call => call.level === level);
-              if (!moduleCalls.length) return null;
-              const allModuleCalls = calls.filter(call => call.level === level);
-              const moduleCompleted = allModuleCalls.filter(call => progress[call.id]?.completed).length;
-              const expanded = isFiltering || expandedModule === level;
-              const moduleId = `call-module-${moduleIndex}`;
-              const heading = <><span className="module-title"><span>Module {moduleIndex + 1}:</span> {level}</span><span className="module-count" aria-label={isFiltering ? `${moduleCalls.length} matching demos` : `${moduleCompleted} of ${allModuleCalls.length} demos completed`}>{isFiltering ? `${moduleCalls.length} ${moduleCalls.length === 1 ? 'demo' : 'demos'}` : `${moduleCompleted}/${allModuleCalls.length}`}</span></>;
-              return <section className={`call-module ${expanded ? 'is-expanded' : ''} ${active.level === level ? 'is-current' : ''}`} key={level}>
-                <h3 className="module-heading" id={`${moduleId}-heading`}>
-                  {isFiltering ? <span className="module-label">{heading}</span> : <button className="module-toggle" aria-expanded={expanded} aria-controls={moduleId} onClick={() => setExpandedModule(expanded ? null : level)}>{heading}<ChevronDown size={13} aria-hidden="true" /></button>}
-                </h3>
-                <ol className="module-calls" id={moduleId} aria-labelledby={`${moduleId}-heading`} hidden={!expanded}>
-                  {moduleCalls.map(call => {
-                    const p = progress[call.id] || EMPTY;
-                    const selected = call.id === activeId;
-                    const responses = call.questions.filter((_, i) => p.answers[i] >= 0).length + Number(Boolean(p.reflection.trim()));
-                    const responseTotal = call.questions.length + 1;
-                    const state = p.completed ? '' : p.submitted ? 'Review answers' : responses === responseTotal ? 'Ready to submit' : responses > 0 ? `${responses} of ${responseTotal} answered` : '';
-                    return <li className={`call-item ${selected ? 'active' : ''} ${p.completed ? 'is-complete' : ''}`} key={call.id} ref={selected ? activeDemo : null}>
-                      <button className="call-select" aria-current={selected ? 'true' : undefined} onClick={() => selectCall(call.id)}>
-                        <span className="call-lesson-icon" aria-hidden="true"><Play size={10} strokeWidth={1.6} /></span>
-                        <span className="call-row-copy">
-                          <span className="call-item-title"><strong>{call.title}</strong></span>
-                          <span className="call-row-meta"><span>Demo <span className="call-number">{String(calls.indexOf(call) + 1).padStart(2, '0')}</span></span><span className="call-duration"><Clock3 size={10} aria-hidden="true" />{formatDuration(call.duration)}</span>{selected && <span className="call-current-label">Current demo</span>}</span>
-                          {state && <span className={`call-row-state ${p.submitted ? 'needs-review' : ''}`}>{state}</span>}
-                        </span>
-                        <span className={`call-row-indicator ${p.completed ? 'is-complete' : selected ? 'is-current' : ''}`}>
-                          {p.completed ? <CircleCheck size={14} aria-label="Completed" /> : selected ? <span className="current-demo-dot" aria-hidden="true" /> : <ChevronRight size={12} aria-hidden="true" />}
-                        </span>
-                      </button>
-                    </li>;
-                  })}
-                </ol>
-              </section>;
-            }) : <div className="empty-state"><Search size={25} /><strong>No calls found</strong><p>{query || manager !== 'all' ? 'Try a different search or filter.' : filter === 'completed' ? 'Your completed demos will appear here.' : 'All demos are complete. Revisit any call to practice.'}</p><button className="text-button" onClick={() => { setQuery(''); setFilter('all'); setManager('all'); }}>Show all calls<ArrowRight size={13} /></button></div>}
-          </div>
-          </div>
+          <p className="library-queue-heading" role="status">{completed === calls.length ? <CircleCheck size={14} /> : <CircleDashed size={14} />}<span>{completed === calls.length ? 'All demos completed' : `${calls.length - completed} ${calls.length - completed === 1 ? 'demo' : 'demos'} remaining`}</span></p>
+          <ol className="call-list" aria-label="Calls" ref={demoList}>
+            {visibleCalls.length ? visibleCalls.map(call => {
+              const p = progress[call.id] || EMPTY;
+              const selected = call.id === activeId;
+              const responses = call.questions.filter((_, i) => p.answers[i] >= 0).length + Number(Boolean(p.reflection.trim()));
+              const responseTotal = call.questions.length + 1;
+              const state = p.completed ? 'Completed' : p.submitted ? 'Review answers' : responses === responseTotal ? 'Ready to submit' : responses > 0 ? `${responses} of ${responseTotal} answered` : '';
+              return <li className={`call-item ${selected ? 'active' : ''} ${p.completed ? 'is-complete' : ''}`} key={call.id} ref={selected ? activeDemo : null}>
+                <button className="call-select" aria-current={selected ? 'true' : undefined} onClick={() => selectCall(call.id)}>
+                  <span className={`call-step ${selected || responses > 0 ? 'has-progress' : ''} ${p.completed ? 'is-complete' : ''}`} aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle className="call-step-track" cx="12" cy="12" r="9" /><circle className="call-step-fill" cx="12" cy="12" r="9" pathLength="100" strokeDasharray={`${p.completed ? 100 : responses / responseTotal * 100} 100`} /></svg>
+                    <span className="call-number">{calls.indexOf(call) + 1}</span>{p.completed && <Check size={11} strokeWidth={2.2} />}
+                  </span>
+                  <span className="call-row-copy">
+                    <span className="call-item-title"><strong>{call.title}</strong><span className="call-duration"><Clock3 size={11} />{formatDuration(call.duration)}</span></span>
+                    <span className="call-description">{call.topic}</span>
+                    {state && <span className={`call-row-state ${p.completed ? 'complete' : p.submitted ? 'needs-review' : ''}`}>{state}</span>}
+                  </span>
+                  <ChevronRight size={14} className="call-row-chevron" aria-hidden="true" />
+                </button>
+              </li>;
+            }) : <li className="empty-state"><Search size={25} /><strong>No calls found</strong><p>{query || manager !== 'all' ? 'Try a different search or filter.' : filter === 'completed' ? 'Your completed demos will appear here.' : 'All demos are complete. Revisit any call to practice.'}</p><button className="text-button" onClick={() => { setQuery(''); setFilter('all'); setManager('all'); }}>Show all calls<ArrowRight size={13} /></button></li>}
+          </ol>
           </div>
         </aside>
 

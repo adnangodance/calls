@@ -263,59 +263,48 @@ test('moving between demos reveals the active row inside the scrollable library'
   rows[1].getBoundingClientRect = () => ({ top: 320, bottom: 410 });
   await interact(() => button('Next demo').click());
   assert.ok(list.scrollTop >= 110);
-  assert.equal(document.querySelectorAll('.call-current-label').length, 1);
-  assert.ok(rows[1].querySelector('.call-current-label'));
+  assert.equal(document.querySelectorAll('.call-select[aria-current=true]').length, 1);
+  assert.equal(rows[1].querySelector('.call-select').getAttribute('aria-current'), 'true');
   assert.equal(document.activeElement.id, 'call-title');
 
   const previousScroll = list.scrollTop;
   rows[0].getBoundingClientRect = () => ({ top: 40, bottom: 130 });
   await interact(() => button('Previous demo').click());
   assert.ok(list.scrollTop < previousScroll);
-  assert.ok(rows[0].querySelector('.call-current-label'));
+  assert.equal(rows[0].querySelector('.call-select').getAttribute('aria-current'), 'true');
 });
 
-test('the course outline opens the current module and allows any demo without listening', async () => {
+test('the step list keeps every demo available and restores the selected demo after reload', async () => {
   await mount();
-  const toggles = [...document.querySelectorAll('.module-toggle')];
-  const panels = [...document.querySelectorAll('.module-calls')];
-  assert.equal(toggles.length, 4);
-  assert.deepEqual(panels.map(panel => panel.hidden), [false, true, true, true]);
-  assert.equal(toggles[0].getAttribute('aria-expanded'), 'true');
-  assert.equal(toggles[0].getAttribute('aria-controls'), panels[0].id);
-
-  await interact(() => toggles[0].click());
-  assert.equal(panels[0].hidden, true);
-  assert.equal(saved().activeId, first.id);
-  await interact(() => toggles[3].click());
-  assert.equal(panels[3].hidden, false);
-  assert.equal(toggles[3].getAttribute('aria-expanded'), 'true');
-  const finalDemo = panels[3].querySelector('.call-select');
+  const rows = [...document.querySelectorAll('.call-item')];
+  assert.equal(rows.length, calls.length);
+  assert.ok(rows.every(row => !row.closest('[hidden]')));
+  assert.equal(document.querySelectorAll('.call-item.active').length, 1);
+  assert.match(document.querySelector('.library-queue-heading').textContent, /10 demos remaining/);
+  const finalDemo = rows.at(-1).querySelector('.call-select');
   assert.equal(finalDemo.disabled, false);
   await interact(() => finalDemo.click());
   assert.equal(saved().activeId, calls.at(-1).id);
   assert.equal(document.getElementById('quiz-panel').hidden, false);
   assert.equal(document.querySelector('audio').paused, true);
-
-  // Previous/next navigation must reveal a different module automatically.
+  assert.equal(finalDemo.getAttribute('aria-current'), 'true');
   await interact(() => button('Previous demo').click());
-  assert.deepEqual(panels.map(panel => panel.hidden), [true, true, false, true]);
-  assert.equal(document.querySelector('.call-select[aria-current=true]').closest('ol').hidden, false);
+  assert.equal(rows.at(-2).querySelector('.call-select').getAttribute('aria-current'), 'true');
   await unmount();
   await mount({}, true);
-  assert.deepEqual([...document.querySelectorAll('.module-calls')].map(panel => panel.hidden), [true, true, false, true]);
+  assert.match(document.querySelector('.call-item.active').textContent, new RegExp(calls.at(-2).title));
 });
 
-test('search and filters reveal matching demos across modules and restore the outline when cleared', async () => {
+test('search and filters keep the step list completion count and selection intact', async () => {
   const last = calls.at(-1);
   await mount({
     [last.id]: { answers: last.questions.map(q => q.correct), reflection: 'Confirm the next step.', bestScore: 100, completed: true, submitted: true },
   });
-  assert.match(document.querySelector('.library-course-heading p').textContent, /1 \/ 10 demos completed/);
-  assert.equal(document.querySelectorAll('.module-count')[3].textContent, '1/1');
+  assert.match(document.querySelector('.library-queue-heading').textContent, /9 demos remaining/);
   await interact(() => button('Completed').click());
   assert.equal(document.querySelectorAll('.call-select').length, 1);
-  assert.equal(document.querySelector('.module-calls').hidden, false);
-  assert.equal(document.querySelector('.call-row-indicator [aria-label=Completed]') !== null, true);
+  assert.equal(document.querySelectorAll('.call-step.is-complete').length, 1);
+  assert.match(document.querySelector('.call-row-state').textContent, /Completed/);
   await interact(() => button('All').click());
 
   const input = document.querySelector('input[aria-label="Search training calls"]');
@@ -324,11 +313,11 @@ test('search and filters reveal matching demos across modules and restore the ou
     input.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
   });
   assert.equal(document.querySelectorAll('.call-select').length, 1);
-  assert.equal(document.querySelector('.module-calls').hidden, false);
   assert.match(document.querySelector('.call-select').textContent, new RegExp(last.title));
+  assert.match(document.querySelector('.library-queue-heading').textContent, /9 demos remaining/);
   await interact(() => button('Clear search').click());
-  assert.deepEqual([...document.querySelectorAll('.module-calls')].map(panel => panel.hidden), [false, true, true, true]);
   assert.equal(document.querySelectorAll('.call-select').length, 10);
+  assert.match(document.querySelector('.call-select[aria-current=true]').textContent, new RegExp(first.title));
 });
 
 test('incomplete answers get focused validation and a failed attempt can be retried', async () => {
