@@ -58,7 +58,10 @@ async function interact(callback) {
   await act(async () => { await callback(); await new Promise(resolve => setTimeout(resolve, 5)); });
 }
 async function mount(progress = {}, preserve = false) {
-  if (!preserve) localStorage.setItem('targetone-training-v1', JSON.stringify({ activeId: first.id, progress }));
+  if (!preserve) {
+    window.history.replaceState(null, '', '/calls/');
+    localStorage.setItem('targetone-training-v1', JSON.stringify({ activeId: first.id, progress }));
+  }
   root = createRoot(document.getElementById('root'));
   await interact(() => root.render(React.createElement(React.StrictMode, null, React.createElement(App))));
 }
@@ -426,4 +429,85 @@ test('previously submitted questionnaires stay available with incomplete legacy 
   await mount({ [first.id]: { coverage: [[0, 1]], answers: first.questions.map(question => question.correct), reflection: 'Saved takeaway.', bestScore: 100, completed: true, submitted: true } });
   assert.ok(document.querySelector('#quiz-panel form'));
   assert.match(document.querySelector('.quiz-result').textContent, /Demo complete/);
+});
+
+function passedDemos(demos) {
+  return Object.fromEntries(demos.map(call => [call.id, {
+    answers: call.questions.map((question, index) => index < 2 ? question.correct : (question.correct + 1) % question.options.length),
+    reflection: 'Ask a useful question and agree on a next step.',
+    bestScore: 67, completed: true, submitted: true,
+  }]));
+}
+
+test('passing the final remaining demo celebrates completion and opens AI practice without losing progress', async () => {
+  await mount(passedDemos(calls.slice(1)));
+  assert.equal(document.getElementById('completion-title'), null);
+  await answer();
+  const question = first.questions[2];
+  await interact(() => document.querySelector(`input[name="question-${first.id}-2"][value="${(question.correct + 1) % question.options.length}"]`).click());
+  await submit();
+
+  assert.ok(calls.every(call => saved().progress[call.id].completed));
+  assert.equal(window.location.hash, '#/completed');
+  assert.match(document.getElementById('completion-title').textContent, /Congratulations,.*you’ve passed/);
+  assert.equal(document.activeElement.id, 'completion-title');
+  assert.match(document.querySelector('.completion-results').textContent, /67%/);
+  assert.equal(document.querySelector('audio'), null);
+
+  await interact(() => button('Start AI call practice').click());
+  assert.equal(window.location.hash, '#/ai-practice');
+  assert.equal(document.activeElement.id, 'practice-title');
+  assert.equal(button('Start practice call').disabled, true);
+  assert.match(document.getElementById('practice-availability').textContent, /coming soon/);
+  await interact(() => document.querySelector('input[name="practice-scenario"][value="1"]').click());
+  assert.equal(document.getElementById('practice-partner-title').textContent, 'Practice manager');
+  assert.match(document.querySelector('.practice-goal').textContent, /Understand the concern/);
+
+  await unmount();
+  await mount({}, true);
+  assert.equal(document.getElementById('practice-title').textContent, 'AI call practice');
+  await interact(() => button('Back to the demos').click());
+  assert.equal(window.location.hash, '#/training');
+  assert.equal(document.getElementById('completion-title'), null);
+  assert.equal(saved().progress[first.id].bestScore, 67);
+  assert.ok(calls.every(call => saved().progress[call.id].completed));
+  assert.ok(document.querySelector('.course-complete'));
+  await unmount();
+  await mount({}, true);
+  assert.ok(document.getElementById('page-title'));
+  assert.equal(document.getElementById('completion-title'), null);
+});
+
+test('a failed final demo and a direct practice URL do not unlock the next stage', async () => {
+  await mount(passedDemos(calls.slice(1)));
+  await answer(false);
+  await submit();
+  assert.equal(document.getElementById('completion-title'), null);
+  assert.equal(saved().progress[first.id].completed, false);
+  await interact(() => { window.location.hash = '/ai-practice'; });
+  assert.equal(document.getElementById('practice-title'), null);
+  assert.ok(document.querySelector('#quiz-panel form'));
+});
+
+test('passing demo nine stays in training and completed users can review without a repeated celebration', async () => {
+  await mount(passedDemos(calls.slice(1, 9)));
+  await answer();
+  await submit();
+  assert.equal(Object.values(saved().progress).filter(progress => progress.completed).length, 9);
+  assert.equal(document.getElementById('completion-title'), null);
+  assert.ok(button('Continue to next demo'));
+  await unmount();
+
+  await mount(passedDemos(calls));
+  assert.ok(document.getElementById('completion-title'));
+  await interact(() => button('Review the demos').click());
+  assert.equal(document.getElementById('completion-title'), null);
+  await interact(() => button('Review answers again').click());
+  await answer();
+  await submit();
+  assert.equal(document.getElementById('completion-title'), null);
+  await interact(() => button('Start AI call practice').click());
+  assert.ok(document.getElementById('practice-title'));
+  await interact(() => { window.location.hash = '/training'; });
+  assert.ok(document.getElementById('page-title'));
 });

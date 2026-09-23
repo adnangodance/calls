@@ -26,12 +26,20 @@ Vite's `/calls/` base path applies to scripts, styles, the favicon, and recordin
 ## Training flow
 
 - 10 fictional, voice-generated demo calls, shown in demo order.
-- The original page frame and Listen/Questionnaire tabs are retained. The Questionnaire tab opens immediately: new visitors start on demo 1 with the first question expanded; returning visitors resume their saved demo and next unanswered question.
+- The recording and questionnaire share one view. New visitors start on demo 1 with the first question expanded; returning visitors resume their saved demo and next unanswered question.
 - Listening is optional. The recording stays above the questions, with seeking, speed, and volume controls. Playing or finishing it does not interrupt the questionnaire.
 - Each questionnaire contains three multiple-choice questions and a required written takeaway. Two correct answers complete the demo; missed questions can be retried.
-- The optional confidence rating is saved separately and does not affect completion or scores.
+- Choosing an answer opens the next unanswered question automatically. There is no separate confidence rating.
 - Search, manager filters, and completion filters help find a call. Four stats cards show completed demos, the average of saved best quiz scores, questions answered (including drafts), and the selected demo’s best quiz score in a circular gauge. The score chart follows demo order; unanswered demos have no score. On mobile, the cards scroll horizontally.
 - Answers, feedback, notes, playback position, and progress are saved in this browser using local storage. There is no server or shared employee reporting. Use the same browser and URL to resume saved progress.
+- Passing the last remaining demo opens a congratulations page. Passing means at least two correct answers per demo, not a perfect score. From there, learners can open AI call practice or return to review the demos.
+- `#/completed`, `#/ai-practice`, and `#/training` use hash navigation so direct links and reloads work on GitHub Pages. Completion and practice views require all 10 demos to be passed in this browser. This is a local onboarding flow, not a server-enforced access control.
+
+## AI call practice
+
+The next-stage page lets learners choose from three practice scenarios and read their roleplay brief. The call button is intentionally disabled and the page says AI calling is coming soon. No AI voice provider is connected yet, and the app does not request microphone access or simulate a live call.
+
+Connecting real calls requires a voice service and an authorized backend or hosted calling page. Do not place provider secrets in this public frontend.
 
 ## Replace sample recordings
 
@@ -41,4 +49,4 @@ The sample recordings can be regenerated on macOS with `python3 scripts/generate
 
 ## Verification
 
-Automated React/DOM tests cover immediate questionnaire access, submission without playback, validation, retries, optional playback, call navigation, and progress restoration. Media events are simulated rather than decoded. `node scripts/check-pages-build.mjs` verifies production asset paths and sample recordings after building.
+Automated React/DOM tests cover immediate questionnaire access, submission without playback, validation, retries, optional playback, call navigation, progress restoration, course completion, and navigation to AI practice. Media events are simulated rather than decoded. `node scripts/check-pages-build.mjs` verifies production asset paths and sample recordings after building.

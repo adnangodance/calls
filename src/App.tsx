@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleDashed, CirclePlay, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Star, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleDashed, CirclePlay, Clock3, Headphones, Info, MapPin, Pause, Phone, Play, RotateCcw, RotateCw, Search, Star, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
 import callData from './calls.json';
 import { gradeQuiz, listenedSeconds, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
 
@@ -7,6 +7,8 @@ type Call = (typeof callData)[number];
 type Progress = { coverage: number[][]; position: number; answers: number[]; reflection: string; confidence: number; bestScore?: number; completed: boolean; submitted?: boolean };
 type Saved = { activeId?: string; progress: Record<string, Progress> };
 type Filter = 'all' | 'todo' | 'completed';
+type Page = 'training' | 'completed' | 'ai-practice';
+const readPage = (): Page => window.location.hash === '#/ai-practice' ? 'ai-practice' : window.location.hash === '#/completed' ? 'completed' : 'training';
 const calls = callData as Call[];
 const EMPTY: Progress = { coverage: [], position: 0, answers: [], reflection: '', confidence: 0, completed: false };
 const STORAGE_KEY = 'targetone-training-v1';
@@ -85,8 +87,60 @@ function QuestionnaireTask({ id, title, description, status, meta, expanded, onT
   </section>;
 }
 
+function CompletionPage({ average, onPractice, onReview }: { average: number | null; onPractice: () => void; onReview: () => void }) {
+  return <main id="main" className="page-shell journey-page">
+    <div className="breadcrumbs"><span>Learning & development</span><ChevronRight size={12} /><span>Training complete</span></div>
+    <section className="completion-card" aria-labelledby="completion-title">
+      <div className="completion-emblem" aria-hidden="true"><Check size={38} strokeWidth={1.7} /></div>
+      <span className="journey-eyebrow">ALL DEMOS COMPLETE</span>
+      <h1 id="completion-title" data-journey-heading tabIndex={-1}>Congratulations,<br />you’ve passed.</h1>
+      <p className="completion-intro">You’ve passed all {calls.length} demos. Now put what you’ve learned into a conversation with an AI practice partner.</p>
+      <div className="completion-results" aria-label="Your training results">
+        <div><strong>{calls.length}<span> / {calls.length}</span></strong><span>Demos passed</span></div>
+        <div><strong>{average ?? '—'}<span>{average !== null ? '%' : ''}</span></strong><span>Quiz average</span></div>
+        <span className="journey-passed"><CircleCheck size={14} />Passed</span>
+      </div>
+      <div className="completion-actions"><button type="button" className="button button-dark journey-primary" onClick={onPractice}>Start AI call practice</button><button type="button" className="text-button" onClick={onReview}>Review the demos</button></div>
+      <p className="completion-save-note"><CheckCheck size={13} />Your demo progress is saved on this browser.</p>
+    </section>
+    <p className="journey-next-note">NEXT UP <span>Your first practice conversation</span></p>
+  </main>;
+}
+
+const practiceScenarios = [
+  { title: 'Make your introduction', subtitle: 'Start a conversation with a busy office manager.', role: 'Office manager', brief: 'The office has a full schedule and only a moment to talk. Introduce yourself and ask permission to continue.', goal: 'Discover one need and agree on a clear next step.' },
+  { title: 'Handle an objection', subtitle: 'Work through “We already have a partner.”', role: 'Practice manager', brief: 'The practice already works with a partner. Acknowledge that relationship and ask where there may still be gaps.', goal: 'Understand the concern before offering a solution.' },
+  { title: 'Earn the next conversation', subtitle: 'Respond to “Just send me an email.”', role: 'Front desk coordinator', brief: 'The coordinator asks you to email some information. Make the follow-up relevant and find the right person to speak with.', goal: 'Ask a useful question and agree on a specific follow-up.' },
+];
+
+function PracticePage({ onReview }: { onReview: () => void }) {
+  const [scenarioIndex, setScenarioIndex] = useState(0);
+  const scenario = practiceScenarios[scenarioIndex];
+  return <main id="main" className="page-shell journey-page practice-page">
+    <div className="breadcrumbs"><button type="button" onClick={onReview}>Training Calls</button><ChevronRight size={12} /><span>AI call practice</span></div>
+    <header className="practice-heading"><div><span className="journey-eyebrow">FROM LISTENING TO SPEAKING</span><h1 id="practice-title" data-journey-heading tabIndex={-1}>AI call practice</h1><p>Your turn to lead the conversation. Practice with an AI partner before your first real call.</p></div><span className="journey-passed"><CircleCheck size={14} />Demos passed</span></header>
+    <div className="practice-layout">
+      <section className="practice-scenarios" aria-labelledby="scenario-title">
+        <h2 id="scenario-title">Choose a scenario</h2><p>A familiar situation. A chance to make it your own.</p>
+        <fieldset className="scenario-options"><legend className="sr-only">Practice scenario</legend>{practiceScenarios.map((item, index) => <label key={item.title} className={`scenario-option ${scenarioIndex === index ? 'is-selected' : ''}`}>
+          <input type="radio" name="practice-scenario" value={index} checked={scenarioIndex === index} onChange={() => setScenarioIndex(index)} />
+          <span className="scenario-symbol" aria-hidden="true"><Phone size={16} /></span><span><strong>{item.title}</strong><span>{item.subtitle}</span></span><span className="scenario-radio" aria-hidden="true">{scenarioIndex === index && <span />}</span>
+        </label>)}</fieldset>
+        <div className="practice-goal"><span className="journey-eyebrow">YOUR GOAL</span><p>{scenario.goal}</p></div>
+      </section>
+      <section className="practice-dialer" aria-labelledby="practice-partner-title">
+        <div className="practice-dialer-top"><span>Practice room</span><span className="practice-ai-label">AI ROLEPLAY</span></div>
+        <div className="practice-partner"><div className="practice-avatar" aria-hidden="true"><Phone size={34} strokeWidth={1.4} /></div><span className="journey-eyebrow">YOUR AI PRACTICE PARTNER</span><h2 id="practice-partner-title">{scenario.role}</h2><p>{scenario.brief}</p></div>
+        <div className="practice-call-actions"><button type="button" className="button button-dark journey-primary" disabled aria-describedby="practice-availability"><Phone size={16} />Start practice call</button><p id="practice-availability">AI calling is coming soon.<br />You can explore the scenarios in the meantime.</p></div>
+      </section>
+    </div>
+    <button type="button" className="text-button practice-back" onClick={onReview}><ChevronLeft size={14} />Back to the demos</button>
+  </main>;
+}
+
 export default function App() {
   const [initial] = useState(readSaved);
+  const [page, setPage] = useState<Page>(() => readPage() === 'training' && !window.location.hash && calls.every(call => initial.progress[call.id]?.completed) ? 'completed' : readPage());
   const [progress, setProgress] = useState<Record<string, Progress>>(initial.progress);
   const [activeId, setActiveId] = useState(calls.some(c => c.id === initial.activeId) ? initial.activeId! : calls[0].id);
   const [query, setQuery] = useState('');
@@ -116,6 +170,8 @@ export default function App() {
   const current = progress[activeId] || EMPTY;
   const coveragePercent = Math.min(100, Math.floor(listenedSeconds(current.coverage) / active.duration * 100));
   const completed = calls.filter(c => progress[c.id]?.completed).length;
+  const coursePassed = completed === calls.length;
+  const visiblePage = coursePassed ? page : 'training';
   const scores = calls.map(c => progress[c.id]?.bestScore).filter((s): s is number => s !== undefined);
   const average = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
   const totalQuestions = calls.reduce((total, call) => total + call.questions.length, 0);
@@ -140,6 +196,34 @@ export default function App() {
     if (itemBounds.top < listBounds.top) list.scrollTop += itemBounds.top - listBounds.top - 6;
     else if (itemBounds.bottom > listBounds.bottom) list.scrollTop += itemBounds.bottom - listBounds.bottom + 6;
   }, [activeId, filter, manager, query]);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      audio.current?.pause();
+      setPlaying(false);
+      setPage(readPage());
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    if (visiblePage === 'training') return;
+    const heading = document.querySelector<HTMLElement>('[data-journey-heading]');
+    heading?.focus({ preventScroll: true });
+    document.getElementById('main')?.scrollIntoView({ block: 'start' });
+  }, [visiblePage]);
+
+  function navigate(nextPage: Page) {
+    audio.current?.pause();
+    setPlaying(false);
+    setPage(nextPage);
+    window.location.hash = `/${nextPage}`;
+    if (nextPage === 'training') requestAnimationFrame(() => {
+      document.getElementById('page-title')?.focus({ preventScroll: true });
+      document.getElementById('main')?.scrollIntoView({ block: 'start' });
+    });
+  }
 
   function update(id: string, patch: Partial<Progress>) {
     setProgress(previous => ({ ...previous, [id]: { ...EMPTY, ...previous[id], ...patch } }));
@@ -217,6 +301,10 @@ export default function App() {
     setExpandedTasks([]);
     update(activeId, { submitted: true, bestScore: Math.max(current.bestScore ?? 0, grade.score), completed: current.completed || grade.passed });
     setFormError('');
+    if (!coursePassed && grade.passed && calls.every(call => call.id === activeId || progress[call.id]?.completed)) {
+      navigate('completed');
+      return;
+    }
     requestAnimationFrame(() => { quizHeading.current?.focus({ preventScroll: true }); quizHeading.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   }
 
@@ -248,6 +336,7 @@ export default function App() {
   }
 
   function nextCall() {
+    if (coursePassed) { navigate('ai-practice'); return; }
     const next = calls.slice(index + 1).find(c => !progress[c.id]?.completed) || calls.find(c => !progress[c.id]?.completed) || calls[(index + 1) % calls.length];
     selectCall(next.id);
   }
@@ -263,16 +352,16 @@ export default function App() {
       <a className="brand" href="#main" aria-label="TargetOne home"><Target size={20} strokeWidth={1.8} /><span>Target<span className="brand-one">One</span></span></a>
       <nav className="workspace-nav" aria-label="Workspace">
         {['Routes', 'Users', 'AutoDialer', 'Analytics', 'Pipeline', 'Followup', 'Call History'].map(label => <span className="workspace-placeholder" key={label}>{label}</span>)}
-        <a className="nav-active" href="#main" aria-current="page">Training Calls</a>
+        <a className="nav-active" href="#/training" aria-current={visiblePage === 'training' ? 'page' : undefined}>Training Calls</a>
         <span className="workspace-placeholder secondary-nav">Customer Service</span>
       </nav>
       <div className="header-account"><span className="workspace-status"><i />Florida<ChevronDown size={11} /></span><span className="header-divider" /><span className="user-avatar">AG</span><span className="user-name">Adnan Goda</span></div>
     </header>
 
-    <main id="main" className="page-shell">
+    {visiblePage === 'completed' ? <CompletionPage average={average} onPractice={() => navigate('ai-practice')} onReview={() => navigate('training')} /> : visiblePage === 'ai-practice' ? <PracticePage onReview={() => navigate('training')} /> : <main id="main" className="page-shell">
       <div className="breadcrumbs"><span>Workspace</span><ChevronRight size={12} /><span>Learning & development</span></div>
       <section className="page-heading" aria-labelledby="page-title">
-        <div><div className="heading-title"><h1 id="page-title">Training Calls</h1><span className="course-badge">SALES ONBOARDING</span></div><p>Listen to the experts. Find your approach. Make your next call count.</p></div>
+        <div><div className="heading-title"><h1 id="page-title" tabIndex={-1}>Training Calls</h1><span className="course-badge">SALES ONBOARDING</span></div><p>Listen to the experts. Find your approach. Make your next call count.</p></div>
         <div className="heading-actions"><button className="button button-dark start-training-button" onClick={startTraining}><span className="start-play-icon" aria-hidden="true"><Play size={7} fill="currentColor" strokeWidth={0} /></span>{completed === 10 ? 'Revisit training' : answeredQuestions > 0 ? 'Continue training' : 'Start training'}</button></div>
       </section>
 
@@ -307,7 +396,7 @@ export default function App() {
           <h2 className="stat-label" id="stat-demo-score-label">Demo score</h2>
         </article>
       </section>
-      {completed === calls.length && <div className="course-complete" role="status"><Trophy size={24} /><div><strong>All demos completed</strong><p>Revisit any call or review your answers whenever you need a refresher.</p></div></div>}
+      {coursePassed && <div className="course-complete" role="status"><Trophy size={24} /><div><strong>Congratulations, you’ve passed all {calls.length} demos.</strong><p>You’re ready for the next step: AI call practice.</p></div><button type="button" className="button button-dark" onClick={() => navigate('ai-practice')}>Start AI call practice</button></div>}
 
       <div className="learning-layout">
         <aside className="library" aria-label="Training call library">
@@ -436,7 +525,7 @@ export default function App() {
                 </div>
                 <p className="questionnaire-save-note"><CheckCheck size={13} />{saveError ? 'Available for this session' : 'Your answers are saved as you go'}</p>
                 {formError && <p className="form-error" role="alert"><Info size={15} />{formError}</p>}
-                {(!submitted || result.passed) && <div className="quiz-actions">{submitted ? <>{result.passed && <button type="button" className="text-button" onClick={retryQuiz}><RotateCcw size={14} />Review answers again</button>}<button type="button" className="button button-dark" onClick={nextCall}>{completed === calls.length ? 'Explore the calls' : 'Continue to next demo'}</button></> : <><span>{answered === totalTasks ? 'All set. Submit when you’re ready.' : `${answered} of ${totalTasks} answered`}</span><button type="submit" className="button button-dark">Submit questionnaire<ArrowRight size={15} /></button></>}</div>}
+                {(!submitted || result.passed) && <div className="quiz-actions">{submitted ? <>{result.passed && <button type="button" className="text-button" onClick={retryQuiz}><RotateCcw size={14} />Review answers again</button>}<button type="button" className="button button-dark" onClick={nextCall}>{coursePassed ? 'Start AI call practice' : 'Continue to next demo'}</button></> : <><span>{answered === totalTasks ? 'All set. Submit when you’re ready.' : `${answered} of ${totalTasks} answered`}</span><button type="submit" className="button button-dark">Submit questionnaire<ArrowRight size={15} /></button></>}</div>}
               </form>
             </section>
           </div>
@@ -444,7 +533,7 @@ export default function App() {
         </section>
       </div>
       <footer className="page-footer"><span><Target size={14} />Better conversations start with practice.</span><span><span className="local-save-dot" />{saveError ? 'Browser storage unavailable. Keep this tab open to preserve progress.' : 'Progress saved on this browser'}</span></footer>
-    </main>
+    </main>}
 
     <dialog aria-labelledby="course-guide-title" className="guide-dialog" ref={guide} onClick={event => { if (event.target === event.currentTarget) guide.current?.close(); }}><button className="dialog-close" aria-label="Close course guide" onClick={() => guide.current?.close()}><X size={20} /></button><span className="guide-illustration"><Headphones size={32} /></span><span className="section-eyebrow">YOUR FIRST 10 CONVERSATIONS</span><h2 id="course-guide-title">Listen. Reflect. Get ready.</h2><p className="guide-intro">A little practice before the real thing. Work through the demos at your own pace.</p><ol><li><span>01</span><div><strong>Listen with intention</strong><p>Play each demo and notice the techniques the manager uses. Listening is optional; the questionnaire is available from the start.</p></div></li><li><span>02</span><div><strong>Make the learning stick</strong><p>Answer three questions and write a takeaway. Get at least two answers right to complete the demo. You can retry anytime.</p></div></li><li><span>03</span><div><strong>Build your own approach</strong><p>Complete all 10 demos and revisit any call for more practice. Your progress and notes stay in this browser.</p></div></li></ol><div className="guide-note"><Info size={16} /><span>This preview uses fictional, voice-generated sample conversations. Replace them with your team’s recordings for live onboarding.</span></div><button className="button button-dark" onClick={() => { guide.current?.close(); startTraining(); }}>Let’s get started<ArrowRight size={15} /></button></dialog>
   </>;
