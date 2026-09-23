@@ -467,9 +467,10 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .library-queue-heading { display: flex; align-items: center; gap: 6px; padding: 6px 8px 12px; color: #8b8e8c; font-size: 11px; line-height: 1.5; }
 .library-queue-heading > svg { color: #b1b8b1; }
 .call-list { display: grid; gap: 5px; max-height: 760px; overflow-y: auto; list-style: none; margin: 0; padding: 0 3px 8px; scrollbar-width: thin; scrollbar-color: #dcdce2 transparent; }
-.call-item { position: relative; min-width: 0; border: 1px solid #e5e7eb; border-radius: 13px; background: #f1f2f4; transition: background .15s, border-color .15s, box-shadow .15s; }
-.call-item:hover { background: #eaecef; border-color: #daddE4; box-shadow: 0 2px 8px #24243006; }
-.call-item.active { border-color: #e8dced; background: linear-gradient(110deg, #f3edff 0%, #faf3f9 48%, #fff0e1 100%); box-shadow: 0 2px 4px #56396705, 0 5px 12px #8c519209; }
+.call-item { position: relative; min-width: 0; border: 1px solid #eef0f3; border-radius: 13px; background: #f7f8fa; transition: background .15s, border-color .15s, box-shadow .15s; }
+.call-item:hover { background: #fff; border-color: #dce0e7; box-shadow: 0 2px 8px #24243006; }
+.call-item.active { border-color: #ceb8e7; background: linear-gradient(110deg, #ece1ff 0%, #f7eaf6 48%, #ffe8d3 100%); box-shadow: 0 2px 4px #70439d0a, 0 5px 14px #70439d12; }
+.call-item.active::before { content: ''; position: absolute; left: 0; top: 13px; bottom: 13px; width: 3px; border-radius: 0 3px 3px 0; background: #9462ce; pointer-events: none; }
 .call-select { display: grid; grid-template-columns: 22px minmax(0, 1fr) 14px; align-items: start; gap: 9px; text-align: left; width: 100%; min-height: 77px; padding: 14px 10px; border-radius: 12px; }
 .call-select:focus-visible { outline-offset: -3px; }
 .call-step { position: relative; display: grid; place-items: center; width: 22px; height: 22px; margin-top: 1px; border-radius: 50%; background: #e9ece9; }
@@ -481,19 +482,27 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .call-step.has-progress, .call-step.is-complete { background: transparent; }
 .call-step.has-progress > svg, .call-step.is-complete > svg { opacity: 1; }
 .active .call-number { color: #52824a; }
+.active .call-step:not(.is-complete) { background: #8b5cbb; }
+.active .call-step:not(.is-complete) .call-step-track { stroke: #ffffff55; }
+.active .call-step:not(.is-complete) .call-step-fill { stroke: #fff; }
+.active .call-step:not(.is-complete) .call-number { color: #fff; font-weight: 550; }
 .call-step.is-complete .call-number { visibility: hidden; }
 .call-step.is-complete > svg:last-child { width: 11px; height: 11px; inset: auto; color: #4a9642; transform: none; }
 .call-row-copy { display: block; min-width: 0; }
 .call-item-title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; }
 .call-item-title strong { color: #434946; font-size: 12px; font-weight: 550; letter-spacing: -.15px; line-height: 1.5; }
-.active .call-item-title strong { color: #252c27; }
+.active .call-item-title strong { color: #352540; font-weight: 650; }
 .call-duration { display: inline-flex; align-items: center; gap: 4px; color: #929993; font-size: 10px; line-height: 1.5; white-space: nowrap; }
 .call-description { display: block; margin-top: 5px; color: #848b85; font-size: 11px; line-height: 1.55; }
-.call-row-state { display: block; margin-top: 6px; color: #838e80; font-size: 10px; line-height: 1.5; }
+.active .call-description { color: #756779; }
+.active .call-duration { color: #8a7b91; }
+.call-row-status { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 8px; margin-top: 7px; }
+.call-current-label { padding: 2px 5px; border: 1px solid #d9c5e6; border-radius: 4px; background: #ffffffa8; color: #79509b; font-size: 9px; font-weight: 550; line-height: 1.4; }
+.call-row-state { color: #838e80; font-size: 10px; line-height: 1.5; }
 .call-row-state.complete { color: #4d8645; }
 .call-row-state.needs-review { color: #9a7748; }
 .call-row-chevron { align-self: center; color: #bec6bd; }
-.active .call-row-chevron { color: #9caa98; }
+.active .call-row-chevron { color: #9264b5; }
 .empty-state { padding: 38px 18px; text-align: center; color: #9898a0; background: #fff; border-radius: 12px; font-size: 11px; }
 .empty-state strong { display: block; color: #45454c; margin: 14px 0 8px; font-size: 13px; font-weight: 550; }
 .empty-state p { line-height: 1.7; }

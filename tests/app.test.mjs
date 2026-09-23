@@ -255,6 +255,25 @@ test('returning to an unfinished demo resumes the next unanswered question', asy
   assert.equal(saved().progress[first.id].answers[0], first.questions[0].correct);
 });
 
+test('moving between demos reveals the active row inside the scrollable library', async () => {
+  await mount();
+  const list = document.querySelector('.call-list');
+  const rows = [...document.querySelectorAll('.call-item')];
+  list.getBoundingClientRect = () => ({ top: 100, bottom: 300 });
+  rows[1].getBoundingClientRect = () => ({ top: 320, bottom: 410 });
+  await interact(() => button('Next demo').click());
+  assert.ok(list.scrollTop >= 110);
+  assert.equal(document.querySelectorAll('.call-current-label').length, 1);
+  assert.ok(rows[1].querySelector('.call-current-label'));
+  assert.equal(document.activeElement.id, 'call-title');
+
+  const previousScroll = list.scrollTop;
+  rows[0].getBoundingClientRect = () => ({ top: 40, bottom: 130 });
+  await interact(() => button('Previous demo').click());
+  assert.ok(list.scrollTop < previousScroll);
+  assert.ok(rows[0].querySelector('.call-current-label'));
+});
+
 test('incomplete answers get focused validation and a failed attempt can be retried', async () => {
   await mount();
   await interact(() => document.getElementById('quiz-task-0-heading').click());

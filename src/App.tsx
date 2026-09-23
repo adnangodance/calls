@@ -109,6 +109,8 @@ export default function App() {
   });
   const audio = useRef<HTMLAudioElement>(null);
   const detail = useRef<HTMLElement>(null);
+  const demoList = useRef<HTMLOListElement>(null);
+  const activeDemo = useRef<HTMLLIElement>(null);
   const guide = useRef<HTMLDialogElement>(null);
   const quizHeading = useRef<HTMLHeadingElement>(null);
   const active = calls.find(c => c.id === activeId)!;
@@ -130,12 +132,27 @@ export default function App() {
     catch { setSaveError(true); }
   }, [activeId, progress]);
 
+  useEffect(() => {
+    const list = demoList.current;
+    const item = activeDemo.current;
+    if (!list || !item) return;
+    const listBounds = list.getBoundingClientRect();
+    const itemBounds = item.getBoundingClientRect();
+    // Reveal the selected row inside the library without moving the page.
+    if (itemBounds.top < listBounds.top) list.scrollTop += itemBounds.top - listBounds.top - 6;
+    else if (itemBounds.bottom > listBounds.bottom) list.scrollTop += itemBounds.bottom - listBounds.bottom + 6;
+  }, [activeId, filter, manager, query]);
+
   function update(id: string, patch: Partial<Progress>) {
     setProgress(previous => ({ ...previous, [id]: { ...EMPTY, ...previous[id], ...patch } }));
   }
 
   function selectCall(id: string) {
     setTab('quiz');
+    requestAnimationFrame(() => {
+      document.getElementById('call-title')?.focus({ preventScroll: true });
+      detail.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
     if (id === activeId) return;
     audio.current?.pause();
     setFormError('');
@@ -147,10 +164,6 @@ export default function App() {
     const firstUnanswered = call.questions.findIndex((_, i) => !(saved?.answers[i] >= 0));
     setExpandedTasks(saved?.submitted ? [] : [firstUnanswered < 0 ? call.questions.length : firstUnanswered]);
     setActiveId(id);
-    requestAnimationFrame(() => {
-      document.getElementById('call-title')?.focus({ preventScroll: true });
-      detail.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
   }
 
   function openQuiz() {
@@ -322,14 +335,14 @@ export default function App() {
 
           <div className="call-list-panel">
           <p className="library-queue-heading" role="status">{completed === calls.length ? <CircleCheck size={14} /> : <CircleDashed size={14} />}<span>{completed === calls.length ? 'All demos completed' : `${calls.length - completed} ${calls.length - completed === 1 ? 'demo' : 'demos'} remaining`}</span></p>
-          <ol className="call-list" aria-label="Calls">
+          <ol className="call-list" aria-label="Calls" ref={demoList}>
             {visibleCalls.length ? visibleCalls.map(call => {
               const p = progress[call.id] || EMPTY;
               const selected = call.id === activeId;
               const responses = call.questions.filter((_, i) => p.answers[i] >= 0).length + Number(Boolean(p.reflection.trim()));
               const responseTotal = call.questions.length + 1;
               const state = p.completed ? 'Completed' : p.submitted ? 'Review answers' : responses === responseTotal ? 'Ready to submit' : responses > 0 ? `${responses} of ${responseTotal} answered` : '';
-              return <li className={`call-item ${selected ? 'active' : ''} ${p.completed ? 'is-complete' : ''}`} key={call.id}>
+              return <li className={`call-item ${selected ? 'active' : ''} ${p.completed ? 'is-complete' : ''}`} key={call.id} ref={selected ? activeDemo : null}>
                 <button className="call-select" aria-current={selected ? 'true' : undefined} onClick={() => selectCall(call.id)}>
                   <span className={`call-step ${selected || responses > 0 ? 'has-progress' : ''} ${p.completed ? 'is-complete' : ''}`} aria-hidden="true">
                     <svg viewBox="0 0 24 24"><circle className="call-step-track" cx="12" cy="12" r="9" /><circle className="call-step-fill" cx="12" cy="12" r="9" pathLength="100" strokeDasharray={`${p.completed ? 100 : responses / responseTotal * 100} 100`} /></svg>
@@ -338,7 +351,7 @@ export default function App() {
                   <span className="call-row-copy">
                     <span className="call-item-title"><strong>{call.title}</strong><span className="call-duration"><Clock3 size={11} />{formatDuration(call.duration)}</span></span>
                     <span className="call-description">{call.topic}</span>
-                    {state && <span className={`call-row-state ${p.completed ? 'complete' : p.submitted ? 'needs-review' : ''}`}>{state}</span>}
+                    {(selected || state) && <span className="call-row-status">{selected && <span className="call-current-label">Current demo</span>}{state && <span className={`call-row-state ${p.completed ? 'complete' : p.submitted ? 'needs-review' : ''}`}>{state}</span>}</span>}
                   </span>
                   <ChevronRight size={14} className="call-row-chevron" aria-hidden="true" />
                 </button>
