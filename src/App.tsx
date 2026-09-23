@@ -1,14 +1,14 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { ArrowRight, AudioLines, Bookmark, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleHelp, ClipboardCheck, Clock3, Headphones, Info, LockKeyhole, MapPin, Pause, Play, RotateCcw, RotateCw, Search, SlidersHorizontal, Sparkles, Star, Target, Timer, TrendingUp, Trophy, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleHelp, ClipboardCheck, Clock3, Headphones, Info, LockKeyhole, MapPin, Pause, Play, RotateCcw, RotateCw, Search, SlidersHorizontal, Sparkles, Star, Target, Timer, TrendingUp, Trophy, Volume2, VolumeX, X } from 'lucide-react';
 import callData from './calls.json';
 import { canTakeQuiz, firstUnplayedPosition, gradeQuiz, listenedSeconds, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
 
-type Call = (typeof callData)[number] & { duration: number; audio: string; transcript: { speaker: string; text: string; at: number }[] };
-type Progress = { coverage: number[][]; bookmark: boolean; position: number; checked: number[]; answers: number[]; reflection: string; confidence: number; bestScore?: number; completed: boolean; submitted?: boolean };
+type Call = (typeof callData)[number];
+type Progress = { coverage: number[][]; position: number; checked: number[]; answers: number[]; reflection: string; confidence: number; bestScore?: number; completed: boolean; submitted?: boolean };
 type Saved = { activeId?: string; progress: Record<string, Progress> };
-type Filter = 'all' | 'todo' | 'completed' | 'saved';
+type Filter = 'all' | 'todo' | 'completed';
 const calls = callData as Call[];
-const EMPTY: Progress = { coverage: [], bookmark: false, position: 0, checked: [], answers: [], reflection: '', confidence: 0, completed: false };
+const EMPTY: Progress = { coverage: [], position: 0, checked: [], answers: [], reflection: '', confidence: 0, completed: false };
 const STORAGE_KEY = 'targetone-training-v1';
 const managers = [...new Set(calls.map(c => c.manager))];
 const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
@@ -74,7 +74,6 @@ export default function App() {
   const [time, setTime] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [muted, setMuted] = useState(false);
-  const [transcriptOpen, setTranscriptOpen] = useState(false);
   const [playbackEnded, setPlaybackEnded] = useState(false);
   const [audioError, setAudioError] = useState(false);
   const [notice, setNotice] = useState('');
@@ -90,7 +89,6 @@ export default function App() {
   const index = calls.findIndex(c => c.id === activeId);
   const current = progress[activeId] || EMPTY;
   const completed = calls.filter(c => progress[c.id]?.completed).length;
-  const bookmarked = calls.filter(c => progress[c.id]?.bookmark).length;
   const totalListened = calls.reduce((total, c) => total + listenedSeconds(progress[c.id]?.coverage), 0);
   const scores = calls.map(c => progress[c.id]?.bestScore).filter((s): s is number => s !== undefined);
   const average = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
@@ -104,15 +102,12 @@ export default function App() {
   // Sparklines summarize real course data; no fabricated weekly history.
   const completedSeries = [0];
   const listenedSeries = [0];
-  const bookmarkedSeries = [0];
   for (const call of calls) {
     completedSeries.push(completedSeries[completedSeries.length - 1] + Number(Boolean(progress[call.id]?.completed)));
     listenedSeries.push(listenedSeries[listenedSeries.length - 1] + listenedSeconds(progress[call.id]?.coverage));
-    bookmarkedSeries.push(bookmarkedSeries[bookmarkedSeries.length - 1] + Number(Boolean(progress[call.id]?.bookmark)));
   }
   const answered = active.questions.filter((_, i) => current.answers[i] >= 0).length + (current.reflection.trim() ? 1 : 0);
   const totalTasks = active.questions.length + 1;
-  const activeLine = active.transcript.reduce((last, line, i) => line.at <= time ? i : last, -1);
 
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ activeId, progress })); setSaveError(false); }
@@ -145,12 +140,6 @@ export default function App() {
       setActiveId(id);
     }
     if (window.innerWidth < 900) detail.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  function toggleBookmark(id: string) {
-    const next = !progress[id]?.bookmark;
-    update(id, { bookmark: next });
-    setNotice(next ? 'Call added to your bookmarks' : 'Bookmark removed');
   }
 
   function startTraining() {
@@ -261,7 +250,7 @@ export default function App() {
   const visibleCalls = calls.filter(call => {
     const p = progress[call.id] || EMPTY;
     const matchesQuery = `${call.title} ${call.manager} ${call.specialty} ${call.topic}`.toLowerCase().includes(query.trim().toLowerCase());
-    return matchesQuery && call.rating >= minRating && call.duration >= minDuration && (manager === 'all' || call.manager === manager) && (filter === 'all' || (filter === 'todo' && !p.completed) || (filter === 'completed' && p.completed) || (filter === 'saved' && p.bookmark));
+    return matchesQuery && call.rating >= minRating && call.duration >= minDuration && (manager === 'all' || call.manager === manager) && (filter === 'all' || (filter === 'todo' && !p.completed) || (filter === 'completed' && p.completed));
   }).sort((a, b) => sort === 'rating' ? b.rating - a.rating : sort === 'shortest' ? a.duration - b.duration : sort === 'longest' ? b.duration - a.duration : calls.indexOf(a) - calls.indexOf(b));
 
   return <>
@@ -306,13 +295,6 @@ export default function App() {
             <p className="stat-caption">{scores.length ? 'across your answered demos' : 'Complete your first quiz'}</p>
           </div><StatSparkline values={scores} maximum={100} color="#a020e8" label={scores.length ? 'Best quiz scores in course order' : 'No quiz scores yet'} /></div>
         </div>
-        <div className="stat-card">
-          <h2 className="stat-label">Bookmarked calls</h2>
-          <div className="stat-content"><div className="stat-copy">
-            <div className="stat-value-row"><div className="stat-value">{bookmarked}</div>{bookmarked > 0 && <span className="stat-badge"><Bookmark size={10} />Saved</span>}</div>
-            <button className="stat-link" onClick={() => setFilter(filter === 'saved' ? 'all' : 'saved')}>{filter === 'saved' ? 'Back to all calls' : 'View your saved calls'}<ArrowRight size={11} /></button>
-          </div><StatSparkline values={bookmarkedSeries} color="#a020e8" label="Cumulative bookmarked calls in course order" /></div>
-        </div>
       </section>
 
       <div className="learning-strip">
@@ -333,7 +315,7 @@ export default function App() {
               {query && <button aria-label="Clear search" onClick={() => setQuery('')}><X size={14} /></button>}
             </label>
             <div className="filter-pills library-filters" role="group" aria-label="Filter by review status">
-              {([['all', 'All'], ['todo', 'To review'], ['completed', 'Reviewed'], ['saved', 'Bookmarked']] as const).map(([value, label]) => <button key={value} aria-pressed={filter === value} onClick={() => setFilter(value)} className={filter === value ? 'selected' : ''}>{label}</button>)}
+              {([['all', 'All'], ['todo', 'To review'], ['completed', 'Reviewed']] as const).map(([value, label]) => <button key={value} aria-pressed={filter === value} onClick={() => setFilter(value)} className={filter === value ? 'selected' : ''}>{label}</button>)}
             </div>
             <details className="library-extra-filters">
               <summary><span><SlidersHorizontal size={13} />More filters</span><span>{Number(manager !== 'all') + Number(minRating > 0) + Number(minDuration > 0) || ''}<ChevronDown size={13} /></span></summary>
@@ -367,9 +349,8 @@ export default function App() {
                   <div className="call-item-meta"><span><Clock3 size={12} />{call.date}</span><span><Timer size={12} />{formatDuration(call.duration)}</span><span className={`call-rating ${call.rating >= 8 ? 'high-rating' : call.rating >= 6 ? 'mid-rating' : 'low-rating'}`} aria-label={`Manager rating ${call.rating.toFixed(1)} out of 10`}><TrendingUp size={12} />{call.rating.toFixed(1)}</span></div>
                 </button>
                 {p.completed && <span className="call-completed" role="img" aria-label="Demo completed" title="Demo completed"><CircleCheck size={13} fill="#16b34b" stroke="#fff" strokeWidth={2.5} /></span>}
-                <button className={`call-bookmark ${p.bookmark ? 'is-saved' : ''}`} aria-label={`${p.bookmark ? 'Unbookmark' : 'Bookmark'} ${call.title}`} aria-pressed={p.bookmark} onClick={() => toggleBookmark(call.id)}><Bookmark size={14} fill={p.bookmark ? 'currentColor' : 'none'} /></button>
               </div>;
-            }) : <div className="empty-state"><Search size={25} /><strong>No calls found</strong><p>{minDuration || minRating || query || manager !== 'all' ? 'Try a different search or filter.' : filter === 'saved' ? 'Bookmark a call to keep it here.' : filter === 'completed' ? 'Your completed demos will appear here.' : 'Try a different search or filter.'}</p><button className="text-button" onClick={() => { setQuery(''); setFilter('all'); setManager('all'); setMinRating(0); setMinDuration(0); }}>Show all calls<ArrowRight size={13} /></button></div>}
+            }) : <div className="empty-state"><Search size={25} /><strong>No calls found</strong><p>{minDuration || minRating || query || manager !== 'all' ? 'Try a different search or filter.' : filter === 'completed' ? 'Your completed demos will appear here.' : 'Try a different search or filter.'}</p><button className="text-button" onClick={() => { setQuery(''); setFilter('all'); setManager('all'); setMinRating(0); setMinDuration(0); }}>Show all calls<ArrowRight size={13} /></button></div>}
           </div>
         </aside>
 
@@ -434,12 +415,6 @@ export default function App() {
               </section>
 
               <section className="objectives-section"><div className="section-title"><h3>What to listen for</h3><span>{current.checked.length} / {active.objectives.length}</span></div><div className="objective-list">{active.objectives.map((objective, i) => <label key={`${active.id}-${i}`} className={current.checked.includes(i) ? 'checked' : ''}><input type="checkbox" checked={current.checked.includes(i)} onChange={() => update(activeId, { checked: current.checked.includes(i) ? current.checked.filter(item => item !== i) : [...current.checked, i] })} /><span className="custom-checkbox"><Check size={11} strokeWidth={3} /></span>{objective}</label>)}</div></section>
-
-              <details className="coaching-section" key={`coaching-${active.id}`}><summary><h3>Coaching notes</h3><span>{active.summary.length} observations<ChevronDown size={15} /></span></summary><ul>{active.summary.map((item, i) => <li key={item}><span>{String(i + 1).padStart(2, '0')}</span>{item}</li>)}</ul></details>
-
-              <section className="transcript-section"><button className="transcript-heading" onClick={() => setTranscriptOpen(!transcriptOpen)} aria-expanded={transcriptOpen} aria-controls="transcript-content"><h3>Call transcript</h3><span>Click a timestamp to jump<ChevronDown size={15} className={transcriptOpen ? 'rotated' : ''} /></span></button>{transcriptOpen && <div className="transcript-rows" id="transcript-content">{active.transcript.map((line, i) => <button className={`transcript-line ${activeLine === i ? 'current-line' : ''} ${i % 2 === 0 ? 'manager-line' : ''}`} key={`${active.id}-${i}`} onClick={() => seek(line.at)} aria-label={`Jump to ${formatTime(line.at)}, ${line.speaker}: ${line.text}`}><span className="transcript-person"><strong>{line.speaker}</strong><span>{activeLine === i && playing ? <AudioLines size={10} /> : null}{formatTime(line.at)}</span></span><span className="transcript-text">{line.text}</span></button>)}</div>}</section>
-
-
             </div> : <div id="quiz-panel" role="tabpanel" aria-labelledby="quiz-tab">
               <div className="questionnaire-heading">
                 <div><span className="questionnaire-eyebrow">CALL REVIEW</span><h3 ref={quizHeading} tabIndex={-1}>Questionnaire</h3><p>{active.questions.length} questions and a written takeaway.<br />Answer at least {Math.ceil(active.questions.length * 2 / 3)} questions correctly to complete this demo.</p></div>
@@ -498,13 +473,13 @@ export default function App() {
               </form>}
             </div>}
           </div>
-          <footer className="detail-footer"><button className={`text-button bookmark-footer ${current.bookmark ? 'green' : ''}`} onClick={() => toggleBookmark(activeId)}><Bookmark size={15} fill={current.bookmark ? 'currentColor' : 'none'} />{current.bookmark ? 'Bookmarked' : 'Bookmark call'}</button><div className="previous-next"><button aria-label="Previous demo" disabled={index === 0} onClick={() => selectCall(calls[index - 1].id)}><ChevronLeft size={15} /><span>Previous</span></button><span>{index + 1} / 10</span><button aria-label="Next demo" disabled={index === calls.length - 1} onClick={() => selectCall(calls[index + 1].id)}><span>Next demo</span><ChevronRight size={15} /></button></div></footer>
+          <footer className="detail-footer"><div className="previous-next"><button aria-label="Previous demo" disabled={index === 0} onClick={() => selectCall(calls[index - 1].id)}><ChevronLeft size={15} /><span>Previous</span></button><span>{index + 1} / 10</span><button aria-label="Next demo" disabled={index === calls.length - 1} onClick={() => selectCall(calls[index + 1].id)}><span>Next demo</span><ChevronRight size={15} /></button></div></footer>
         </section>
       </div>
       <footer className="page-footer"><span><Target size={14} />Better conversations start with practice.</span><span><span className="local-save-dot" />{saveError ? 'Browser storage unavailable. Keep this tab open to preserve progress.' : 'Progress saved on this browser'}</span></footer>
     </main>
 
     {notice && <div className="toast" role="status"><CircleCheck size={16} />{notice}</div>}
-    <dialog className="guide-dialog" ref={guide} onClick={event => { if (event.target === event.currentTarget) guide.current?.close(); }}><button className="dialog-close" aria-label="Close course guide" onClick={() => guide.current?.close()}><X size={20} /></button><span className="guide-illustration"><Headphones size={32} /></span><span className="section-eyebrow">YOUR FIRST 10 CONVERSATIONS</span><h2>Listen. Reflect. Get ready.</h2><p className="guide-intro">A little practice before the real thing. Work through the demos at your own pace.</p><ol><li><span>01</span><div><strong>Listen with intention</strong><p>Play each demo, follow the transcript, and notice the techniques the manager uses. Listen to 90% to unlock the questions.</p></div></li><li><span>02</span><div><strong>Make the learning stick</strong><p>Answer three questions and write a takeaway. Get at least two answers right to complete the demo. You can retry anytime.</p></div></li><li><span>03</span><div><strong>Build your own approach</strong><p>Complete all 10 demos and bookmark calls you want to revisit. Your progress and notes stay in this browser.</p></div></li></ol><div className="guide-note"><Info size={16} /><span>This preview uses fictional, voice-generated sample conversations. Replace them with your team’s recordings for live onboarding.</span></div><button className="button button-dark" onClick={() => { guide.current?.close(); startTraining(); }}>Let’s get started<ArrowRight size={15} /></button></dialog>
+    <dialog className="guide-dialog" ref={guide} onClick={event => { if (event.target === event.currentTarget) guide.current?.close(); }}><button className="dialog-close" aria-label="Close course guide" onClick={() => guide.current?.close()}><X size={20} /></button><span className="guide-illustration"><Headphones size={32} /></span><span className="section-eyebrow">YOUR FIRST 10 CONVERSATIONS</span><h2>Listen. Reflect. Get ready.</h2><p className="guide-intro">A little practice before the real thing. Work through the demos at your own pace.</p><ol><li><span>01</span><div><strong>Listen with intention</strong><p>Play each demo and notice the techniques the manager uses. Listen to 90% to unlock the questions.</p></div></li><li><span>02</span><div><strong>Make the learning stick</strong><p>Answer three questions and write a takeaway. Get at least two answers right to complete the demo. You can retry anytime.</p></div></li><li><span>03</span><div><strong>Build your own approach</strong><p>Complete all 10 demos and revisit any call for more practice. Your progress and notes stay in this browser.</p></div></li></ol><div className="guide-note"><Info size={16} /><span>This preview uses fictional, voice-generated sample conversations. Replace them with your team’s recordings for live onboarding.</span></div><button className="button button-dark" onClick={() => { guide.current?.close(); startTraining(); }}>Let’s get started<ArrowRight size={15} /></button></dialog>
   </>;
 }
