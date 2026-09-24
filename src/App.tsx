@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleDashed, CirclePlay, Clock3, Headphones, Info, MapPin, Pause, Phone, Play, RotateCcw, RotateCw, Search, Star, Target, Trophy, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleDashed, CirclePlay, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Star, Target, Volume2, VolumeX, X } from 'lucide-react';
 import callData from './calls.json';
+import PracticePage from './PracticePage';
 import { gradeQuiz, listenedSeconds, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
 
 type Call = (typeof callData)[number];
@@ -119,37 +120,6 @@ function CompletionPage({ average, onPractice, onReview }: { average: number | n
       <p className="completion-save-note"><CheckCheck size={13} />Your demo progress is saved on this browser.</p>
     </section>
     <p className="journey-next-note">NEXT UP <span>Your first practice conversation</span></p>
-  </main>;
-}
-
-const practiceScenarios = [
-  { title: 'Make your introduction', subtitle: 'Start a conversation with a busy office manager.', role: 'Office manager', brief: 'The office has a full schedule and only a moment to talk. Introduce yourself and ask permission to continue.', goal: 'Discover one need and agree on a clear next step.' },
-  { title: 'Handle an objection', subtitle: 'Work through “We already have a partner.”', role: 'Practice manager', brief: 'The practice already works with a partner. Acknowledge that relationship and ask where there may still be gaps.', goal: 'Understand the concern before offering a solution.' },
-  { title: 'Earn the next conversation', subtitle: 'Respond to “Just send me an email.”', role: 'Front desk coordinator', brief: 'The coordinator asks you to email some information. Make the follow-up relevant and find the right person to speak with.', goal: 'Ask a useful question and agree on a specific follow-up.' },
-];
-
-function PracticePage({ onReview }: { onReview: () => void }) {
-  const [scenarioIndex, setScenarioIndex] = useState(0);
-  const scenario = practiceScenarios[scenarioIndex];
-  return <main id="main" className="page-shell journey-page practice-page">
-    <div className="breadcrumbs"><button type="button" onClick={onReview}>Training Calls</button><ChevronRight size={12} /><span>AI call practice</span></div>
-    <header className="practice-heading"><div><span className="journey-eyebrow">FROM LISTENING TO SPEAKING</span><h1 id="practice-title" data-journey-heading tabIndex={-1}>AI call practice</h1><p>Your turn to lead the conversation. Practice with an AI partner before your first real call.</p></div><span className="journey-passed"><CircleCheck size={14} />Demos passed</span></header>
-    <div className="practice-layout">
-      <section className="practice-scenarios" aria-labelledby="scenario-title">
-        <h2 id="scenario-title">Choose a scenario</h2><p>A familiar situation. A chance to make it your own.</p>
-        <fieldset className="scenario-options"><legend className="sr-only">Practice scenario</legend>{practiceScenarios.map((item, index) => <label key={item.title} className={`scenario-option ${scenarioIndex === index ? 'is-selected' : ''}`}>
-          <input type="radio" name="practice-scenario" value={index} checked={scenarioIndex === index} onChange={() => setScenarioIndex(index)} />
-          <span className="scenario-symbol" aria-hidden="true"><Phone size={16} /></span><span><strong>{item.title}</strong><span>{item.subtitle}</span></span><span className="scenario-radio" aria-hidden="true">{scenarioIndex === index && <span />}</span>
-        </label>)}</fieldset>
-        <div className="practice-goal"><span className="journey-eyebrow">YOUR GOAL</span><p>{scenario.goal}</p></div>
-      </section>
-      <section className="practice-dialer" aria-labelledby="practice-partner-title">
-        <div className="practice-dialer-top"><span>Practice room</span><span className="practice-ai-label">AI ROLEPLAY</span></div>
-        <div className="practice-partner"><div className="practice-avatar" aria-hidden="true"><Phone size={34} strokeWidth={1.4} /></div><span className="journey-eyebrow">YOUR AI PRACTICE PARTNER</span><h2 id="practice-partner-title">{scenario.role}</h2><p>{scenario.brief}</p></div>
-        <div className="practice-call-actions"><button type="button" className="button button-dark journey-primary" disabled aria-describedby="practice-availability"><Phone size={16} />Start practice call</button><p id="practice-availability">AI calling is coming soon.<br />You can explore the scenarios in the meantime.</p></div>
-      </section>
-    </div>
-    <button type="button" className="text-button practice-back" onClick={onReview}><ChevronLeft size={14} />Back to the demos</button>
   </main>;
 }
 
@@ -411,7 +381,7 @@ export default function App() {
           <h2 className="stat-label" id="stat-demo-score-label">Demo score</h2>
         </article>
       </section>
-      {coursePassed && <div className="course-complete" role="status"><Trophy size={24} /><div><strong>Congratulations, you’ve passed all {calls.length} demos.</strong><p>You’re ready for the next step: AI call practice.</p></div><button type="button" className="button button-dark" onClick={() => navigate('ai-practice')}>Start AI call practice</button></div>}
+      {coursePassed && <div className="course-complete" role="status"><span className="course-complete-emoji" aria-hidden="true">🎉</span><div><strong>Congratulations, you’ve passed all {calls.length} demos.</strong><p>You’re ready for the next step: AI call practice.</p></div><button type="button" className="button button-dark" onClick={() => navigate('ai-practice')}>Start AI call practice</button></div>}
 
       <div className="learning-layout">
         <aside className="library" aria-label="Training call library">

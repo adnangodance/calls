@@ -1,9 +1,7 @@
 import test, { after, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, writeFile, unlink } from 'node:fs/promises';
-import { pathToFileURL } from 'node:url';
-import { resolve } from 'node:path';
-import ts from 'typescript';
+import { readFile } from 'node:fs/promises';
+import { loadSource } from './compile.mjs';
 import { JSDOM } from 'jsdom';
 import React, { act } from 'react';
 
@@ -39,19 +37,7 @@ mediaPrototype.pause = function () {
 };
 
 const { createRoot } = await import('react-dom/client');
-const source = await readFile(new URL('../src/App.tsx', import.meta.url), 'utf8');
-const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX } }).outputText
-  // Vite substitutes this value when building for the GitHub Pages subpath.
-  .replaceAll('import.meta.env.BASE_URL', JSON.stringify('/calls/'))
-  .replace(/from ['"]\.\/calls\.json['"];/, "from './calls.json' with { type: 'json' };");
-const temporaryModule = resolve(`src/.app-test-${process.pid}.mjs`);
-let App;
-try {
-  await writeFile(temporaryModule, compiled);
-  App = (await import(pathToFileURL(temporaryModule).href)).default;
-} finally {
-  await unlink(temporaryModule);
-}
+const { default: App } = await loadSource('App');
 
 let root;
 async function interact(callback) {
@@ -458,7 +444,7 @@ test('passing the final remaining demo celebrates completion and opens AI practi
   assert.equal(window.location.hash, '#/ai-practice');
   assert.equal(document.activeElement.id, 'practice-title');
   assert.equal(button('Start practice call').disabled, true);
-  assert.match(document.getElementById('practice-availability').textContent, /coming soon/);
+  assert.match(document.getElementById('practice-availability').textContent, /practice service is connected/);
   await interact(() => document.querySelector('input[name="practice-scenario"][value="1"]').click());
   assert.equal(document.getElementById('practice-partner-title').textContent, 'Practice manager');
   assert.match(document.querySelector('.practice-goal').textContent, /Understand the concern/);
