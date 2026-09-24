@@ -346,8 +346,7 @@ export default function App() {
     {visiblePage === 'completed' ? <CompletionPage average={average} onPractice={() => navigate('ai-practice')} onReview={() => navigate('training')} /> : visiblePage === 'ai-practice' ? <PracticePage onReview={() => navigate('training')} /> : <main id="main" className="page-shell training-page">
       <div className="breadcrumbs"><span>Workspace</span><ChevronRight size={12} /><span>Learning & development</span></div>
       <section className="page-heading" aria-labelledby="page-title">
-        <div><div className="heading-title"><h1 id="page-title" tabIndex={-1}>Training Calls</h1><span className="course-badge">SALES ONBOARDING</span></div><p>Listen to the experts. Find your approach. Make your next call count.</p></div>
-        <div className="heading-actions"><button className="button button-dark start-training-button" onClick={startTraining}><span className="start-play-icon" aria-hidden="true"><Play size={7} fill="currentColor" strokeWidth={0} /></span>{completed === 10 ? 'Revisit training' : answeredQuestions > 0 ? 'Continue training' : 'Start training'}</button></div>
+        <div><h1 id="page-title" tabIndex={-1}>Training Calls</h1><p>Listen to the experts. Find your approach. Make your next call count.</p></div>
       </section>
 
 
