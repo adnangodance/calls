@@ -67,7 +67,9 @@ test('the real Vite config serves the API without a separate backend and loads t
   const client = await fetch(`${runtime.base()}/calls/src/practice-client.ts`);
   assert.equal(client.status, 200);
   assert.doesNotMatch(await client.text(), /runtime-private-test-key/);
-  const secretFile = await fetch(`${runtime.base()}/calls/.env.local`);
+  // Request the actual fixture: a missing file under the repo root can return
+  // the SPA's HTML with status 200 on a clean checkout without exposing secrets.
+  const secretFile = await fetch(`${runtime.base()}/@fs/${join(runtime.envDir, '.env.local')}`);
   assert.notEqual(secretFile.status, 200);
 });
 

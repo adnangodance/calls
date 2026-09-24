@@ -343,7 +343,7 @@ export default function App() {
       <div className="header-account"><span className="workspace-status"><i />Florida<ChevronDown size={11} /></span><span className="header-divider" /><span className="user-avatar">AG</span><span className="user-name">Adnan Goda</span></div>
     </header>
 
-    {visiblePage === 'completed' ? <CompletionPage average={average} onPractice={() => navigate('ai-practice')} onReview={() => navigate('training')} /> : visiblePage === 'ai-practice' ? <PracticePage onReview={() => navigate('training')} /> : <main id="main" className="page-shell">
+    {visiblePage === 'completed' ? <CompletionPage average={average} onPractice={() => navigate('ai-practice')} onReview={() => navigate('training')} /> : visiblePage === 'ai-practice' ? <PracticePage onReview={() => navigate('training')} /> : <main id="main" className="page-shell training-page">
       <div className="breadcrumbs"><span>Workspace</span><ChevronRight size={12} /><span>Learning & development</span></div>
       <section className="page-heading" aria-labelledby="page-title">
         <div><div className="heading-title"><h1 id="page-title" tabIndex={-1}>Training Calls</h1><span className="course-badge">SALES ONBOARDING</span></div><p>Listen to the experts. Find your approach. Make your next call count.</p></div>
