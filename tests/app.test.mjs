@@ -188,20 +188,27 @@ test('the first questionnaire can be completed without listening and its result 
   assert.match(document.querySelector('.quiz-result').textContent, /Demo complete/);
   assert.equal(document.querySelector('.quiz-result .review-badge').textContent, 'Passed');
   assert.equal(document.querySelectorAll('.answer-review-card .review-badge.is-correct').length, first.questions.length);
-  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => body.hidden));
-  await interact(() => document.getElementById('quiz-task-0-heading').click());
+  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => !body.hidden));
   assert.equal(document.getElementById('quiz-task-0-body').hidden, false);
   assert.equal(document.querySelector('#quiz-task-0-body .answer-feedback').textContent, first.questions[0].explanation);
 
   await unmount();
   await mount({}, true);
   assert.match(document.querySelector('.quiz-result').textContent, /100%/);
+  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => !body.hidden));
   assert.equal(document.getElementById('takeaway').value, 'Ask a clarifying question before offering a solution.');
   assert.ok([...document.querySelectorAll('#quiz-panel input')].every(input => input.disabled));
   await interact(() => button('Continue to next demo').click());
   assert.equal(saved().activeId, calls[1].id);
   assert.ok(document.querySelector('#quiz-panel form'));
   assert.equal(document.getElementById('quiz-task-0-body').hidden, false);
+  await interact(() => button('Previous demo').click());
+  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => !body.hidden));
+  assert.ok([...document.querySelectorAll('.answer-review-card .task-toggle')].every(heading => heading.getAttribute('aria-expanded') === 'true'));
+  await interact(() => button('Collapse all').click());
+  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => body.hidden));
+  await interact(() => button('Expand all').click());
+  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => !body.hidden));
 });
 
 test('two correct answers use the same passed layout as a perfect score', async () => {
@@ -357,6 +364,7 @@ test('incomplete answers get focused validation and a failed attempt can be retr
   await submit();
   assert.equal(saved().progress[first.id].completed, false);
   assert.match(document.querySelector('.quiz-result').textContent, /Review your answers/);
+  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => !body.hidden));
   assert.equal(document.querySelector('.quiz-result .review-badge'), null);
   assert.equal(document.querySelectorAll('.answer-review-card .review-badge.needs-review').length, first.questions.length - 1);
   const retry = document.querySelector('.quiz-result .review-retry-button');

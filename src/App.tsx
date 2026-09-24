@@ -140,8 +140,8 @@ export default function App() {
   const [formError, setFormError] = useState('');
   const [expandedTasks, setExpandedTasks] = useState<number[]>(() => {
     const saved = initial.progress[activeId];
-    if (saved?.submitted) return [];
     const call = calls.find(item => item.id === activeId)!;
+    if (saved?.submitted) return Array.from({ length: call.questions.length + 1 }, (_, i) => i);
     const missing = call.questions.findIndex((_, i) => !(saved?.answers[i] >= 0));
     return [missing < 0 ? call.questions.length : missing];
   });
@@ -227,7 +227,7 @@ export default function App() {
     const saved = progress[id];
     const call = calls.find(item => item.id === id)!;
     const firstUnanswered = call.questions.findIndex((_, i) => !(saved?.answers[i] >= 0));
-    setExpandedTasks(saved?.submitted ? [] : [firstUnanswered < 0 ? call.questions.length : firstUnanswered]);
+    setExpandedTasks(saved?.submitted ? Array.from({ length: call.questions.length + 1 }, (_, i) => i) : [firstUnanswered < 0 ? call.questions.length : firstUnanswered]);
     setActiveId(id);
   }
 
@@ -283,7 +283,7 @@ export default function App() {
     }
     audio.current?.pause();
     const grade = gradeQuiz(active.questions, current.answers);
-    setExpandedTasks([]);
+    setExpandedTasks(Array.from({ length: totalTasks }, (_, i) => i));
     update(activeId, { submitted: true, bestScore: Math.max(current.bestScore ?? 0, grade.score), completed: current.completed || grade.passed });
     setFormError('');
     if (!coursePassed && grade.passed && calls.every(call => call.id === activeId || progress[call.id]?.completed)) {
@@ -471,7 +471,7 @@ export default function App() {
               <form onSubmit={submitQuiz}>
                 {submitted && <div className={`quiz-result review-summary ${result.passed ? 'passed' : 'retry'}`} role="status">
                   <ReviewRing label={result.score} progress={result.score} />
-                  <div className="review-summary-copy"><strong>{result.passed ? 'Demo complete' : 'Review your answers'}</strong><p>{result.correct} of {result.total} correct · {result.score}% score</p><span>{result.passed ? 'Open any answer to revisit the feedback.' : 'Open the marked answers, then try again.'}</span></div>
+                  <div className="review-summary-copy"><strong>{result.passed ? 'Demo complete' : 'Review your answers'}</strong><p>{result.correct} of {result.total} correct · {result.score}% score</p><span>{result.passed ? 'Your answers and feedback are below.' : 'Review the marked answers, then try again.'}</span></div>
                   {result.passed && <span className="review-badge is-correct">Passed</span>}
                   {!result.passed && <button type="button" className="button button-dark review-retry-button" onClick={retryQuiz}><RotateCcw size={14} aria-hidden="true" />Retry missed questions</button>}
                 </div>}
