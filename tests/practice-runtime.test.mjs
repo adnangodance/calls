@@ -55,7 +55,7 @@ test('the real Vite config serves the API without a separate backend and loads t
   const runtime = await start(t, { actualConfig: true });
   let response = await runtime.request('config');
   assert.equal(response.status, 200, 'The frontend port must serve JSON rather than a failed proxy');
-  assert.deepEqual(await response.json(), { available: false, accessCodeRequired: false, maxCallSeconds: 300 });
+  assert.deepEqual(await response.json(), { available: false, accessCodeRequired: false, maxCallSeconds: 20 });
   const page = await fetch(`${runtime.base()}/calls/`);
   assert.equal(page.status, 200);
   assert.match(await page.text(), /src\/main\.tsx/);
@@ -86,6 +86,8 @@ test('voice setup, feedback, and hangup work through the actual HTTP boundary on
   assert.equal(response.status, 200);
   const session = await response.json();
   assert.equal(session.sdp, 'v=0\r\nanswer');
+  assert.equal(session.maxCallSeconds, 20);
+  assert.equal((await runtime.request('connected', { sessionId: session.sessionId })).status, 200);
   assert.equal(calls[0].options.headers.Authorization, 'Bearer private-test-key');
   const review = await runtime.request('feedback', { scenario: 'introduction', messages: [{ role: 'user', text: 'Hi Sarah. Do you have a minute?' }] });
   assert.deepEqual(await review.json(), { feedback });
@@ -101,7 +103,7 @@ test('exposing Vite on the network still requires production access controls', a
   const runtime = await start(t, { key: 'private-test-key', publicHost: true });
   const response = await fetch(`${runtime.base()}/api/practice/config`);
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { available: false, accessCodeRequired: true, maxCallSeconds: 300 });
+  assert.deepEqual(await response.json(), { available: false, accessCodeRequired: true, maxCallSeconds: 20 });
   const session = await fetch(`${runtime.base()}/api/practice/session`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
   assert.equal(session.status, 503);
 });
@@ -110,5 +112,5 @@ test('local preview also serves the practice API without a second process', asyn
   const runtime = await start(t, { key: 'private-test-key', previewMode: true, actualConfig: true });
   const response = await runtime.request('config');
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { available: true, accessCodeRequired: false, maxCallSeconds: 300 });
+  assert.deepEqual(await response.json(), { available: true, accessCodeRequired: false, maxCallSeconds: 20 });
 });

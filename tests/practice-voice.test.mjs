@@ -40,7 +40,8 @@ test('voice connects only when the channel opens, greets once, mutes and release
   assert.equal(peer.answer.sdp, 'v=0\r\nanswer');
   peer.channel.onopen();
   assert.equal(context.connected(), 1);
-  assert.deepEqual(context.calls[1], { type: 'response.create' });
+  assert.deepEqual(context.calls.filter(item => item.type === 'response.create'), [{ type: 'response.create' }]);
+  assert.deepEqual(context.calls.find(item => item.url === '/api/practice/connected').body, { sessionId: 'session-1' });
   context.voice.setMuted(true); assert.equal(context.track.enabled, false);
   context.voice.setMuted(false); assert.equal(context.track.enabled, true);
   peer.channel.onmessage({ data: JSON.stringify({ type: 'input_audio_buffer.speech_started' }) });

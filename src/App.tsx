@@ -1,7 +1,8 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleDashed, CirclePlay, Clock3, Headphones, Info, MapPin, Pause, Play, RotateCcw, RotateCw, Search, Star, Target, Volume2, VolumeX, X } from 'lucide-react';
 import callData from './calls.json';
 import PracticePage from './PracticePage';
+import { StatBars, ScoreSparkline, ScoreGauge } from './Stats';
 import { gradeQuiz, listenedSeconds, mergePlayedRanges, sanitizeProgress } from './progress.mjs';
 
 type Call = (typeof callData)[number];
@@ -18,48 +19,6 @@ const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Ma
 const formatDuration = (seconds: number) => `${Math.floor(seconds / 60)}m ${String(Math.floor(seconds % 60)).padStart(2, '0')}s`;
 const managerClass = (manager: string) => manager.startsWith('Zee') ? 'zee' : manager.startsWith('Edrin') ? 'edrin' : 'will';
 
-function StatBars({ value, total, label, segments = 40, gradient = false }: { value: number; total: number; label: string; segments?: number; gradient?: boolean }) {
-  const filled = Math.round(value / total * segments);
-  return <div className="stat-bars" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={total} aria-valuenow={value}>
-    {Array.from({ length: segments }, (_, i) => <span key={i} className={i < filled ? 'is-filled' : ''} style={gradient && i < filled ? { backgroundColor: `hsl(${Math.round(i / Math.max(1, filled - 1) * 36)} 95% 58%)` } : undefined} />)}
-  </div>;
-}
-
-function ScoreSparkline({ values }: { values: (number | undefined)[] }) {
-  const point = (value: number, index: number) => ({ x: 4 + index / (values.length - 1) * 312, y: 34 - value / 100 * 28 });
-  const path = values.map((value, i) => {
-    if (value === undefined) return '';
-    const { x, y } = point(value, i);
-    return `${i > 0 && values[i - 1] !== undefined ? 'L' : 'M'}${x},${y}`;
-  }).join(' ');
-  const description = values.flatMap((value, i) => value === undefined ? [] : [`Demo ${i + 1}: ${value}%`]).join(', ');
-  return <svg className="stat-sparkline" viewBox="0 0 320 40" preserveAspectRatio="none" role="img" aria-label={description ? `Best quiz scores in demo order. ${description}` : 'No quiz scores yet'}>
-    <path className="stat-chart-baseline" d="M4,35 H316" />
-    {values.map((_, i) => <path className="stat-chart-tick" key={i} d={`M${point(0, i).x},36 v3`} />)}
-    <path className="stat-chart-line" d={path} />
-    {values.map((value, i) => value === undefined ? null : <circle className="stat-chart-point" key={i} cx={point(value, i).x} cy={point(value, i).y} r="2.5" />)}
-  </svg>;
-}
-
-function ScoreGauge({ score, demo }: { score?: number; demo: number }) {
-  const gradientId = useId();
-  const arc = 'M46.16 119.84 A62 62 0 1 1 133.84 119.84';
-  const angle = (135 + (score ?? 0) * 2.7) * Math.PI / 180;
-  const status = score === undefined ? 'unscored' : score >= 67 ? 'passed' : 'retry';
-  const tone = score === undefined ? 'unscored' : score === 100 ? 'high' : score >= 67 ? 'medium' : 'low';
-  return <div className={`score-gauge ${status} score-${tone}`} role="img" aria-label={score === undefined ? `Demo ${demo} has no quiz score yet` : `Best quiz score for demo ${demo}: ${score} out of 100. ${status === 'passed' ? 'Passed' : 'Try again'}.`}>
-    <svg viewBox="0 0 180 130" aria-hidden="true">
-      <defs><linearGradient id={gradientId} x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stopColor="var(--gauge-start)" /><stop offset="55%" stopColor="var(--gauge-middle)" /><stop offset="100%" stopColor="var(--gauge-end)" /></linearGradient></defs>
-      <path className="score-gauge-halo" d={arc} />
-      <path className="score-gauge-track" d={arc} />
-      <path className="score-gauge-fill" d={arc} pathLength="100" stroke={`url(#${gradientId})`} strokeDasharray={`${score ?? 0} 100`} />
-      {score !== undefined && <circle className="score-gauge-marker" cx={90 + 62 * Math.cos(angle)} cy={76 + 62 * Math.sin(angle)} r="4" />}
-    </svg>
-    <div className="score-gauge-readout" aria-hidden="true"><span className="score-gauge-number">{score ?? '—'}</span><span className="score-gauge-caption">Best · Demo {String(demo).padStart(2, '0')}</span></div>
-    <span className="score-gauge-status" aria-hidden="true">{status === 'unscored' ? 'Not scored' : status === 'passed' ? 'Passed' : 'Try again'}</span>
-  </div>;
-}
-
 function readSaved(): Saved {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
@@ -74,9 +33,9 @@ function ReviewRing({ label, progress = 100 }: { label: React.ReactNode; progres
   </span>;
 }
 
-function QuestionnaireTask({ id, title, description, status, meta, expanded, onToggle, children, reviewMode = false }: {
+function QuestionnaireTask({ id, title, description, status, meta, expanded, onToggle, children, reviewMode = false, summary }: {
   id: string; title: string; description: string; status: 'todo' | 'answered' | 'correct' | 'review';
-  meta: string; expanded: boolean; onToggle: () => void; children: React.ReactNode; reviewMode?: boolean;
+  meta: string; expanded: boolean; onToggle: () => void; children: React.ReactNode; reviewMode?: boolean; summary?: React.ReactNode;
 }) {
   return <section className={`questionnaire-task ${expanded ? 'is-open' : ''} task-${status} ${reviewMode ? 'answer-review-card' : ''}`}>
     <h4 className="task-heading"><button type="button" id={`${id}-heading`} className="task-toggle" aria-expanded={expanded} aria-controls={`${id}-body`} onClick={onToggle}>
@@ -84,6 +43,7 @@ function QuestionnaireTask({ id, title, description, status, meta, expanded, onT
       {reviewMode && <span className={`review-badge ${status === 'correct' ? 'is-correct' : status === 'review' ? 'needs-review' : 'is-saved'}`}>{meta}</span>}
       <ChevronRight size={15} className="task-chevron" aria-hidden="true" />
     </button></h4>
+    {!expanded && summary && <div className="task-answer-summary">{summary}</div>}
     <div className="task-body" id={`${id}-body`} role="region" aria-labelledby={`${id}-heading`} hidden={!expanded}>{children}</div>
   </section>;
 }
@@ -141,7 +101,7 @@ export default function App() {
   const [expandedTasks, setExpandedTasks] = useState<number[]>(() => {
     const saved = initial.progress[activeId];
     const call = calls.find(item => item.id === activeId)!;
-    if (saved?.submitted) return Array.from({ length: call.questions.length + 1 }, (_, i) => i);
+    if (saved?.submitted) return [];
     const missing = call.questions.findIndex((_, i) => !(saved?.answers[i] >= 0));
     return [missing < 0 ? call.questions.length : missing];
   });
@@ -227,7 +187,7 @@ export default function App() {
     const saved = progress[id];
     const call = calls.find(item => item.id === id)!;
     const firstUnanswered = call.questions.findIndex((_, i) => !(saved?.answers[i] >= 0));
-    setExpandedTasks(saved?.submitted ? Array.from({ length: call.questions.length + 1 }, (_, i) => i) : [firstUnanswered < 0 ? call.questions.length : firstUnanswered]);
+    setExpandedTasks(saved?.submitted ? [] : [firstUnanswered < 0 ? call.questions.length : firstUnanswered]);
     setActiveId(id);
   }
 
@@ -283,7 +243,7 @@ export default function App() {
     }
     audio.current?.pause();
     const grade = gradeQuiz(active.questions, current.answers);
-    setExpandedTasks(Array.from({ length: totalTasks }, (_, i) => i));
+    setExpandedTasks([]);
     update(activeId, { submitted: true, bestScore: Math.max(current.bestScore ?? 0, grade.score), completed: current.completed || grade.passed });
     setFormError('');
     if (!coursePassed && grade.passed && calls.every(call => call.id === activeId || progress[call.id]?.completed)) {
@@ -471,7 +431,7 @@ export default function App() {
               <form onSubmit={submitQuiz}>
                 {submitted && <div className={`quiz-result review-summary ${result.passed ? 'passed' : 'retry'}`} role="status">
                   <ReviewRing label={result.score} progress={result.score} />
-                  <div className="review-summary-copy"><strong>{result.passed ? 'Demo complete' : 'Review your answers'}</strong><p>{result.correct} of {result.total} correct · {result.score}% score</p><span>{result.passed ? 'Your answers and feedback are below.' : 'Review the marked answers, then try again.'}</span></div>
+                  <div className="review-summary-copy"><strong>{result.passed ? 'Demo complete' : 'Review your answers'}</strong><p>{result.correct} of {result.total} correct · {result.score}% score</p><span>{result.passed ? 'Your answers are below. Open a question for feedback.' : 'Review the marked answers, then try again.'}</span></div>
                   {result.passed && <span className="review-badge is-correct">Passed</span>}
                   {!result.passed && <button type="button" className="button button-dark review-retry-button" onClick={retryQuiz}><RotateCcw size={14} aria-hidden="true" />Retry missed questions</button>}
                 </div>}
@@ -483,6 +443,7 @@ export default function App() {
                     return <QuestionnaireTask key={`${activeId}-${questionIndex}`} id={`quiz-task-${questionIndex}`} title={`Question ${questionIndex + 1}`} description={question.prompt}
                       status={submitted ? isCorrect ? 'correct' : 'review' : isAnswered ? 'answered' : 'todo'}
                       reviewMode={submitted} meta={submitted ? isCorrect ? 'Correct' : 'Review' : isAnswered ? 'Answered' : 'Choose one answer'}
+                      summary={submitted && <><p><strong>Your answer:</strong> {question.options[current.answers[questionIndex]] ? `${String.fromCharCode(65 + current.answers[questionIndex])}. ${question.options[current.answers[questionIndex]]}` : 'No answer saved'}</p>{!isCorrect && <p className="task-correct-answer"><strong>Correct answer:</strong> {String.fromCharCode(65 + question.correct)}. {question.options[question.correct]}</p>}</>}
                       expanded={expandedTasks.includes(questionIndex)} onToggle={() => toggleQuizTask(questionIndex)}>
                       <fieldset className="question" aria-label={question.prompt}>
                         <div className="answer-options">{question.options.map((option, optionIndex) => {
@@ -499,6 +460,7 @@ export default function App() {
                   })}
                   <QuestionnaireTask id={`quiz-task-${active.questions.length}`} title="Your takeaway" description={submitted ? 'Your written reflection · Not scored' : active.reflection}
                     reviewMode={submitted} status={current.reflection.trim() ? 'answered' : 'todo'} meta={submitted ? 'Saved' : current.reflection.trim() ? 'Added · Not scored' : 'Required · Not scored'}
+                    summary={submitted && <p>{current.reflection}</p>}
                     expanded={expandedTasks.includes(active.questions.length)} onToggle={() => toggleQuizTask(active.questions.length)}>
                     <div className="reflection-section">
                       <label htmlFor="takeaway">What will you try in your next conversation?</label>

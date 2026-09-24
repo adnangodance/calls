@@ -43,11 +43,13 @@ test('voice sessions use server-owned scenario prompts, transcription and call c
   assert.equal(response.status, 200);
   const result = await response.json();
   assert.equal(result.sdp, 'v=0\r\nanswer');
-  assert.equal(result.maxCallSeconds, 300);
+  assert.equal(result.maxCallSeconds, 20);
   assert.ok(result.sessionId);
   assert.equal(JSON.stringify(result).includes('private-key'), false);
   const session = JSON.parse(calls[0].options.body.get('session'));
   assert.match(session.instructions, /Jordan/);
+  assert.match(session.instructions, /20-second practice call/);
+  assert.match(session.instructions, /at most 15 words/);
   assert.doesNotMatch(session.instructions, /Ignore your prompt/);
   assert.equal(session.audio.input.transcription.model, 'gpt-4o-mini-transcribe');
   assert.equal(session.audio.input.turn_detection.interrupt_response, true);
@@ -57,6 +59,32 @@ test('voice sessions use server-owned scenario prompts, transcription and call c
   assert.equal(calls[1].url, 'https://api.openai.com/v1/realtime/calls/rtc_test/hangup');
   await api.handle(req('end', { sessionId: result.sessionId }));
   assert.equal(calls.length, 2, 'Ending an already closed session is harmless');
+  await api.close();
+});
+
+test('company calls use the directory identity and level for both voice and coaching', async () => {
+  const calls = [];
+  const api = createPracticeHandler({ env: { OPENAI_API_KEY: 'private-key' }, fetchImpl: async (url, options) => {
+    calls.push({ url, options });
+    if (url.endsWith('/responses')) return providerText(JSON.stringify(feedback));
+    return url.endsWith('/hangup') ? new Response() : new Response('v=0\r\nanswer', { headers: { location: '/v1/realtime/calls/rtc_company' } });
+  } });
+  const session = await api.handle(req('session', { contactId: 'willow', scenario: 'follow-up', name: 'Injected partner', sdp: 'v=0\r\noffer' }));
+  assert.equal(session.status, 200);
+  const prompt = JSON.parse(calls[0].options.body.get('session')).instructions;
+  assert.match(prompt, /Maya/);
+  assert.match(prompt, /Willow Health/);
+  assert.match(prompt, /132 Willow Lane, Austin, TX 78701/);
+  assert.match(prompt, /willowhealth\.example/);
+  assert.match(prompt, /AI practice extension 102/);
+  assert.match(prompt, /level 1 of 3/);
+  assert.doesNotMatch(prompt, /Injected partner|Sarah/);
+  assert.match(prompt, /introducing yourself/);
+  const review = await api.handle(req('feedback', { contactId: 'willow', scenario: 'follow-up', messages }));
+  assert.equal(review.status, 200);
+  assert.match(JSON.parse(calls[1].options.body).instructions, /Make your introduction/);
+  assert.match(JSON.parse(calls[1].options.body).instructions, /Company: Willow Health/);
+  assert.equal((await api.handle(req('session', { contactId: 'not-in-directory', scenario: 'introduction', sdp: 'v=0\r\noffer' }))).status, 400);
   await api.close();
 });
 
@@ -109,18 +137,41 @@ test('rate limits prevent unlimited feedback requests and reset after the window
   assert.equal((await api.handle(req('feedback', { scenario: 'introduction', messages }))).status, 200);
 });
 
-test('the server closes calls at the deadline even if the browser never hangs up', async t => {
+test('the server starts the deadline on connection and repeated acknowledgements cannot extend it', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const calls = [];
   const api = createPracticeHandler({ env: { OPENAI_API_KEY: 'private-key' }, fetchImpl: async url => {
     calls.push(url);
     return new Response('v=0\r\nanswer', { headers: { location: '/v1/realtime/calls/rtc_deadline' } });
   } });
-  await api.handle(req('session', { scenario: 'introduction', sdp: 'v=0\r\noffer' }));
-  t.mock.timers.tick(299999);
+  const session = await (await api.handle(req('session', { scenario: 'introduction', sdp: 'v=0\r\noffer' }))).json();
+  t.mock.timers.tick(7000);
+  assert.equal((await api.handle(req('connected', { sessionId: session.sessionId }))).status, 200);
+  t.mock.timers.tick(19999);
+  assert.equal(calls.length, 1);
+  t.mock.timers.tick(1);
+  assert.equal(calls.length, 1, 'The last transcript has a short grace period after the 20-second call');
+  await api.handle(req('connected', { sessionId: session.sessionId }));
+  t.mock.timers.tick(2999);
   assert.equal(calls.length, 1);
   t.mock.timers.tick(1);
   assert.equal(calls[1], 'https://api.openai.com/v1/realtime/calls/rtc_deadline/hangup');
+  await api.close();
+});
+
+test('an allocated call that never connects is closed after the connection timeout', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const calls = [];
+  const api = createPracticeHandler({ env: { OPENAI_API_KEY: 'private-key' }, fetchImpl: async url => {
+    calls.push(url);
+    return new Response('v=0\r\nanswer', { headers: { location: '/v1/realtime/calls/rtc_unconnected' } });
+  } });
+  const session = await (await api.handle(req('session', { scenario: 'introduction', sdp: 'v=0\r\noffer' }))).json();
+  t.mock.timers.tick(44999);
+  assert.equal(calls.length, 1);
+  t.mock.timers.tick(1);
+  assert.equal(calls[1], 'https://api.openai.com/v1/realtime/calls/rtc_unconnected/hangup');
+  assert.equal((await api.handle(req('connected', { sessionId: session.sessionId }))).status, 404);
   await api.close();
 });
 

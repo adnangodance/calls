@@ -1,3 +1,5 @@
+import { CALL_CONNECTION_SECONDS } from '../shared/practice.mjs';
+
 export type TranscriptLine = { id: string; role: 'user' | 'assistant'; text: string; pending?: boolean };
 export type Feedback = { summary: string; nextAttempt: string; criteria: { name: string; score: number; evidence: string }[] };
 export type PracticeConfig = { available: boolean; accessCodeRequired: boolean; maxCallSeconds: number };
@@ -48,7 +50,7 @@ export function updateTranscript(lines: TranscriptLine[], event: Record<string, 
 }
 
 type VoiceOptions = {
-  scenario: string; code: string; audio: HTMLAudioElement;
+  scenario: string; contactId?: string; code: string; audio: HTMLAudioElement;
   onConnected: () => void; onEvent: (event: Record<string, any>) => void;
   onError: (message: string) => void; onAudioBlocked: () => void;
   onPhase?: (phase: 'microphone' | 'partner' | 'connecting') => void;
@@ -74,7 +76,7 @@ export class PracticeVoice {
   async start() {
     try {
       if (!navigator.mediaDevices?.getUserMedia || !globalThis.RTCPeerConnection) throw new Error('Voice calls need a supported browser over HTTPS or localhost. Open the secure site in a browser with microphone support.');
-      this.connectionTimer = setTimeout(() => this.fail('The call could not connect. Check microphone permissions and try again.'), 45000);
+      this.connectionTimer = setTimeout(() => this.fail('The call could not connect. Check microphone permissions and try again.'), CALL_CONNECTION_SECONDS * 1000);
       this.options.onPhase?.('microphone');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
       if (this.closed) { stream.getTracks().forEach(track => track.stop()); return; }
@@ -102,6 +104,7 @@ export class PracticeVoice {
       channel.onopen = () => {
         if (this.closed) return;
         clearTimeout(this.connectionTimer);
+        if (this.sessionId) void practiceRequest('connected', { sessionId: this.sessionId }, { code: this.options.code }).catch(() => {});
         this.options.onConnected();
         channel.send(JSON.stringify({ type: 'response.create' }));
       };
@@ -138,7 +141,7 @@ export class PracticeVoice {
       await peer.setLocalDescription(offer);
       if (this.closed) return;
       // Keep the session response alive on cancel so an allocated call can be hung up.
-      const session = await practiceRequest<{ sdp: string; sessionId: string }>('session', { scenario: this.options.scenario, sdp: offer.sdp }, { code: this.options.code });
+      const session = await practiceRequest<{ sdp: string; sessionId: string }>('session', { scenario: this.options.scenario, contactId: this.options.contactId, sdp: offer.sdp }, { code: this.options.code });
       this.sessionId = session.sessionId;
       if (this.closed) { this.endRemote(); return; }
       this.options.onPhase?.('connecting');

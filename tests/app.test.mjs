@@ -188,14 +188,21 @@ test('the first questionnaire can be completed without listening and its result 
   assert.match(document.querySelector('.quiz-result').textContent, /Demo complete/);
   assert.equal(document.querySelector('.quiz-result .review-badge').textContent, 'Passed');
   assert.equal(document.querySelectorAll('.answer-review-card .review-badge.is-correct').length, first.questions.length);
-  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => !body.hidden));
+  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => body.hidden));
+  first.questions.forEach((question, index) => {
+    const summary = document.getElementById(`quiz-task-${index}-heading`).closest('section').querySelector('.task-answer-summary');
+    assert.equal(summary.textContent, `Your answer: ${String.fromCharCode(65 + question.correct)}. ${question.options[question.correct]}`);
+    assert.equal(summary.closest('[hidden]'), null);
+  });
+  await interact(() => document.getElementById('quiz-task-0-heading').click());
   assert.equal(document.getElementById('quiz-task-0-body').hidden, false);
   assert.equal(document.querySelector('#quiz-task-0-body .answer-feedback').textContent, first.questions[0].explanation);
 
   await unmount();
   await mount({}, true);
   assert.match(document.querySelector('.quiz-result').textContent, /100%/);
-  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => !body.hidden));
+  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => body.hidden));
+  assert.equal(document.getElementById(`quiz-task-${first.questions.length}-heading`).closest('section').querySelector('.task-answer-summary').textContent, 'Ask a clarifying question before offering a solution.');
   assert.equal(document.getElementById('takeaway').value, 'Ask a clarifying question before offering a solution.');
   assert.ok([...document.querySelectorAll('#quiz-panel input')].every(input => input.disabled));
   await interact(() => button('Continue to next demo').click());
@@ -203,12 +210,13 @@ test('the first questionnaire can be completed without listening and its result 
   assert.ok(document.querySelector('#quiz-panel form'));
   assert.equal(document.getElementById('quiz-task-0-body').hidden, false);
   await interact(() => button('Previous demo').click());
-  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => !body.hidden));
-  assert.ok([...document.querySelectorAll('.answer-review-card .task-toggle')].every(heading => heading.getAttribute('aria-expanded') === 'true'));
-  await interact(() => button('Collapse all').click());
   assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => body.hidden));
+  assert.ok([...document.querySelectorAll('.answer-review-card .task-toggle')].every(heading => heading.getAttribute('aria-expanded') === 'false'));
   await interact(() => button('Expand all').click());
   assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => !body.hidden));
+  assert.equal(document.querySelector('.task-answer-summary'), null);
+  await interact(() => button('Collapse all').click());
+  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => body.hidden));
 });
 
 test('two correct answers use the same passed layout as a perfect score', async () => {
@@ -222,6 +230,9 @@ test('two correct answers use the same passed layout as a perfect score', async 
   assert.equal(saved().progress[first.id].bestScore, 67);
   assert.equal(document.querySelector('.quiz-result .review-badge').textContent, 'Passed');
   assert.equal(document.querySelector('.quiz-result .review-retry-button'), null);
+  const missedSummary = document.getElementById('quiz-task-2-heading').closest('section').querySelector('.task-answer-summary');
+  assert.equal(missedSummary.querySelector('p').textContent, `Your answer: ${String.fromCharCode(65 + wrongAnswer)}. ${missedQuestion.options[wrongAnswer]}`);
+  assert.equal(missedSummary.querySelector('.task-correct-answer').textContent, `Correct answer: ${String.fromCharCode(65 + missedQuestion.correct)}. ${missedQuestion.options[missedQuestion.correct]}`);
   assert.ok(button('Review answers again'));
   assert.ok(button('Continue to next demo'));
 
@@ -364,7 +375,7 @@ test('incomplete answers get focused validation and a failed attempt can be retr
   await submit();
   assert.equal(saved().progress[first.id].completed, false);
   assert.match(document.querySelector('.quiz-result').textContent, /Review your answers/);
-  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => !body.hidden));
+  assert.ok([...document.querySelectorAll('.answer-review-card .task-body')].every(body => body.hidden));
   assert.equal(document.querySelector('.quiz-result .review-badge'), null);
   assert.equal(document.querySelectorAll('.answer-review-card .review-badge.needs-review').length, first.questions.length - 1);
   const retry = document.querySelector('.quiz-result .review-retry-button');
@@ -452,10 +463,10 @@ test('passing the final remaining demo celebrates completion and opens AI practi
   assert.equal(window.location.hash, '#/ai-practice');
   assert.equal(document.activeElement.id, 'practice-title');
   assert.equal(button('Start practice call').disabled, true);
-  assert.match(document.getElementById('practice-availability').textContent, /practice service is connected/);
-  await interact(() => document.querySelector('input[name="practice-scenario"][value="1"]').click());
-  assert.equal(document.getElementById('practice-partner-title').textContent, 'Practice manager');
-  assert.match(document.querySelector('.practice-goal').textContent, /Understand the concern/);
+  assert.match(document.getElementById('practice-availability').textContent, /couldn’t reach the call service/);
+  await interact(() => button('Select Willow Health, extension 102').click());
+  assert.equal(document.getElementById('practice-partner-title').textContent, 'Willow Health');
+  assert.match(document.querySelector('.practice-business-data').textContent, /willowhealth\.example/);
 
   await unmount();
   await mount({}, true);

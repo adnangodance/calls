@@ -191,18 +191,8 @@ h1 { font-size: 29px; letter-spacing: -1.15px; font-weight: 650; line-height: 1.
 .practice-score-track span { display: block; height: 100%; background: #a5bdb0; border-radius: inherit; }
 .practice-next { background: #f3f5f1; padding: 17px; border-radius: 12px; }
 .practice-next p { margin-top: 8px; color: #657967; }
-.practice-history { margin-top: 35px; border-top: 1px solid #e1e3e8; padding-top: 25px; }
-.practice-history > div:first-child { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
-.practice-history h2 { font-size: 18px; font-weight: 550; margin-top: 6px; }
-.practice-history details { margin-top: 12px; background: #fff; border-radius: 12px; border: 1px solid #e5e6eb; }
-.practice-history summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 15px; align-items: center; padding: 18px; font-size: 12px; }
-.practice-history summary::-webkit-details-marker { display: none; }
-.practice-history summary strong { display: block; font-size: 12px; font-weight: 550; }
-.practice-history summary > span:first-child > span { display: block; font-size: 10px; color: #9696a0; margin-top: 6px; }
-.practice-history summary > span:last-child { display: flex; align-items: center; gap: 12px; white-space: nowrap; color: #6f8175; }
-.practice-history .practice-feedback { border: none; border-top: 1px solid #eeeef3; border-radius: 0 0 12px 12px; }
 @keyframes practice-spin { to { transform: rotate(360deg); } }
-@keyframes practice-pulse { 50% { box-shadow: 0 0 0 9px #eae5f140, 0 0 0 18px #eae5f120; } }
+@keyframes practice-pulse { 50% { box-shadow: 0 0 0 9px #dcdce340, 0 0 0 18px #dcdce320; } }
 @media (prefers-reduced-motion: reduce) { .practice-avatar.is-speaking, .practice-spinner { animation: none; } .practice-transcript { scroll-behavior: auto; } }
 @media (max-width: 700px) { .practice-tip { display: none; } .practice-checklist { margin-bottom: 15px; } .practice-criteria { grid-template-columns: 1fr; gap: 16px; } }
 .journey-page .breadcrumbs button { padding: 0; font-size: inherit; color: inherit; }
@@ -303,8 +293,6 @@ h1 { font-size: 29px; letter-spacing: -1.15px; font-weight: 650; line-height: 1.
 .practice-transcript-toggle > svg { color: #959e94; }
 .practice-transcript-toggle[aria-expanded=true] > svg { transform: rotate(180deg); }
 #practice-transcript-panel { padding-top: 22px; }
-.practice-history summary > span:last-child svg { transition: transform .15s; }
-.practice-history details[open] summary > span:last-child svg { transform: rotate(180deg); }
 .practice-feedback { border-color: #dce6dc; }
 .practice-feedback h3 { color: #405a46; }
 #practice-partner-title:focus, .practice-call-actions h3:focus { outline: none; }
@@ -482,6 +470,11 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
 .answer-review-card .task-description { margin-top: 3px; color: #73737d; font-size: 11px; font-weight: 400; line-height: 1.6; }
 .answer-review-card .task-chevron { width: 12px; }
 .answer-review-card .task-body { padding: 0 16px 14px; }
+.task-answer-summary { padding: 0 14px 10px; color: #53535e; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+.task-answer-summary p { margin: 0; white-space: pre-wrap; }
+.task-answer-summary p + p { margin-top: 4px; }
+.task-answer-summary strong { font-weight: 600; }
+.task-answer-summary .task-correct-answer { color: #34734f; }
 .answer-review-card .answer-feedback { border-top: 1px solid #eeeef1; padding-top: 11px; }
 .question { border: 0; padding: 0; margin: 0; min-width: 0; }
 .answer-options { display: grid; gap: 7px; }
@@ -752,4 +745,255 @@ h3 { font-size: 13px; font-weight: 550; letter-spacing: -.15px; }
   .stat-card { scroll-snap-align: start; }
   .library-manager-row select { min-height: 40px; font-size: 16px; }
   .search-box input { font-size: 16px; }
+}
+
+/* Company directory and practice dialer */
+.practice-page.page-shell { max-width: 1232px; width: 100%; padding: 20px 32px 24px; }
+.practice-page .breadcrumbs { margin-bottom: 12px; }
+.practice-page .practice-heading { margin: 0 0 18px; }
+.practice-page .practice-heading h1 { margin-top: 0; }
+.practice-page .practice-heading p { margin-top: 5px; max-width: none; }
+.practice-stats { margin-top: 0; }
+.practice-example-label { flex-shrink: 0; padding: 7px 11px; border-radius: 999px; background: #e9e9ef; color: #686875; font-size: 10px; }
+.practice-page .practice-layout { grid-template-columns: 310px minmax(0, 1fr) 286px; gap: 0; align-items: stretch; min-height: 660px; border: 1px solid #e4e4e9; border-radius: 14px; background: #fff; }
+.practice-directory { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 20px 12px 16px; border-right: 1px solid #e9e9ed; }
+.practice-directory .call-list-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; padding-inline: 0; }
+.practice-directory .practice-contact-list { flex: 1; height: 0; min-height: 280px; max-height: 680px; }
+.practice-directory .practice-level-tabs button { gap: 5px; }
+.practice-workspace { min-width: 0; padding: 27px 32px 30px; }
+.practice-case-meta { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 23px; color: #71717a; font-size: 10px; line-height: 1.5; }
+.practice-case-meta > span:last-child { color: #3f3f46; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.practice-case-meta > span:last-child > span { color: #a1a1aa; margin-left: 3px; }
+.practice-company-overview h2 { margin: 0; color: #222225; font-size: 26px; font-weight: 600; line-height: 1.2; letter-spacing: -.9px; overflow-wrap: anywhere; }
+.practice-company-subtitle { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; margin-top: 9px; color: #71717a; font-size: 11px; line-height: 1.7; }
+.practice-company-subtitle > span { color: #b6b6bd; }
+.practice-company-reference { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 18px; margin-top: 15px; color: #85858e; font-size: 10px; }
+.practice-company-reference > span { display: inline-flex; align-items: center; gap: 5px; }
+.practice-company-reference strong { color: #52525b; font-weight: 500; font-variant-numeric: tabular-nums; }
+.practice-partner-strip { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 11px; align-items: center; margin: 25px 0 29px; padding: 17px 0; border-block: 1px solid #e9e9ec; }
+.practice-partner-symbol { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #27272a; color: #fff; }
+.practice-partner-strip h3 { display: flex; align-items: center; gap: 7px; color: #303034; font-size: 12px; font-weight: 550; }
+.practice-partner-strip h3 > span { color: #71717a; font-size: 9px; font-weight: 500; padding: 2px 4px; border-radius: 3px; background: #f1f1f3; line-height: 1; }
+.practice-partner-strip p { margin-top: 4px; color: #71717a; font-size: 10px; line-height: 1.5; }
+.practice-partner-format { text-align: right; color: #52525b; font-size: 10px; line-height: 1.5; }
+.practice-partner-format small { display: block; margin-top: 4px; color: #92929c; font-size: 9px; }
+.practice-business-data { container: practice-business / inline-size; }
+.practice-business-data > h3 { margin: 0 0 8px; color: #303034; font-size: 17px; font-weight: 550; line-height: 1.4; letter-spacing: -.35px; }
+.practice-business-fields { margin: 0; }
+.practice-business-fields > div { display: grid; grid-template-columns: 100px minmax(0, 1fr); align-items: baseline; gap: 18px; padding: 18px 0; border-bottom: 1px solid #ededf0; }
+.practice-business-fields dt { color: #85858e; font-size: 11px; line-height: 1.8; }
+.practice-business-fields dd { min-width: 0; margin: 0; color: #3f3f46; font-size: 12px; font-weight: 450; line-height: 1.8; overflow-wrap: anywhere; }
+.practice-business-fields address { font-style: normal; }
+.practice-business-fields address > span { display: block; color: #71717a; }
+.practice-business-line { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; }
+.practice-business-line > span:first-child { font-variant-numeric: tabular-nums; }
+.practice-business-line > span:last-child { color: #85858e; font-size: 10px; font-weight: 400; }
+@container practice-business (max-width: 320px) {
+  .practice-business-fields > div { grid-template-columns: minmax(0, 1fr); gap: 5px; padding: 15px 0; }
+}
+.practice-workspace-empty { display: flex; align-items: center; justify-content: center; flex-direction: column; min-height: 560px; text-align: center; }
+.practice-workspace-empty > span { display: grid; place-items: center; width: 78px; height: 78px; border-radius: 50%; background: #f8f8fa; color: #a0a0a9; margin-bottom: 25px; }
+.practice-workspace-empty h2 { font-size: 18px; font-weight: 550; color: #44444c; }
+.practice-workspace-empty p { max-width: 340px; margin-top: 12px; color: #9999a3; font-size: 12px; line-height: 1.8; }
+.practice-workspace .practice-conversation { margin-top: 23px; padding: 17px; }
+.practice-page .practice-room { padding: 12px; align-content: stretch; }
+.practice-page .practice-room .practice-dialer { height: 100%; padding: 16px 16px 22px; border-color: #ededf0; border-radius: 12px; background: #fafafa; box-shadow: none; }
+.practice-dialer-navigation { display: grid; grid-template-columns: 24px minmax(0, 1fr) 24px; gap: 5px; align-items: center; min-height: 32px; margin-bottom: 23px; }
+.practice-dialer-navigation > button { display: grid; place-items: center; width: 24px; height: 30px; padding: 0; color: #55555f; border-radius: 5px; }
+.practice-dialer-navigation > button:hover:not(:disabled) { background: #eeeef1; }
+.practice-dialer-navigation > h2 { text-align: center; font-size: 11px; font-weight: 600; line-height: 1.5; color: #33333b; }
+.practice-dialer-ready { margin-bottom: 17px; }
+.practice-dialer-ready h3 { font-size: 13px; font-weight: 550; color: #44444c; }
+.practice-dialer-ready p { display: flex; align-items: center; gap: 5px; margin-top: 5px; color: #9999a3; font-size: 10px; }
+.practice-page .practice-partner h3 { font-size: 18px; letter-spacing: -.3px; color: #33333b; font-weight: 550; margin-top: 6px; }
+.practice-page.is-reviewing .practice-partner h3 { font-size: 15px; margin: 0; align-self: start; }
+.practice-page .practice-room .practice-connecting ol { gap: 9px; }
+.practice-page .practice-room .practice-connecting li { font-size: 9px; gap: 4px; }
+.practice-page .practice-room .practice-controls { flex-direction: column; align-items: stretch; }
+.practice-page .practice-room .practice-controls .button { justify-content: center; }
+.practice-page .practice-room .mic-check-heading { grid-template-columns: 31px minmax(0, 1fr); }
+.practice-page .practice-room .mic-check-button { grid-column: 1 / -1; justify-self: stretch; }
+.directory-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 0 8px; }
+.directory-heading h2 { font-size: 18px; font-weight: 550; margin: 0; letter-spacing: -.5px; color: #33333b; }
+.directory-count { padding: 5px 8px; border-radius: 5px; color: #71717e; background: #f3f4f6; font-size: 9px; white-space: nowrap; }
+.practice-level-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 16px 0; }
+.practice-level-emoji { display: inline-block; margin-inline-end: 6px; font-size: 1.15em; line-height: 1; vertical-align: -.08em; letter-spacing: 0; }
+.practice-level-marker { position: relative; display: inline-flex; flex-shrink: 0; }
+.practice-level-marker .practice-level-emoji { margin: 0; font-size: 14px; }
+.practice-level-lock { position: absolute; right: -3px; bottom: -3px; padding: 1px; box-sizing: content-box; border-radius: 3px; background: #fff; color: #71717e; }
+.practice-level-tabs button { display: flex; justify-content: center; align-items: center; gap: 7px; padding: 9px 3px; min-height: 36px; border: 1px solid #e9e9ed; background: #fff; border-radius: 999px; font-size: 11px; color: #71717e; }
+.practice-level-tabs button > small { min-width: 19px; padding: 2px 4px; background: #f3f4f6; border-radius: 5px; font-size: 9px; font-variant-numeric: tabular-nums; }
+.practice-level-tabs button[aria-pressed=true] { background: #1d1d1f; border-color: #1d1d1f; color: #fff; }
+.practice-level-tabs button[aria-pressed=true] > small { background: #ffffff24; }
+.practice-level-tabs button:disabled { cursor: default; color: #9999a3; }
+.directory-level-intro { margin: 0 8px 16px; }
+.directory-level-intro h3 { font-size: 14px; font-weight: 550; color: #33333b; }
+.directory-level-intro p { font-size: 11px; color: #85858e; line-height: 1.7; margin-top: 6px; }
+.practice-contact-list { max-height: 420px; overscroll-behavior-y: contain; }
+.practice-contact:disabled { cursor: default; }
+.practice-contact .call-lesson-icon { border-radius: 50%; background: #000; color: #fff; box-shadow: none; }
+.practice-page .practice-avatar { background: #f3f4f6; color: #626b7b; }
+.directory-progress { padding: 16px 8px 0; }
+.directory-progress > div:first-child { display: flex; justify-content: space-between; gap: 8px; font-size: 10px; color: #71717e; }
+.directory-progress strong { font-weight: 500; }
+.directory-progress-track { height: 5px; overflow: hidden; border-radius: 9px; background: #edf0f4; margin: 10px 0; }
+.directory-progress-track > span { display: block; height: 100%; background: #6f7480; border-radius: inherit; transition: width .3s; }
+.directory-progress p { font-size: 10px; line-height: 1.8; color: #85858e; }
+.practice-brief { border-top: 1px solid #e9e9ec; margin: 20px 8px 0; padding-top: 18px; }
+.practice-brief .journey-eyebrow { font-size: 8px; letter-spacing: 1px; }
+.practice-brief p { font-size: 13px; line-height: 1.7; color: #71717e; margin-top: 8px; }
+.practice-brief > span:last-child { display: flex; align-items: center; gap: 7px; color: #85858e; font-size: 10px; margin-top: 15px; }
+.directory-disclosure { display: flex; align-items: center; gap: 6px; font-size: 9px; color: #9999a3; line-height: 1.7; margin: 18px 8px 0; }
+.practice-page .practice-dialer { border-radius: 10px; padding: 23px; border-color: #dcdce3; box-shadow: 0 2px 7px #26263304; }
+.practice-page .practice-ai-label { display: inline-flex; align-items: center; gap: 5px; font-size: 8px; background: #f3f4f6; color: #85858e; }
+.practice-page .practice-partner { padding: 23px 8px 13px; }
+.practice-page .practice-avatar { width: 56px; height: 56px; border-radius: 17px; margin-bottom: 17px; font-size: 19px; box-shadow: none; }
+.practice-page .practice-avatar > span { width: 22px; height: 22px; right: -4px; bottom: -4px; }
+.practice-page .practice-avatar > span svg { width: 10px; }
+.practice-page .practice-partner .journey-eyebrow { font-size: 8px; letter-spacing: 1px; }
+.practice-page .practice-partner h2 { font-size: 20px; letter-spacing: -.4px; margin-top: 6px; }
+.practice-page .practice-partner > p { margin-top: 6px; font-size: 10px; color: #85858e; }
+.practice-page .practice-dialer.is-idle { min-height: 560px; padding: 25px 24px; background: #fafafa; box-shadow: none; }
+.practice-dialer-idle { width: min(100%, 242px); margin: 0 auto; }
+.practice-line-settings { padding-bottom: 17px; border-bottom: 1px solid #e9e9ed; }
+.practice-line-label { display: block; margin-bottom: 5px; font-size: 12px; font-weight: 500; color: #8b8b93; }
+.practice-line-status { display: flex; align-items: center; gap: 7px; min-height: 28px; padding: 4px 8px; border: 1px solid #dedee3; border-radius: 6px; background: #fff; color: #85858e; font-size: 11px; }
+.practice-line-status > svg { flex-shrink: 0; }
+.practice-line-status.is-ready { color: #64646e; }
+.practice-line-status > button { display: grid; place-items: center; flex-shrink: 0; width: 24px; height: 24px; margin: -3px -5px -3px auto; border-radius: 4px; color: #85858e; }
+.practice-line-status > button:hover { color: #33333b; background: #f3f3f5; }
+.practice-audio-settings { position: relative; margin-top: 8px; border: 1px solid #e5e5e9; border-radius: 8px; background: #fff; }
+.practice-audio-settings > summary { display: flex; align-items: center; gap: 8px; min-height: 34px; padding: 6px 9px; border-radius: inherit; list-style: none; cursor: pointer; color: #44444c; font-size: 11px; }
+.practice-audio-settings > summary::-webkit-details-marker { display: none; }
+.practice-audio-settings > summary:hover, .practice-audio-settings[open] > summary { background: #f7f7f9; }
+.practice-audio-settings > summary > svg { color: #85858e; flex-shrink: 0; }
+.practice-volume-value { margin-left: auto; font-size: 10px; color: #797982; font-variant-numeric: tabular-nums; }
+.practice-audio-settings[open] > summary > svg:last-child { transform: rotate(180deg); }
+.practice-volume-panel { position: absolute; z-index: 2; top: calc(100% + 6px); left: -1px; right: -1px; padding: 11px 12px 7px; border: 1px solid #e8e8ec; border-radius: 10px; background: #fff; box-shadow: 0 8px 24px #24242d0d, 0 2px 5px #24242d05; }
+.practice-volume-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 10px; line-height: 1.4; }
+.practice-volume-heading label { color: #55555f; font-weight: 500; }
+.practice-volume-heading output { color: #85858e; font-variant-numeric: tabular-nums; }
+.practice-volume-slider { display: flex; align-items: center; gap: 9px; margin-top: 3px; color: #92929c; }
+.practice-volume-slider input { appearance: none; -webkit-appearance: none; display: block; flex: 1; min-width: 0; width: 100%; height: 28px; margin: 0; padding: 0; border: 0; border-radius: 4px; background-color: transparent; background-image: linear-gradient(#44444c, #44444c), linear-gradient(#e7e7ec, #e7e7ec); background-position: left center; background-repeat: no-repeat; cursor: pointer; }
+.practice-volume-slider input::-webkit-slider-runnable-track { height: 3px; border-radius: 999px; background: transparent; }
+.practice-volume-slider input::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 12px; height: 12px; margin-top: -4.5px; border: 1px solid #b5b5be; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px #24242d20; }
+.practice-volume-slider input::-moz-range-track { height: 3px; border: 0; border-radius: 999px; background: transparent; }
+.practice-volume-slider input::-moz-range-thumb { box-sizing: border-box; width: 12px; height: 12px; border: 1px solid #b5b5be; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px #24242d20; }
+.practice-volume-slider input:focus-visible { outline: 2px solid #888894; outline-offset: 2px; }
+.practice-number { margin: 16px 0 12px; }
+.practice-number > div { display: flex; align-items: center; gap: 6px; min-height: 32px; }
+.practice-number > div > span { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; padding: 8px 6px; border: 1px solid #e9e9ed; border-radius: 6px; color: #71717e; font-size: 9px; }
+.practice-number input { min-width: 0; width: 100%; border: 0; border-radius: 4px; outline-offset: 2px; background: transparent; color: #33333b; font-size: 15px; padding: 6px 2px; font-variant-numeric: tabular-nums; }
+.practice-number input::placeholder { color: #9999a3; font-size: 12px; }
+.practice-number button { display: grid; place-items: center; flex-shrink: 0; color: #9999a3; width: 28px; height: 28px; border-radius: 50%; }
+.practice-number button:hover:not(:disabled) { background: #eeeef1; color: #55555f; }
+.practice-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px 12px; width: 100%; margin: 0 0 13px; }
+.practice-keypad button { display: flex; flex-direction: column; align-items: center; justify-content: center; justify-self: center; width: 52px; min-height: 44px; border-radius: 50%; border: 0; background: transparent; color: #777780; transition: background .12s, transform .12s; }
+.practice-keypad button:hover:not(:disabled) { background: #eeeef1; color: #33333b; }
+.practice-keypad button:active:not(:disabled) { background: #e1e4ea; transform: scale(.94); }
+.practice-keypad strong { font-size: 20px; font-weight: 450; line-height: 1.1; }
+.practice-keypad button > span { margin-top: 2px; font-size: 7px; letter-spacing: 1px; color: #a0a0a9; line-height: 1; }
+.practice-keypad button:disabled { opacity: .45; }
+.practice-dialer-idle .practice-access { margin: 15px 0; font-size: 10px; }
+.practice-dial-buttons { display: flex; align-items: center; justify-content: center; gap: 16px; }
+.practice-dial-buttons > button { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; }
+.practice-backspace { color: #71717e; }
+.practice-backspace:hover:not(:disabled) { background: #eeeef1; }
+.practice-backspace:disabled, .practice-number button:disabled { opacity: .4; cursor: default; }
+.practice-start-call { background: #64646e; color: #fff; transition: background .15s, transform .15s; }
+.practice-start-call:hover:not(:disabled) { background: #3f3f47; transform: translateY(-1px); }
+.practice-start-call:disabled { background: #bfc0c4; cursor: default; }
+.practice-dial-help { min-height: 29px; margin: 10px 0 0; color: #85858e; font-size: 10px; text-align: center; line-height: 1.6; }
+.practice-dial-footer { border-top: 1px solid #e9e9ed; padding-top: 16px; }
+.practice-mic-settings { border: 1px solid #e5e5e9; border-radius: 9px; background: #fff; }
+.practice-mic-settings > summary { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto 12px; align-items: center; gap: 8px; cursor: pointer; padding: 8px 9px; min-height: 42px; border-radius: inherit; font-size: 11px; font-weight: 500; color: #44444c; list-style: none; }
+.practice-mic-settings > summary::-webkit-details-marker { display: none; }
+.practice-mic-settings > summary:hover, .practice-mic-settings[open] > summary { background: #fafafb; }
+.practice-mic-symbol { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; background: #f1f2f5; color: #63636e; }
+.practice-mic-duration { color: #9999a3; font-size: 9px; font-weight: 400; white-space: nowrap; }
+.practice-mic-settings > summary > svg:last-child { color: #9999a3; }
+.practice-mic-settings[open] > summary > svg:last-child { transform: rotate(180deg); }
+.practice-mic-settings .mic-check { border: 0; border-top: 1px solid #ededf0; border-radius: 0 0 9px 9px; padding: 12px; background: #fff; }
+.practice-mic-settings .mic-check-button { border-radius: 999px; min-height: 34px; padding: 8px 10px; }
+.practice-dial-footer > p { margin-top: 14px; text-align: center; font-size: 10px; line-height: 1.7; color: #85858e; }
+.practice-dial-footer > .practice-disclosure { margin-top: 8px; font-size: 9px; color: #9999a3; }
+.practice-dialer-idle button:focus-visible, .practice-dialer-idle summary:focus-visible, .practice-dialer-idle input:focus-visible { outline: 2px solid #55555f; outline-offset: 3px; }
+.practice-page .practice-call-actions { padding-top: 14px; gap: 9px; }
+.practice-page .practice-call-actions .journey-primary { background: #3f3f47; border-color: #3f3f47; min-height: 46px; border-radius: 9px; }
+.practice-page .practice-call-actions .journey-primary:disabled { background: #edf0f4; border-color: #edf0f4; color: #a0a0aa; }
+.practice-page .practice-call-actions > p { font-size: 9px; }
+.practice-page .practice-call-actions > .practice-disclosure { color: #9999a3; line-height: 1.7; }
+.practice-page .is-live .practice-partner { padding-top: 37px; padding-bottom: 32px; }
+.practice-page .is-live .practice-avatar { width: 82px; height: 82px; font-size: 28px; border-radius: 26px; }
+.practice-page .is-live .practice-ai-label { background: #f3f3f6; color: #83838c; }
+.practice-page .is-live .practice-partner h2 { color: #242429; }
+.practice-page .is-live .practice-call-actions { padding-top: 23px; padding-bottom: 20px; }
+.practice-page .is-live .practice-call-actions > p { font-size: 11px; }
+.practice-page.is-reviewing .practice-partner { padding-bottom: 23px; }
+.practice-level-tabs button:focus-visible, .practice-keypad button:focus-visible { outline: 2px solid #55555f; outline-offset: 3px; }
+.practice-page .button-dark { background: #3f3f47; border-color: #3f3f47; }
+.practice-page .button-dark:hover:not(:disabled), .practice-page .practice-call-actions .journey-primary:hover:not(:disabled) { background: #27272d; border-color: #27272d; }
+.practice-page .text-button:hover { color: #33333b; }
+.practice-page .practice-dialer.is-live { background: #fff; border-color: #dcdce3; box-shadow: 0 2px 7px #26263304; }
+.practice-page .is-live .practice-dialer-top, .practice-page .is-live .practice-partner .journey-eyebrow { color: #83838c; }
+.practice-page .is-live .practice-call-actions { border-color: #eeeef2; }
+.practice-page .is-live .practice-call-actions > p, .practice-page .practice-live-display > span { color: #81818b; }
+.practice-page .practice-live-display time, .practice-page .practice-partner .practice-live-label { color: #33333b; }
+.practice-page .practice-speech span { background: #8b8f9b; }
+.practice-page .practice-mute, .practice-page .practice-audio-prompt .button { background: #f3f4f6; border: 1px solid #dedee7; color: #62626c; }
+.practice-page .practice-mute[aria-pressed=true] { background: #e1e4ea; border-color: #b8bcc6; color: #3f3f47; }
+.practice-page .practice-end { background: #3f3f47; border: 1px solid #3f3f47; color: #fff; }
+.practice-page .practice-end:hover { background: #27272d; }
+.practice-page .practice-audio-prompt { background: #f6f6f8; }
+.practice-page .practice-audio-prompt p { color: #71717e; }
+.practice-page .practice-service { background: #f6f6f8; color: #65656f; }
+.practice-page .practice-service p, .practice-page .practice-service .text-button { color: #797982; }
+.practice-page .practice-service.is-ready { background: transparent; color: #65656f; }
+.practice-page .practice-connecting, .practice-page .practice-connecting li.is-current { color: #62626c; }
+.practice-page .practice-connecting li.is-current > span, .practice-page .practice-ended-mark { background: #eceef3; color: #626b7b; }
+.practice-page .practice-feedback, .practice-page .practice-conversation { border-color: #dcdce3; border-radius: 10px; }
+.practice-page .practice-feedback h3, .practice-page .practice-score { color: #33333b; }
+.practice-page .practice-score-track span { background: #9297a3; }
+.practice-page .practice-next { background: #f5f5f7; }
+.practice-page .practice-next p { color: #71717e; }
+.practice-score-label, .practice-score-track { --score-ink: #71717e; --score-surface: #f0f1f4; --score-fill: #9297a3; }
+.practice-score-label.score-high, .practice-score-track.score-high { --score-ink: #24724d; --score-surface: #e2f5e9; --score-fill: #3caa73; }
+.practice-score-label.score-medium, .practice-score-track.score-medium { --score-ink: #896016; --score-surface: #fff1d6; --score-fill: #dbab49; }
+.practice-score-label.score-low, .practice-score-track.score-low { --score-ink: #a64741; --score-surface: #fce6e2; --score-fill: #df776e; }
+.practice-score-label { display: inline-flex; align-items: center; padding: 3px 7px; border-radius: 999px; color: var(--score-ink); background: var(--score-surface); font-size: 9px; font-weight: 500; line-height: 1.4; white-space: nowrap; }
+.practice-page .practice-score-track span { background: var(--score-fill); }
+.practice-feedback-heading { flex-wrap: wrap; }
+.practice-page .practice-message p, .practice-page .practice-message.from-user p { background: #f3f4f6; color: #65656f; }
+.practice-page .practice-message.from-user p { background: #e9ecf1; }
+.practice-page .mic-check-button { color: #71717e; border-color: #dedee7; }
+.practice-page .mic-check-passed { background: #fafafa; border-color: #e5e7e9; }
+.practice-page .mic-check-passed .mic-check-icon { background: #eceef3; color: #626b7b; }
+.practice-page .mic-check-passed .mic-check-message { color: #62626c; }
+.practice-page .mic-level span.is-on { background: #9297a3; }
+@media (max-width: 1190px) {
+  .practice-page .practice-layout { grid-template-columns: 275px minmax(0, 1fr) 264px; }
+  .practice-workspace { padding-inline: 18px; }
+  .practice-directory .practice-level-tabs button { gap: 4px; font-size: 10px; }
+  .directory-heading { flex-wrap: wrap; gap: 5px; }
+}
+@media (max-width: 1000px) {
+  .practice-page .practice-layout { grid-template-columns: minmax(0, 1fr) 280px; grid-template-areas: 'workspace dialer' 'directory directory'; }
+  .practice-directory { grid-area: directory; border-right: 0; border-top: 1px solid #e9e9ed; }
+  .practice-workspace { grid-area: workspace; }
+  .practice-page .practice-room { grid-area: dialer; }
+  .practice-directory .practice-contact-list { flex: none; height: auto; max-height: 380px; }
+  .practice-directory .call-list-panel { flex: none; }
+  .directory-heading { flex-wrap: nowrap; }
+}
+@media (max-width: 700px) {
+  .practice-page.page-shell { padding-inline: 12px; }
+  .practice-page .practice-layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'workspace' 'dialer' 'directory'; }
+  .practice-page.is-in-call .practice-layout, .practice-page.is-reviewing .practice-layout { grid-template-areas: 'dialer' 'workspace' 'directory'; }
+  .practice-workspace { padding: 20px 16px; }
+  .practice-workspace-empty { min-height: 250px; }
+  .practice-page .practice-room .practice-dialer.is-idle { min-height: 0; padding: 20px 24px; }
+  .practice-dialer-navigation { max-width: 270px; margin-inline: auto; }
+  .practice-page .practice-room { padding: 0 12px 16px; }
+  .practice-directory .practice-contact-list { min-height: 0; }
+  .practice-page .is-live .practice-partner { padding-top: 24px; }
 }
